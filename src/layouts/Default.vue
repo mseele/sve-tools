@@ -14,13 +14,13 @@
       <v-list nav dense>
         <v-list-item-group v-model="item" color="primary">
           <v-list-item
-            v-for="edge in $static.actions.edges"
-            :key="edge.node.id"
+            v-for="(action, index) in actions"
+            :key="index"
             link
-            :to="$static.metadata.pathPrefix + edge.node.link"
+            :to="$static.metadata.pathPrefix + action.link"
           >
             <v-list-item-content>
-              <v-list-item-title v-text="edge.node.name"></v-list-item-title>
+              <v-list-item-title v-text="action.name"></v-list-item-title>
             </v-list-item-content>
           </v-list-item>
         </v-list-item-group>
@@ -34,6 +34,8 @@
 </template>
 
 <script>
+import actions from '@/data/actions.json'
+
 export default {
   props: {
     sidebar: {
@@ -44,6 +46,7 @@ export default {
   data() {
     return {
       item: 0,
+      actions,
     }
   },
 }
@@ -54,15 +57,6 @@ export default {
     metadata {
       pathPrefix
       siteName
-    }
-    actions: allActions(order: ASC) {
-      edges {
-        node {
-          id
-          name
-          link
-        }
-      }
     }
   }
 </static-query>

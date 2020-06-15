@@ -2,6 +2,7 @@ import Vuetify from 'vuetify/lib'
 import 'vuetify/dist/vuetify.min.css'
 import Cookies from 'js-cookie'
 import DefaultLayout from '~/layouts/Default.vue'
+import actions from '@/data/actions.json'
 
 export default function (Vue, { appOptions, head, router }) {
   head.link.push({
@@ -20,7 +21,13 @@ export default function (Vue, { appOptions, head, router }) {
 
   if (process.isClient) {
     router.beforeEach((to, from, next) => {
-      if (Cookies.get('sve_backend_tools') === 'verified' || to.path === '/') {
+      if (Cookies.get('sve_backend_tools') === 'verified') {
+        if (to.path === '/') {
+          next(actions[0].link)
+        } else {
+          next()
+        }
+      } else if (to.path === '/') {
         next()
       } else {
         next('/')

@@ -20,6 +20,7 @@
 <script>
 import Cookies from 'js-cookie'
 import Vue from 'vue'
+import actions from '@/data/actions.json'
 
 export default {
   metaInfo: {
@@ -34,6 +35,7 @@ export default {
   data() {
     return {
       password: '',
+      actions,
     }
   },
   methods: {
@@ -42,8 +44,7 @@ export default {
         if (process.isClient) {
           Cookies.set('sve_backend_tools', 'verified', { expires: 28 })
           this.$router.push(
-            this.$page.metadata.pathPrefix +
-              this.$page.actions.edges[0].node.link
+            this.$page.metadata.pathPrefix + this.actions[0].link
           )
         }
       }
@@ -56,13 +57,6 @@ export default {
   query {
     metadata {
       pathPrefix
-    }
-    actions: allActions(order: ASC) {
-      edges {
-        node {
-          link
-        }
-      }
     }
   }
 </page-query>
