@@ -125,7 +125,9 @@ export default {
     },
     async send() {
       this.disabled = true
-      const tick = 100 / this.people.length
+      const count = this.persons.length
+      const tick = (100 / count) | 0
+      this.progress += 100 - tick * count
       for (const person of this.people) {
         const data = {
           type: this.from,
