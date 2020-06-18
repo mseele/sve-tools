@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.3](https://github.com/mseele/sve-tools/compare/v1.1.2...v1.1.3) (2020-06-18)
+
+
+### Bug Fixes
+
+* correct variable name ([f8a5617](https://github.com/mseele/sve-tools/commit/f8a56172f872505b5bb640c14e3185f9b2ed5a08))
+
 ### [1.1.2](https://github.com/mseele/sve-tools/compare/v1.1.1...v1.1.2) (2020-06-16)
 
 
