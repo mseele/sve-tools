@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.4](https://github.com/mseele/sve-tools/compare/v1.1.3...v1.1.4) (2020-06-20)
+
+
+### Bug Fixes
+
+* correct progress when using action multiple times ([1d17c66](https://github.com/mseele/sve-tools/commit/1d17c66d8c323a1b39aa3e247942991822513b48))
+
 ### [1.1.3](https://github.com/mseele/sve-tools/compare/v1.1.2...v1.1.3) (2020-06-18)
 
 
