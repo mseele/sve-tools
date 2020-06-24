@@ -13,7 +13,6 @@
               @paste="paste"
             ></v-text-field>
             <people-field v-else :disabled="disabled" v-model="people" />
-
             <v-text-field
               v-model="subject"
               outlined
