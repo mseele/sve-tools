@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/mseele/sve-tools/compare/v1.1.4...v1.2.0) (2020-06-24)
+
+
+### Features
+
+* add support for attachments in email action ([25dcca5](https://github.com/mseele/sve-tools/commit/25dcca585e160a42f86c04a953a19f7b446777d2))
+
 ### [1.1.4](https://github.com/mseele/sve-tools/compare/v1.1.3...v1.1.4) (2020-06-20)
 
 
