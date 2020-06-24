@@ -3,6 +3,8 @@
     <template v-for="(person, index) in people">
       <v-chip
         class="ma-2"
+        small
+        label
         :class="{ primary: !disabled }"
         :close="!disabled"
         @click:close="close(index)"
