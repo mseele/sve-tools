@@ -19,4 +19,22 @@ function replace(content, person) {
     .replace('${LASTNAME}', lastName)
 }
 
-export { validateEmail, replace }
+function readFile(inputFile) {
+  const reader = new FileReader()
+
+  return new Promise((resolve, reject) => {
+    reader.onerror = () => {
+      reader.abort()
+      reject(new DOMException('Error reading file: ' + reader.error))
+    }
+
+    reader.onload = () => {
+      var dataUrl = reader.result
+      var base64 = dataUrl.split(',')[1]
+      resolve(base64)
+    }
+    reader.readAsDataURL(inputFile)
+  })
+}
+
+export { validateEmail, replace, readFile }

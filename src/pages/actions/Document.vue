@@ -56,7 +56,7 @@ import Notify from '~/components/Notify.vue'
 import PeopleField from '~/components/PeopleField.vue'
 import ButtonArea from '~/components/ButtonArea.vue'
 import FromSelect from '~/components/FromSelect.vue'
-import { validateEmail, replace } from '~/utils/actions.js'
+import { validateEmail, replace, readFile } from '~/utils/actions.js'
 import axios from 'axios'
 
 export default {
@@ -142,7 +142,7 @@ export default {
           mimeType: person.file.type,
         }
         try {
-          attachment.data = await this.readFile(person.file)
+          attachment.data = await readFile(person.file)
         } catch (error) {
           console.error(error)
           this.$refs.notify.showError(
@@ -173,23 +173,6 @@ export default {
       }
       this.$refs.notify.showSuccess('Alle Emails wurden erfolgreich versandt')
       this.reset()
-    },
-    readFile(inputFile) {
-      const reader = new FileReader()
-
-      return new Promise((resolve, reject) => {
-        reader.onerror = () => {
-          reader.abort()
-          reject(new DOMException('Error reading file: ' + reader.error))
-        }
-
-        reader.onload = () => {
-          var dataUrl = reader.result
-          var base64 = dataUrl.split(',')[1]
-          resolve(base64)
-        }
-        reader.readAsDataURL(inputFile)
-      })
     },
   },
 }

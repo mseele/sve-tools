@@ -13,12 +13,33 @@
               @paste="paste"
             ></v-text-field>
             <people-field v-else :disabled="disabled" v-model="people" />
+
             <v-text-field
               v-model="subject"
               outlined
               label="Betreff"
             ></v-text-field>
             <v-textarea v-model="content" outlined label="Email"></v-textarea>
+            <v-file-input
+              outlined
+              multiple
+              v-model="attachments"
+              prepend-icon=""
+              :clearable="false"
+              label="Anhänge auswählen"
+            >
+              <template v-slot:selection="{ index, text }">
+                <v-chip
+                  small
+                  label
+                  :color="!disabled ? 'primary' : ''"
+                  :close="!disabled"
+                  @click:close="attachments.splice(index, 1)"
+                >
+                  {{ text }}
+                </v-chip>
+              </template>
+            </v-file-input>
           </v-form>
           <button-area
             :disabled="disabled"
@@ -46,7 +67,7 @@ import Notify from '~/components/Notify.vue'
 import PeopleField from '~/components/PeopleField.vue'
 import ButtonArea from '~/components/ButtonArea.vue'
 import FromSelect from '~/components/FromSelect.vue'
-import { validateEmail, replace } from '~/utils/actions.js'
+import { validateEmail, replace, readFile } from '~/utils/actions.js'
 import axios from 'axios'
 
 export default {
@@ -64,6 +85,7 @@ export default {
     return {
       from: 'Fitness',
       people: [],
+      attachments: [],
       subject: '',
       content: '',
       disabled: false,
@@ -121,6 +143,7 @@ export default {
     reset() {
       this.$refs.from.reset()
       this.people = []
+      this.attachments = []
       this.disabled = false
     },
     async send() {
@@ -134,6 +157,26 @@ export default {
           to: person.email,
           subject: this.subject,
           content: replace(this.content, person),
+        }
+        if (this.attachments.length > 0) {
+          data.attachments = []
+          for (const file of this.attachments) {
+            const attachment = {
+              name: file.name,
+              mimeType: file.type,
+            }
+            try {
+              attachment.data = await readFile(file)
+            } catch (error) {
+              console.error(error)
+              this.$refs.notify.showError(
+                'Datei konnte nicht gelesen werden. Details siehe Console'
+              )
+              this.disabled = false
+              return
+            }
+            data.attachments.push(attachment)
+          }
         }
         try {
           await axios.post(this.$page.metadata.sendEmailURL, data)
