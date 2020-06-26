@@ -6,6 +6,10 @@ module.exports = function (api) {
       'sendEmailURL',
       'https://backend.sv-eutingen.de/api/contact/email'
     )
+    store.addMetadata(
+      'loadEventsURL',
+      'https://backend.sv-eutingen.de/api/events?beta=true'
+    )
   })
 
   api.chainWebpack((config, { isServer }) => {

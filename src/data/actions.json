@@ -1,4 +1,5 @@
 [
     { "name": "Batch Email", "link": "/actions/email" },
-    { "name": "Batch Dokument", "link": "/actions/document" }
+    { "name": "Batch Dokument", "link": "/actions/document" },
+    { "name": "Pre-Booking Email", "link": "/actions/prebooking" }
 ]
