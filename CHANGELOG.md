@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.3.0](https://github.com/mseele/sve-tools/compare/v1.2.0...v1.3.0) (2020-06-26)
+
+
+### Features
+
+* implement new pre-booking action ([e84ef08](https://github.com/mseele/sve-tools/commit/e84ef08efe6abeb025e0fe9467537e0d25116101))
+
 ## [1.2.0](https://github.com/mseele/sve-tools/compare/v1.1.4...v1.2.0) (2020-06-24)
 
 
