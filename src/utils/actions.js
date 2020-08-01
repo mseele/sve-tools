@@ -7,16 +7,10 @@ function replace(content, person) {
   const firstName = person.firstName.trim()
   const lastName = person.lastName.trim()
   return content
-    .replaceAll('${vorname}', firstName)
-    .replaceAll('${VORNAME}', firstName)
-    .replaceAll('${firstName}', firstName)
-    .replaceAll('${firstname}', firstName)
-    .replaceAll('${FIRSTNAME}', firstName)
-    .replaceAll('${nachname}', lastName)
-    .replaceAll('${NACHNAME}', lastName)
-    .replaceAll('${lastName}', lastName)
-    .replaceAll('${lastname}', lastName)
-    .replaceAll('${LASTNAME}', lastName)
+    .replace(/\$\{vorname\}/gi, firstName)
+    .replace(/\$\{firstname\}/gi, firstName)
+    .replace(/\$\{nachname\}/gi, lastName)
+    .replace(/\$\{lastname\}/gi, lastName)
 }
 
 function readFile(inputFile) {
