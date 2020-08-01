@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.3.2](https://github.com/mseele/sve-tools/compare/v1.3.1...v1.3.2) (2020-08-01)
+
+
+### Bug Fixes
+
+* **email:** use regex replace instead of non working replaceAll ([e7c62e2](https://github.com/mseele/sve-tools/commit/e7c62e24f550d41ab10084a2fc4add04aa658413))
+
 ### [1.3.1](https://github.com/mseele/sve-tools/compare/v1.3.0...v1.3.1) (2020-07-29)
 
 
