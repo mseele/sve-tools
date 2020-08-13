@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/mseele/sve-tools/compare/v1.4.0...v1.5.0) (2020-08-13)
+
+
+### Features
+
+* **emails:** send multiple emails with 1 request ([ae6b9be](https://github.com/mseele/sve-tools/commit/ae6b9be8cb95bada3c716385c767eba057912d82)), closes [#33](https://github.com/mseele/sve-tools/issues/33)
+
 ## [1.4.0](https://github.com/mseele/sve-tools/compare/v1.3.2...v1.4.0) (2020-08-11)
 
 
