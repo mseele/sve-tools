@@ -12,11 +12,9 @@
       v-if="disabled"
       size="32"
       rotate="-90"
-      :value="progress"
+      indeterminate
       color="light-blue"
-    >
-      {{ progress }}
-    </v-progress-circular>
+    ></v-progress-circular>
     <v-spacer />
     <v-btn depressed class="mr-2" :disabled="disabled" @click="reset()">
       Zurücksetzen
@@ -35,10 +33,6 @@
 <script>
 export default {
   props: {
-    progress: {
-      type: Number,
-      default: 0,
-    },
     disabled: {
       type: Boolean,
       default: false,

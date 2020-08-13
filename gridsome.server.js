@@ -3,8 +3,8 @@ const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 module.exports = function (api) {
   api.loadSource((store) => {
     store.addMetadata(
-      'sendEmailURL',
-      'https://backend.sv-eutingen.de/api/contact/email'
+      'sendEmailsURL',
+      'https://backend.sv-eutingen.de/api/contact/emails'
     )
     store.addMetadata(
       'loadEventsURL',

@@ -33,7 +33,6 @@
           <button-area
             :disabled="disabled"
             :people="people"
-            :progress="progress"
             @send="send"
             @reset="reset"
           />
@@ -79,7 +78,6 @@ export default {
       subject: '',
       content: '',
       disabled: false,
-      progress: 0,
     }
   },
   methods: {
@@ -133,9 +131,7 @@ export default {
     },
     async send() {
       this.disabled = true
-      const count = this.people.length
-      const tick = (100 / count) | 0
-      this.progress = 100 - tick * count
+      const emails = []
       for (const person of this.people) {
         const attachment = {
           name: this.filename,
@@ -151,25 +147,23 @@ export default {
           this.disabled = false
           return
         }
-
-        const data = {
+        emails.push({
           type: this.from,
           to: person.email,
           subject: this.subject,
           content: replace(this.content, person),
           attachments: [attachment],
-        }
-        try {
-          await axios.post(this.$page.metadata.sendEmailURL, data)
-        } catch (error) {
-          console.error(error)
-          this.$refs.notify.showError(
-            'Senden fehlgeschlafen. Details siehe Console'
-          )
-          this.disabled = false
-          return
-        }
-        this.progress += tick
+        })
+      }
+      try {
+        await axios.post(this.$page.metadata.sendEmailsURL, { emails: emails })
+      } catch (error) {
+        console.error(error)
+        this.$refs.notify.showError(
+          'Senden fehlgeschlafen. Details siehe Console'
+        )
+        this.disabled = false
+        return
       }
       this.$refs.notify.showSuccess('Alle Emails wurden erfolgreich versandt')
       this.reset()
@@ -179,9 +173,9 @@ export default {
 </script>
 
 <page-query>
-  query {
-    metadata {
-      sendEmailURL
-    }
+query {
+  metadata {
+    sendEmailsURL
   }
+}
 </page-query>
