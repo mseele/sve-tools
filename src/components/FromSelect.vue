@@ -73,11 +73,3 @@ Team Events@SVE`,
   },
 }
 </script>
-
-<page-query>
-  query {
-    metadata {
-      sendEmailURL
-    }
-  }
-</page-query>
