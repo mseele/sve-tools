@@ -7,12 +7,7 @@ module.exports = {
   parserOptions: {
     parser: 'babel-eslint',
   },
-  extends: [
-    'plugin:gridsome/recommended',
-    'prettier',
-    'prettier/vue',
-    'plugin:prettier/recommended',
-  ],
+  extends: ['plugin:gridsome/recommended', 'plugin:prettier/recommended'],
   plugins: ['prettier'],
   // add your custom rules here
   rules: {},
