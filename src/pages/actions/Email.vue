@@ -1,7 +1,7 @@
 <template>
   <Layout>
     <v-container>
-      <action-header title="Batch Email" subtitle="Individuelle Email" />
+      <action-header title="Batch Email" subtitle="Individuelle Email" :help="help" />
       <v-row>
         <v-col cols="12">
           <v-form :disabled="disabled">
@@ -87,6 +87,9 @@ export default {
       subject: '',
       content: '',
       disabled: false,
+      help: ['Vorname, Nachname und Email-Adresse Spalten zusammen aus der Tabelle kopieren',
+             'Für Individualisierung <b>${vorname}</b> oder <b>${firstname}</b> für den Vorname in der Email nutzen',
+             'Für Individualisierung <b>${nachname}</b> oder <b>${lastname}</b> für den Nachname in der Email nutzen']
     }
   },
   methods: {
