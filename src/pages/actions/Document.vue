@@ -4,7 +4,12 @@
       <action-header
         title="Batch Dokument"
         subtitle="Individuelles Dokument per Email"
-        :help="help"
+        :help="[
+          'Namenskonvention für Dokumente: Vorname#Nachname#Email.pdf. Z.B.: Michael#Seele#mseele@gmail.com.pdf',
+          'Dokumentenname ist der Name der in der Email angezeigt wird. Z.B.: Teilnahmebescheinigung.pdf',
+          'Für Individualisierung <b>${vorname}</b> oder <b>${firstname}</b> für den Vorname in der Email nutzen',
+          'Für Individualisierung <b>${nachname}</b> oder <b>${lastname}</b> für den Nachname in der Email nutzen',
+        ]"
       />
       <v-row>
         <v-col cols="12">
@@ -79,10 +84,6 @@ export default {
       subject: '',
       content: '',
       disabled: false,
-      help: ['Namenskonvention für Dokumente: Vorname#Nachname#Email.pdf. Z.B.: Michael#Seele#mseele@gmail.com.pdf',
-             'Dokumentenname ist der Name der in der Email angezeigt wird. Z.B.: Teilnahmebescheinigung.pdf',
-             'Für Individualisierung <b>${vorname}</b> oder <b>${firstname}</b> für den Vorname in der Email nutzen',
-             'Für Individualisierung <b>${nachname}</b> oder <b>${lastname}</b> für den Nachname in der Email nutzen']
     }
   },
   methods: {

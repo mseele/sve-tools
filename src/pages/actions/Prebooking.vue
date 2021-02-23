@@ -1,7 +1,17 @@
 <template>
   <Layout>
     <v-container>
-      <action-header title="Pre-Booking Email" subtitle="Kursbuchung Email" :help="help" />
+      <action-header
+        title="Pre-Booking Email"
+        subtitle="Kursbuchung Email"
+        :help="[
+          'Alle benötigten Spalten (siehe oben) zusammen aus der Tabelle kopieren',
+          'Es können nur Events/Kurse ausgewählt werden die intern als Beta bezeichnet sind (nicht öffentlich, nur über next.sv-eutingen.de erreichbar)',
+          'Zur Linkerzeugung <b>${link}</b> in der Email nutzen',
+          'Für Individualisierung <b>${vorname}</b> oder <b>${firstname}</b> für den Vorname in der Email nutzen',
+          'Für Individualisierung <b>${nachname}</b> oder <b>${lastname}</b> für den Nachname in der Email nutzen',
+        ]"
+      />
       <v-row>
         <v-col cols="12">
           <v-form :disabled="disabled">
@@ -97,11 +107,6 @@ export default {
       subject: '',
       content: '',
       disabled: false,
-      help: ['Alle benötigten Spalten (siehe oben) zusammen aus der Tabelle kopieren',
-             'Es können nur Events/Kurse ausgewählt werden die intern als Beta bezeichnet sind (nicht öffentlich, nur über next.sv-eutingen.de erreichbar)',
-             'Zur Linkerzeugung <b>${link}</b> in der Email nutzen',
-             'Für Individualisierung <b>${vorname}</b> oder <b>${firstname}</b> für den Vorname in der Email nutzen',
-             'Für Individualisierung <b>${nachname}</b> oder <b>${lastname}</b> für den Nachname in der Email nutzen']
     }
   },
   async mounted() {
