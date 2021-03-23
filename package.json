@@ -18,7 +18,7 @@
     "vuetify": "^2.3.9"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.13.5",
+    "@babel/preset-env": "^7.13.12",
     "@commitlint/cli": "^12.0.0",
     "@commitlint/config-conventional": "^12.0.0",
     "@mdi/js": "^5.9.55",
