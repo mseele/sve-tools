@@ -11029,10 +11029,10 @@ vuetify-loader@^1.7.2:
     file-loader "^6.2.0"
     loader-utils "^2.0.0"
 
-vuetify@^2.3.9:
-  version "2.3.9"
-  resolved "https://registry.yarnpkg.com/vuetify/-/vuetify-2.3.9.tgz#6dcd1de647e1ce2c7cfaebb7068a0cf8929360b3"
-  integrity sha512-E5K9flTvS21tCkHgqDBMl0BY/Rld4SLUaJpQ+sQdL8/2uPcWmWLrdumn4SI8LBFojE0UP1GSaH4zKuxLL36fYg==
+vuetify@^2.4.8:
+  version "2.4.8"
+  resolved "https://registry.yarnpkg.com/vuetify/-/vuetify-2.4.8.tgz#c6e883a9b2560f9906bd8b9f9eb58b001200aeef"
+  integrity sha512-rJYyzSO4Qsm/Q79W4FAUedgIDzUvx2uXzXXQ7OB2z9kAAkVOpTdMFY0CnpBcvlYbXOYy/mJ81/yUCV1ZAvJ3FQ==
 
 watchpack-chokidar2@^2.0.0:
   version "2.0.0"
