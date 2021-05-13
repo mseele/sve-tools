@@ -20,7 +20,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.13.5",
     "@commitlint/cli": "^12.0.0",
-    "@commitlint/config-conventional": "^12.0.0",
+    "@commitlint/config-conventional": "^12.1.4",
     "@mdi/js": "^5.9.55",
     "babel-eslint": "^10.1.0",
     "deepmerge": "^4.2.2",
