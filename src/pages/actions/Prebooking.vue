@@ -111,7 +111,7 @@ export default {
   },
   async mounted() {
     try {
-      const res = await axios.get(this.$page.metadata.loadEventsURL)
+      const res = await axios.get(this.$page.metadata.loadBetaEventsURL)
       this.allEvents = res.data
       this.initEvents()
     } catch (error) {
@@ -266,7 +266,7 @@ export default {
 query {
   metadata {
     sendEmailsURL
-    loadEventsURL
+    loadBetaEventsURL
   }
 }
 </page-query>

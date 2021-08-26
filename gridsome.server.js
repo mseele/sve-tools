@@ -7,7 +7,7 @@ module.exports = function (api) {
       'https://backend.sv-eutingen.de/api/contact/emails'
     )
     store.addMetadata(
-      'loadEventsURL',
+      'loadBetaEventsURL',
       'https://backend.sv-eutingen.de/api/events?beta=true'
     )
     store.addMetadata(
