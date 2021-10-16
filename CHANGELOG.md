@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.7.3](https://github.com/mseele/sve-tools/compare/v1.7.2...v1.7.3) (2021-10-16)
+
+
+### Bug Fixes
+
+* correct plugin source ([b50cc5b](https://github.com/mseele/sve-tools/commit/b50cc5be515f23e263d7ea7e57ceeb09c4c1627a))
+
 ### [1.7.2](https://github.com/mseele/sve-tools/compare/v1.7.1...v1.7.2) (2021-10-16)
 
 
