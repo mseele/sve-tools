@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.0](https://github.com/mseele/sve-tools/compare/v1.6.1...v1.7.0) (2021-10-16)
+
+
+### Features
+
+* **actions:** add re-deploy website action ([01dea57](https://github.com/mseele/sve-tools/commit/01dea57dea407589bcfa308372513fc52288ad65))
+* add colored dot for state ([0148b2a](https://github.com/mseele/sve-tools/commit/0148b2adf7cd6c546b082591b188bdd3505552a7))
+* add event images as preview ([b45143e](https://github.com/mseele/sve-tools/commit/b45143e8c7f5f8ebdfd64b97ac2fa3d869361aa4))
+* add manage events action ([1ea2dc8](https://github.com/mseele/sve-tools/commit/1ea2dc878d3bbde526e3e5854f258836cff20c8e))
+
+
+### Bug Fixes
+
+* correct delete errors ([55a5d5e](https://github.com/mseele/sve-tools/commit/55a5d5e5c05d72748a06871ba42e5bd680d549af))
+
 ### [1.6.1](https://github.com/mseele/sve-tools/compare/v1.6.0...v1.6.1) (2021-02-23)
 
 ## [1.6.0](https://github.com/mseele/sve-tools/compare/v1.5.0...v1.6.0) (2021-02-23)
