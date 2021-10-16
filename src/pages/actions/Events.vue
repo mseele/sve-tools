@@ -158,7 +158,12 @@
                   <v-btn color="primary" text @click="deleteDialog = false">
                     Abbrechen
                   </v-btn>
-                  <v-btn color="error" text @click="onDelete()">
+                  <v-btn
+                    color="error"
+                    text
+                    :loading="loading"
+                    @click="onDelete()"
+                  >
                     Löschen
                   </v-btn>
                 </v-card-actions>
@@ -748,7 +753,7 @@ export default {
       this.onEdit(true)
     },
     async onDelete() {
-      this.oading = true
+      this.loading = true
       try {
         await axios.post(this.$page.metadata.deleteEventURL, this.selection)
         this.allEvents = (
@@ -765,6 +770,7 @@ export default {
           'Fehler beim Löschen des Events. Details siehe Console'
         )
       } finally {
+        this.deleteDialog = false
         this.loading = false
       }
     },
