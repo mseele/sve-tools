@@ -1,4 +1,4 @@
-const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
+const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin.js')
 
 module.exports = function (api) {
   api.loadSource((store) => {
