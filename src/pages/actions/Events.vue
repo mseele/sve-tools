@@ -19,7 +19,29 @@
               label="Event auswählen"
               hide-details
               :disabled="!readonly"
-            ></v-autocomplete>
+            >
+              <template v-slot:item="data">
+                <div class="d-flex align-center">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16pt"
+                    height="21.333"
+                  >
+                    <path
+                      d="M15.625 10a5.625 5.625 0 11-11.25 0 5.625 5.625 0 0111.25 0z"
+                      :fill="
+                        data.item.visible
+                          ? data.item.beta
+                            ? '#FBBF24'
+                            : '#65A30D'
+                          : '#DC2626'
+                      "
+                    />
+                  </svg>
+                  <div class="ml-2">{{ eventName(data.item) }}</div>
+                </div>
+              </template>
+            </v-autocomplete>
             <v-dialog v-model="newDialog" persistent max-width="400">
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
