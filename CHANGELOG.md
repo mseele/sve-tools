@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.7.2](https://github.com/mseele/sve-tools/compare/v1.7.1...v1.7.2) (2021-10-16)
+
+
+### Bug Fixes
+
+* add netlify configuration ([9bdb135](https://github.com/mseele/sve-tools/commit/9bdb135ef6eba6b5a13eebd6d550f3dd34f0a0ca))
+
 ### [1.7.1](https://github.com/mseele/sve-tools/compare/v1.7.0...v1.7.1) (2021-10-16)
 
 
