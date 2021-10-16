@@ -11,6 +11,18 @@ module.exports = function (api) {
       'https://backend.sv-eutingen.de/api/events?beta=true'
     )
     store.addMetadata(
+      'loadAllEventsURL',
+      'https://backend.sv-eutingen.de/api/events?all=true'
+    )
+    store.addMetadata(
+      'updateEventURL',
+      'https://backend.sv-eutingen.de/api/events/update'
+    )
+    store.addMetadata(
+      'deleteEventURL',
+      'https://backend.sv-eutingen.de/api/events/delete'
+    )
+    store.addMetadata(
       'deployURL_sveNext',
       'https://api.netlify.com/build_hooks/6127d32c2032942b064c7947'
     )
