@@ -268,13 +268,26 @@
           </v-col>
           <v-col cols="4">
             <v-select
-              :items="images"
+              :items="eventImages"
+              item-value="name"
+              item-text="name"
               label="Bild"
               outlined
               dense
               :readonly="readonly"
               v-model="selection.image"
-            ></v-select>
+            >
+              <template v-slot:item="data">
+                <div class="d-flex align-center my-2">
+                  <g-image
+                    :src="data.item.src"
+                    fit="contain"
+                    :immediate="true"
+                  />
+                  <div class="ml-2">{{ data.item.name }}</div>
+                </div>
+              </template>
+            </v-select>
           </v-col>
           <v-col cols="2">
             <v-select
@@ -557,32 +570,6 @@ export default {
         { value: true, text: 'Ja' },
         { value: false, text: 'Nein' },
       ],
-      images: [
-        'fit_gesund.jpg',
-        'after_work.jpg',
-        'aqua_2.jpg',
-        'aqua_3.jpg',
-        'aqua.jpg',
-        'baby.jpg',
-        'bretzel.jpg',
-        'brot.jpg',
-        'deep.jpg',
-        'fit.jpg',
-        'fussballtor.jpg',
-        'pilates.jpg',
-        'rf.jpg',
-        'ski.jpg',
-        'sommerferien.jpg',
-        'spargel.jpg',
-        'sv.jpg',
-        'swabian.jpg',
-        'thekla.jpg',
-        'weihnacht.jpg',
-        'wein_2.jpg',
-        'wein.jpg',
-        'yoga.jpg',
-        'zumba.jpg',
-      ],
       mdiPlus,
       mdiPencil,
       mdiFileDocumentMultiple,
@@ -695,6 +682,9 @@ export default {
           }
           return a.sortIndex - b.sortIndex
         })
+    },
+    eventImages() {
+      return this.$page.eventImages.edges.map((edge) => edge.node)
     },
     readonly() {
       return this.editOriginal == null
@@ -871,6 +861,14 @@ query {
     loadAllEventsURL
     updateEventURL
     deleteEventURL
+  }
+  eventImages: allEventImages(sortBy: "name", order: ASC) {
+    edges {
+      node {
+        name
+        src(width: 120, height: 70, quality: 70)
+      }
+    }
   }
 }
 </page-query>

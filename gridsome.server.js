@@ -30,6 +30,19 @@ module.exports = function (api) {
       'deployURL_sveRelease',
       'https://api.netlify.com/build_hooks/6127d409612b8830aa05d286'
     )
+
+    const eventImages = store.addCollection('eventImages')
+
+    const fs = require('fs')
+    const dir = fs.opendirSync('./src/assets/events/')
+    while ((dirent = dir.readSync()) !== null) {
+      const name = dirent.name
+      eventImages.addNode({
+        name: name,
+        src: require.resolve('./src/assets/events/' + name),
+      })
+    }
+    dir.closeSync()
   })
 
   api.chainWebpack((config, { isServer }) => {
