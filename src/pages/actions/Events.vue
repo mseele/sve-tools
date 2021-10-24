@@ -4,7 +4,11 @@
       <action-header
         title="Manage Events"
         subtitle="Events &amp; Fitnesskurse bearbeiten"
-        :help="['Hier können Events & Fitnesskurse bearbeitet werden']"
+        :help="[
+          'Hier können Events & Fitnesskurse bearbeitet werden',
+          'Sheet ID & GID sind die Werte des Google Sheet Dokuments in welches die Buchungen gespeichert werden',
+          'In der Beschreibung kann mit HTML-Tags z.B. für eine Liste oder eine fettgedruckte Schrift gerarbeitet werden',
+        ]"
       />
       <v-row>
         <v-col cols="12">
