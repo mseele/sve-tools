@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.8.0](https://github.com/mseele/sve-tools/compare/v1.7.4...v1.8.0) (2021-10-24)
+
+
+### Features
+
+* add success notifications ([79f291b](https://github.com/mseele/sve-tools/commit/79f291bd168a96372a680783cae23abf7f9f5f45))
+
+
+### Bug Fixes
+
+* add more help items ([c255aec](https://github.com/mseele/sve-tools/commit/c255aec39b1643ccbcb7d367385c651f6d8b92d6))
+
 ### [1.7.4](https://github.com/mseele/sve-tools/compare/v1.7.3...v1.7.4) (2021-10-16)
 
 ### [1.7.3](https://github.com/mseele/sve-tools/compare/v1.7.2...v1.7.3) (2021-10-16)
