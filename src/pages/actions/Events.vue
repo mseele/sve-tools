@@ -763,6 +763,7 @@ export default {
       this.allEvents.push(this.selection)
       this.dialogID = null
       this.onEdit(true)
+      this.$refs.notify.showSuccess('Das Event wurde erfolgreich dupliziert')
     },
     async onDelete() {
       this.loading = true
@@ -776,6 +777,7 @@ export default {
         this.editNew = false
         this.editOriginal = null
         this.dateToAdd = null
+        this.$refs.notify.showSuccess('Das Event wurde erfolgreich gelöscht')
       } catch (error) {
         console.log(error)
         this.$refs.notify.showError(
@@ -826,6 +828,7 @@ export default {
         this.editNew = false
         this.editOriginal = null
         this.dateToAdd = null
+        this.$refs.notify.showSuccess('Das Event wurde erfolgreich gespeichert')
       } catch (error) {
         console.log(error)
         this.$refs.notify.showError(
