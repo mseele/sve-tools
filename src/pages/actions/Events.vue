@@ -539,15 +539,7 @@ import ActionHeader from '~/components/ActionHeader.vue'
 import Notify from '~/components/Notify.vue'
 import FromSelect from '~/components/FromSelect.vue'
 import axios from 'axios'
-import {
-  parse,
-  parseISO,
-  format,
-  formatISO,
-  isBefore,
-  isValid,
-  addDays,
-} from 'date-fns'
+import { parse, parseISO, format, isBefore, isValid, addDays } from 'date-fns'
 import { isEqual, transform, cloneDeep } from 'lodash-es'
 
 export default {
@@ -734,7 +726,8 @@ export default {
         }
         index++
       }
-      this.selection.dates.splice(index, 0, formatISO(newDate))
+      const dateString = format(newDate, "yyyy-MM-dd'T'HH:mm:ss")
+      this.selection.dates.splice(index, 0, dateString)
       this.dateToAdd = format(addDays(newDate, 7), 'dd-MM-yyyy HH:mm')
     },
     onNew() {
