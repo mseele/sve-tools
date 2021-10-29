@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.0](https://github.com/mseele/sve-tools/compare/v1.8.1...v1.9.0) (2021-10-29)
+
+
+### Features
+
+* simplify visibility selection ([6e9e865](https://github.com/mseele/sve-tools/commit/6e9e865fbb3c5ef73ec25c64b24dbf6101165748))
+
+
+### Bug Fixes
+
+* remove g-image due to noscript bug ([062d05d](https://github.com/mseele/sve-tools/commit/062d05d2e651734ceec1f78108af54ffd192eecf))
+* remove immediate tag ([e373323](https://github.com/mseele/sve-tools/commit/e37332377f56879438349487bb26c98e7f07e61c))
+* use next tick to push router ([5fa2242](https://github.com/mseele/sve-tools/commit/5fa22424a4078a54c310465eea17e6e48b931a87))
+* work on hydration problem ([68f8b9c](https://github.com/mseele/sve-tools/commit/68f8b9cd645903ee10fec7e9bbaaa982dbcbf0a0))
+* workaround hydration problem ([8f51d01](https://github.com/mseele/sve-tools/commit/8f51d01ccbfdd4e03ec74923ed35bf9bd00c6548))
+
 ### [1.8.1](https://github.com/mseele/sve-tools/compare/v1.8.0...v1.8.1) (2021-10-25)
 
 
