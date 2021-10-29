@@ -273,11 +273,7 @@
             >
               <template v-slot:item="data">
                 <div class="d-flex align-center my-2">
-                  <g-image
-                    :src="data.item.src"
-                    fit="contain"
-                    :immediate="true"
-                  />
+                  <g-image :src="data.item.src" fit="contain" />
                   <div class="ml-2">{{ data.item.name }}</div>
                 </div>
               </template>
