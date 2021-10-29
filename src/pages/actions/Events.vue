@@ -220,24 +220,14 @@
               :rules="rules.positiveNumber"
             ></v-text-field>
           </v-col>
-          <v-col cols="2">
+          <v-col cols="4">
             <v-select
-              :items="trueFalse"
-              label="Sichtbar"
+              :items="itemsVisibility"
+              label="Sichtbarkeit"
               outlined
               dense
               :readonly="readonly"
-              v-model="selection.visible"
-            ></v-select>
-          </v-col>
-          <v-col cols="2">
-            <v-select
-              :items="trueFalse"
-              label="Beta"
-              outlined
-              dense
-              :readonly="readonly"
-              v-model="selection.beta"
+              v-model="visibility"
             ></v-select>
           </v-col>
           <v-col cols="8">
@@ -566,6 +556,11 @@ export default {
         { value: true, text: 'Ja' },
         { value: false, text: 'Nein' },
       ],
+      itemsVisibility: [
+        { value: 'visible', text: 'Sichtbar' },
+        { value: 'beta', text: 'Beta' },
+        { value: 'invisible', text: 'Unsichtbar' },
+      ],
       mdiPlus,
       mdiPencil,
       mdiFileDocumentMultiple,
@@ -688,6 +683,35 @@ export default {
     isDateToAddValid() {
       return isValid(parse(this.dateToAdd, 'dd-MM-yyyy HH:mm', new Date()))
     },
+    visibility: {
+      get() {
+        if (this.selection != null) {
+          if (this.selection.visible && !this.selection.beta) {
+            return 'visible'
+          } else if (this.selection.visible && this.selection.beta) {
+            return 'beta'
+          }
+          return 'invisible'
+        }
+        return undefined
+      },
+      set(value) {
+        switch (value) {
+          case 'visible':
+            this.selection.visible = true
+            this.selection.beta = false
+            break
+          case 'beta':
+            this.selection.visible = true
+            this.selection.beta = true
+            break
+          case 'invisible':
+            this.selection.visible = false
+            this.selection.beta = false
+            break
+        }
+      },
+    },
   },
   watch: {
     from() {
@@ -703,13 +727,15 @@ export default {
   },
   methods: {
     eventName(event) {
-      return (
-        event.name +
-        ' (' +
-        (event.visible ? 'sichtbar' : 'unsichtbar') +
-        (event.beta ? ' - beta' : '') +
-        ')'
-      )
+      let visibility
+      if (event.visible && !event.beta) {
+        visibility = 'Sichtbar'
+      } else if (event.visible && event.beta) {
+        visibility = 'Beta'
+      } else {
+        visibility = 'Unsichtbar'
+      }
+      return event.name + ' (' + visibility + ')'
     },
     eventValue(event) {
       return event
