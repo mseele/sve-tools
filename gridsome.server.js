@@ -39,7 +39,6 @@ module.exports = function (api) {
       const name = dirent.name
       eventImages.addNode({
         name: name,
-        src: require.resolve('./src/assets/events/' + name),
       })
     }
     dir.closeSync()

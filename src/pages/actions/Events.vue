@@ -273,7 +273,10 @@
             >
               <template v-slot:item="data">
                 <div class="d-flex align-center my-2">
-                  <g-image :src="data.item.src" fit="contain" />
+                  <img
+                    :src="require('~/assets/events/' + data.item.name)"
+                    class="event-img"
+                  />
                   <div class="ml-2">{{ data.item.name }}</div>
                 </div>
               </template>
@@ -875,6 +878,11 @@ export default {
 .colored-border {
   border-color: rgba(0, 0, 0, 0.42) !important;
 }
+.event-img {
+  width: 120px;
+  height: 70px;
+  object-fit: cover;
+}
 </style>
 
 <page-query>
@@ -888,7 +896,6 @@ query {
     edges {
       node {
         name
-        src(width: 120, height: 70, quality: 70)
       }
     }
   }
