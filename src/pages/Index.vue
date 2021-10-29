@@ -43,9 +43,11 @@ export default {
       if (this.encrypt === window.btoa(this.password)) {
         if (process.isClient) {
           Cookies.set('sve_backend_tools', 'verified', { expires: 28 })
-          this.$router.push(
-            this.$page.metadata.pathPrefix + this.actions[0].link
-          )
+          this.$nextTick(() => {
+            this.$router.push(
+              this.$page.metadata.pathPrefix + this.actions[0].link
+            )
+          })
         }
       }
     },
@@ -54,9 +56,9 @@ export default {
 </script>
 
 <page-query>
-  query {
-    metadata {
-      pathPrefix
-    }
+query {
+  metadata {
+    pathPrefix
   }
+}
 </page-query>
