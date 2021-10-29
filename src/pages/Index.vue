@@ -38,11 +38,6 @@ export default {
       actions,
     }
   },
-  mounted() {
-    if (process.isClient && Cookies.get('sve_backend_tools') === 'verified') {
-      this.$router.push(this.$page.metadata.pathPrefix + this.actions[0].link)
-    }
-  },
   methods: {
     login() {
       if (this.encrypt === window.btoa(this.password)) {

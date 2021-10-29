@@ -18,21 +18,23 @@ export default function (Vue, { appOptions, head, router }) {
     },
   })
 
-  // if (process.isClient) {
-  //   router.beforeEach((to, from, next) => {
-  //     if (Cookies.get('sve_backend_tools') === 'verified') {
-  //       if (to.path === '/') {
-  //         next(actions[0].link)
-  //       } else {
-  //         next()
-  //       }
-  //     } else if (to.path === '/') {
-  //       next()
-  //     } else {
-  //       next('/')
-  //     }
-  //   })
-  // }
+  if (process.isClient) {
+    router.beforeEach((to, from, next) => {
+      Vue.nextTick(() => {
+        if (Cookies.get('sve_backend_tools') === 'verified') {
+          if (to.path === '/') {
+            next(actions[0].link)
+          } else {
+            next()
+          }
+        } else if (to.path === '/') {
+          next()
+        } else {
+          next('/')
+        }
+      })
+    })
+  }
 
   Vue.component('Layout', DefaultLayout)
 }
