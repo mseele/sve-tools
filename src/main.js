@@ -7,8 +7,7 @@ import actions from '@/data/actions.json'
 export default function (Vue, { appOptions, head, router }) {
   head.link.push({
     rel: 'stylesheet',
-    href:
-      'https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900',
+    href: 'https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900',
   })
 
   Vue.use(Vuetify)
@@ -19,21 +18,21 @@ export default function (Vue, { appOptions, head, router }) {
     },
   })
 
-  if (process.isClient) {
-    router.beforeEach((to, from, next) => {
-      if (Cookies.get('sve_backend_tools') === 'verified') {
-        if (to.path === '/') {
-          next(actions[0].link)
-        } else {
-          next()
-        }
-      } else if (to.path === '/') {
-        next()
-      } else {
-        next('/')
-      }
-    })
-  }
+  // if (process.isClient) {
+  //   router.beforeEach((to, from, next) => {
+  //     if (Cookies.get('sve_backend_tools') === 'verified') {
+  //       if (to.path === '/') {
+  //         next(actions[0].link)
+  //       } else {
+  //         next()
+  //       }
+  //     } else if (to.path === '/') {
+  //       next()
+  //     } else {
+  //       next('/')
+  //     }
+  //   })
+  // }
 
   Vue.component('Layout', DefaultLayout)
 }
