@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.10.0](https://github.com/mseele/sve-tools/compare/v1.9.0...v1.10.0) (2021-12-02)
+
+
+### Features
+
+* add new event image ([3e6dd06](https://github.com/mseele/sve-tools/commit/3e6dd0656b146281d0e28389a0e850b8da89f5fb))
+
 ## [1.9.0](https://github.com/mseele/sve-tools/compare/v1.8.1...v1.9.0) (2021-10-29)
 
 
