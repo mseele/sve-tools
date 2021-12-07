@@ -211,7 +211,7 @@
           </v-col>
           <v-col cols="2">
             <v-text-field
-              label="Sort Index"
+              label="Sortier-Index"
               outlined
               dense
               :readonly="readonly"
