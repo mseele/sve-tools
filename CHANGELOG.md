@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.11.0](https://github.com/mseele/sve-tools/compare/v1.10.0...v1.11.0) (2021-12-07)
+
+
+### Features
+
+* add booking button configuration ([81200aa](https://github.com/mseele/sve-tools/commit/81200aab057c5916a86b8480a1aec05a157fe58f))
+
+
+### Bug Fixes
+
+* use german text ([5bfad1b](https://github.com/mseele/sve-tools/commit/5bfad1b89275f7c8dc00a7e738bd016bd4e5615f))
+
 ## [1.10.0](https://github.com/mseele/sve-tools/compare/v1.9.0...v1.10.0) (2021-12-02)
 
 
