@@ -735,12 +735,8 @@ export default {
     from() {
       this.selection = null
     },
-    dateSelection(newValue) {
-      if (newValue == 0) {
-        this.selection.customDate = undefined
-      } else {
-        this.selection.customDate = ''
-      }
+    dateSelection() {
+      this.selection.customDate = ''
     },
   },
   methods: {
