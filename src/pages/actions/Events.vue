@@ -607,9 +607,14 @@ export default {
             }
             if (
               !this.selection.maxSubscribers ||
-              (val >= 0 && val <= this.selection.maxSubscribers)
+              (val >= 0 &&
+                (this.selection.maxSubscribers == -1 ||
+                  val <= this.selection.maxSubscribers))
             ) {
               return true
+            }
+            if (this.selection.maxSubscribers == -1) {
+              return 'Ein Wert größer/gleich 0 wird benötigt'
             }
             return (
               'Ein Wert zwischen 0 und ' +
@@ -625,9 +630,14 @@ export default {
             }
             if (
               !this.selection.maxWaitingList ||
-              (val >= 0 && val <= this.selection.maxWaitingList)
+              (val >= 0 &&
+                (this.selection.maxWaitingList == -1 ||
+                  val <= this.selection.maxWaitingList))
             ) {
               return true
+            }
+            if (this.selection.maxWaitingList == -1) {
+              return 'Ein Wert größer/gleich 0 wird benötigt'
             }
             return (
               'Ein Wert zwischen 0 und ' +
