@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.11.1](https://github.com/mseele/sve-tools/compare/v1.11.0...v1.11.1) (2021-12-13)
+
+
+### Bug Fixes
+
+* correct validation when value is -1 ([5da483f](https://github.com/mseele/sve-tools/commit/5da483fd35bc083d4cb427ffb581a46be2d6e835))
+* deselection of custom date ([7b75e47](https://github.com/mseele/sve-tools/commit/7b75e4742c04343c765181d8f5643626d546f595))
+
 ## [1.11.0](https://github.com/mseele/sve-tools/compare/v1.10.0...v1.11.0) (2021-12-07)
 
 
