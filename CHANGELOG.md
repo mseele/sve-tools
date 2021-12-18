@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.12.0](https://github.com/mseele/sve-tools/compare/v1.11.2...v1.12.0) (2021-12-18)
+
+
+### Features
+
+* add support for alternative email address ([cafc623](https://github.com/mseele/sve-tools/commit/cafc6235cf02d550a8bdbc06743d7c0536bf242d))
+
 ### [1.11.2](https://github.com/mseele/sve-tools/compare/v1.11.1...v1.11.2) (2021-12-15)
 
 
