@@ -467,6 +467,16 @@
             ></v-text-field>
           </v-col>
           <v-col cols="6">
+            <v-text-field
+              label="Alternative Versand-Emailadresse"
+              outlined
+              dense
+              :readonly="readonly"
+              v-model="selection.altEmailAddress"
+              :rules="rules.altEmailAddress"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="6">
             <v-checkbox
               label="Durchführung durch den Förderverein"
               :readonly="readonly"
@@ -656,6 +666,17 @@ export default {
             }
             if (val.trim().indexOf(' ') >= 0) {
               return 'Die ID darf keine Leerzeichen enthalten'
+            }
+            return true
+          },
+        ],
+        altEmailAddress: [
+          (val) => {
+            if (
+              (val || '').length > 0 &&
+              val !== 'jugendturnier@sv-eutingen.de'
+            ) {
+              return "Als alternative Email Adresse ist aktuell nur 'jugendturnier@sv-eutingen.de' möglich"
             }
             return true
           },
