@@ -459,11 +459,11 @@
           </v-col>
           <v-col cols="6">
             <v-text-field
-              label="Buchungstext f. Button (Alternative)"
+              label="Alternativer Button Text"
               outlined
               dense
               :readonly="readonly"
-              v-model="selection.bookingButton"
+              v-model="selection.altBookingButtonText"
             ></v-text-field>
           </v-col>
           <v-col cols="6">
