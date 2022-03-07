@@ -246,8 +246,9 @@
               outlined
               dense
               :readonly="readonly"
-              v-model="selection.gid"
-              :rules="rules.required"
+              type="number"
+              v-model.number="selection.gid"
+              :rules="rules.positiveNumber"
             ></v-text-field>
           </v-col>
           <v-col cols="6">
@@ -398,7 +399,7 @@
               dense
               :readonly="readonly"
               type="number"
-              v-model="selection.costMember"
+              v-model.number="selection.costMember"
               :rules="rules.positiveNumber"
             ></v-text-field>
           </v-col>
