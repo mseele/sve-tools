@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.14.1](https://github.com/mseele/sve-tools/compare/v1.14.0...v1.14.1) (2022-03-07)
+
+
+### Bug Fixes
+
+* correct field types ([b1fb4c5](https://github.com/mseele/sve-tools/commit/b1fb4c5967199e8ebd47ec507555330d283414d8))
+
 ## [1.14.0](https://github.com/mseele/sve-tools/compare/v1.13.0...v1.14.0) (2022-02-02)
 
 
