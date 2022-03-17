@@ -39,7 +39,7 @@ export default {
     },
     people: {
       type: Array,
-      default: [],
+      default: () => [],
     },
     sendText: {
       type: String,
