@@ -25,7 +25,7 @@
       :disabled="disabled"
       @click="send()"
     >
-      {{ confirmSend ? 'Sicher?' : 'Senden' }}
+      {{ confirmSend ? 'Sicher?' : sendText }}
     </v-btn>
   </div>
 </template>
@@ -40,6 +40,10 @@ export default {
     people: {
       type: Array,
       default: [],
+    },
+    sendText: {
+      type: String,
+      default: 'Senden',
     },
   },
   data() {
