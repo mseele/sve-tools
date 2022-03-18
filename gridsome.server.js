@@ -2,26 +2,12 @@ const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 
 module.exports = function (api) {
   api.loadSource((store) => {
-    store.addMetadata(
-      'sendEmailsURL',
-      'https://backend.sv-eutingen.de/api/contact/emails'
-    )
-    store.addMetadata(
-      'loadBetaEventsURL',
-      'https://backend.sv-eutingen.de/api/events?beta=true'
-    )
-    store.addMetadata(
-      'loadAllEventsURL',
-      'https://backend.sv-eutingen.de/api/events?all=true'
-    )
-    store.addMetadata(
-      'updateEventURL',
-      'https://backend.sv-eutingen.de/api/events/update'
-    )
-    store.addMetadata(
-      'deleteEventURL',
-      'https://backend.sv-eutingen.de/api/events/delete'
-    )
+    const backend_prefix = 'https://backend.sv-eutingen.de/api/'
+    store.addMetadata('sendEmailsURL', backend_prefix + 'contact/emails')
+    store.addMetadata('loadBetaEventsURL', backend_prefix + 'events?beta=true')
+    store.addMetadata('loadAllEventsURL', backend_prefix + 'events?all=true')
+    store.addMetadata('updateEventURL', backend_prefix + 'events/update')
+    store.addMetadata('deleteEventURL', backend_prefix + 'events/delete')
     store.addMetadata(
       'deployURL_sveNext',
       'https://api.netlify.com/build_hooks/6127d32c2032942b064c7947'
