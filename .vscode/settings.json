@@ -1,8 +1,11 @@
 {
   "editor.defaultFormatter": "dbaeumer.vscode-eslint",
   "editor.formatOnSave": true,
-  "eslint.validate": ["vue", "html", "javascript"],
-  "telemetry.enableTelemetry": false,
+  "eslint.validate": [
+    "vue",
+    "html",
+    "javascript"
+  ],
   "explorer.confirmDragAndDrop": false,
   "git.enableSmartCommit": true,
   "editor.codeActionsOnSave": {
@@ -12,5 +15,10 @@
   "gitlens.currentLine.enabled": false,
   "gitlens.hovers.currentLine.over": "line",
   "gitlens.codeLens.enabled": false,
-  "gitlens.views.repositories.location": "scm"
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[vue]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }
