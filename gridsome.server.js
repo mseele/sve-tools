@@ -1,3 +1,4 @@
+const { mdiConsoleLine } = require('@mdi/js')
 const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 
 module.exports = function (api) {
@@ -27,8 +28,23 @@ module.exports = function (api) {
     const dir = fs.opendirSync('./src/assets/events/')
     while ((dirent = dir.readSync()) !== null) {
       const name = dirent.name
+      const separator = name.lastIndexOf('_')
+      const dot = name.lastIndexOf('.')
+      const image =
+        name.substring(0, separator) + name.substring(dot, name.length)
+      const suffix = name.substring(separator + 1, dot)
+      if ('light' !== suffix && 'dark' !== suffix) {
+        throw (
+          'Invalid event image suffix on ' +
+          name +
+          '. Only light or dark is supported.'
+        )
+      }
+      const light = 'light' === suffix
       eventImages.addNode({
-        name: name,
+        name,
+        image,
+        light,
       })
     }
     dir.closeSync()

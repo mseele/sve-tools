@@ -251,7 +251,7 @@
               :rules="rules.positiveNumber"
             ></v-text-field>
           </v-col>
-          <v-col cols="6">
+          <v-col cols="8">
             <v-text-field
               label="Name"
               outlined
@@ -264,13 +264,14 @@
           <v-col cols="4">
             <v-select
               :items="eventImages"
-              item-value="name"
-              item-text="name"
+              item-value="image"
+              item-text="image"
               label="Bild"
               outlined
               dense
               :readonly="readonly"
-              v-model="selection.image"
+              :value="eventImageValue()"
+              @input="onEventImageInput"
             >
               <template v-slot:item="data">
                 <div class="d-flex align-center my-2">
@@ -278,20 +279,10 @@
                     :src="require('~/assets/events/' + data.item.name)"
                     class="event-img"
                   />
-                  <div class="ml-2">{{ data.item.name }}</div>
+                  <div class="ml-2">{{ data.item.image }}</div>
                 </div>
               </template>
             </v-select>
-          </v-col>
-          <v-col cols="2">
-            <v-select
-              :items="trueFalse"
-              label="Helle Schrift"
-              outlined
-              dense
-              :readonly="readonly"
-              v-model="selection.light"
-            ></v-select>
           </v-col>
           <v-col cols="12">
             <v-textarea
@@ -792,6 +783,17 @@ export default {
       this.selection.dates.splice(index, 0, dateString)
       this.dateToAdd = format(addDays(newDate, 7), 'dd-MM-yyyy HH:mm')
     },
+    eventImageValue() {
+      if (this.selection) {
+        return this.eventImages.find((v) => v.image == this.selection.image)
+      }
+      return undefined
+    },
+    onEventImageInput(newSelection) {
+      const eventImage = this.eventImages.find((v) => v.image == newSelection)
+      this.selection.image = eventImage.image
+      this.selection.light = eventImage.light
+    },
     onNew() {
       this.newDialog = false
       this.selection = {
@@ -933,6 +935,8 @@ query {
     edges {
       node {
         name
+        image
+        light
       }
     }
   }
