@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.15.0](https://github.com/mseele/sve-tools/compare/v1.14.1...v1.15.0) (2022-03-18)
+
+
+### Features
+
+* add new "verify payments" tool ([28f9135](https://github.com/mseele/sve-tools/commit/28f91355c0fb9219bfbcf123cd688ce8e5b26702))
+* make send button optional ([db13cd0](https://github.com/mseele/sve-tools/commit/db13cd006f193816fd87e13f2ef9d076dc4fcdc5))
+* make send text configurable ([66941ec](https://github.com/mseele/sve-tools/commit/66941ec85de1526a519e03a9222397852ca8e1af))
+
+
+### Bug Fixes
+
+* correct default argument of people ([6a290b2](https://github.com/mseele/sve-tools/commit/6a290b23224f350bebfd6208c0f252e401bd5e42))
+
 ### [1.14.1](https://github.com/mseele/sve-tools/compare/v1.14.0...v1.14.1) (2022-03-07)
 
 
