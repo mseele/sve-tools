@@ -1,7 +1,26 @@
 [
-    { "name": "Batch Email", "link": "/actions/email" },
-    { "name": "Batch Dokument", "link": "/actions/document" },
-    { "name": "Pre-Booking Email", "link": "/actions/prebooking" },
-    { "name": "Manage Events", "link": "/actions/events" },
-    { "name": "Re-Deploy Website", "link": "/actions/redeploy" }
+    {
+        "name": "Batch Email",
+        "link": "/actions/email"
+    },
+    {
+        "name": "Batch Dokument",
+        "link": "/actions/document"
+    },
+    {
+        "name": "Pre-Booking Email",
+        "link": "/actions/prebooking"
+    },
+    {
+        "name": "Manage Events",
+        "link": "/actions/events"
+    },
+    {
+        "name": "Re-Deploy Website",
+        "link": "/actions/redeploy"
+    },
+    {
+        "name": "Zahlungen überprüfen",
+        "link": "/actions/verifypayments"
+    }
 ]

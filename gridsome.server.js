@@ -9,6 +9,10 @@ module.exports = function (api) {
     store.addMetadata('updateEventURL', backend_prefix + 'events/update')
     store.addMetadata('deleteEventURL', backend_prefix + 'events/delete')
     store.addMetadata(
+      'verifyPaymentsURL',
+      backend_prefix + 'events/verify_payments'
+    )
+    store.addMetadata(
       'deployURL_sveNext',
       'https://api.netlify.com/build_hooks/6127d32c2032942b064c7947'
     )
