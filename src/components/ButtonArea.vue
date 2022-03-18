@@ -16,13 +16,15 @@
       color="light-blue"
     ></v-progress-circular>
     <v-spacer />
-    <v-btn depressed class="mr-2" :disabled="disabled" @click="reset()">
+    <v-btn depressed :disabled="disabled" @click="reset()">
       Zurücksetzen
     </v-btn>
     <v-btn
+      v-if="sendVisible"
       depressed
       :color="confirmSend ? 'red' : 'primary'"
       :disabled="disabled"
+      class="ml-2"
       @click="send()"
     >
       {{ confirmSend ? 'Sicher?' : sendText }}
@@ -44,6 +46,10 @@ export default {
     sendText: {
       type: String,
       default: 'Senden',
+    },
+    sendVisible: {
+      type: Boolean,
+      default: true,
     },
   },
   data() {
