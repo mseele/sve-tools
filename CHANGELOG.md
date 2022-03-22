@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.16.0](https://github.com/mseele/sve-tools/compare/v1.15.0...v1.16.0) (2022-03-22)
+
+
+### Features
+
+* add events batch edit ([bc2d044](https://github.com/mseele/sve-tools/commit/bc2d044204d9c1628f2a787d7d413550b04258fb))
+
 ## [1.15.0](https://github.com/mseele/sve-tools/compare/v1.14.1...v1.15.0) (2022-03-18)
 
 
