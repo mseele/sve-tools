@@ -25,25 +25,11 @@
               :disabled="!readonly"
             >
               <template v-slot:item="data">
-                <div class="d-flex align-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16pt"
-                    height="21.333"
-                  >
-                    <path
-                      d="M15.625 10a5.625 5.625 0 11-11.25 0 5.625 5.625 0 0111.25 0z"
-                      :fill="
-                        data.item.visible
-                          ? data.item.beta
-                            ? '#FBBF24'
-                            : '#65A30D'
-                          : '#DC2626'
-                      "
-                    />
-                  </svg>
-                  <div class="ml-2">{{ eventName(data.item) }}</div>
-                </div>
+                <EventListItem
+                  :visible="data.item.visible"
+                  :beta="data.item.beta"
+                  :text="eventName(data.item)"
+                />
               </template>
             </v-autocomplete>
             <v-dialog v-model="newDialog" persistent max-width="400">
@@ -195,6 +181,82 @@
                 </v-card-actions>
               </v-card>
             </v-dialog>
+            <v-dialog v-model="batchDialog" persistent max-width="600">
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  icon
+                  color="primary"
+                  :disabled="!readonly"
+                  v-bind="attrs"
+                  v-on="on"
+                >
+                  <v-icon>{{ mdiPencilBoxMultiple }}</v-icon>
+                </v-btn>
+              </template>
+              <v-card>
+                <v-card-title class="text-h5">Batch Edit</v-card-title>
+                <v-card-text class="pb-0">
+                  Selektiere alle Events die du gleichzeitig bearbeiten
+                  möchtest:<br />
+                  <v-form v-model="batchDialogValid" class="mt-2">
+                    <v-select
+                      v-model="batchSelection"
+                      :items="events"
+                      :item-value="eventValue"
+                      :item-text="eventName"
+                      outlined
+                      chips
+                      multiple
+                      label="Events auswählen"
+                      :rules="rules.batchSelection"
+                    >
+                      <template v-slot:item="data">
+                        <v-icon
+                          v-if="
+                            batchSelection !== null &&
+                            batchSelection.includes(data.item)
+                          "
+                          color="primary"
+                          class="mr-3"
+                        >
+                          {{ mdiCheckboxMarked }}
+                        </v-icon>
+                        <v-icon v-else class="mr-3">
+                          {{ mdiCheckboxBlankOutline }}
+                        </v-icon>
+                        <EventListItem
+                          :visible="data.item.visible"
+                          :beta="data.item.beta"
+                          :text="eventName(data.item)"
+                        />
+                      </template>
+                    </v-select>
+                  </v-form>
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn
+                    color="primary"
+                    text
+                    @click="
+                      () => {
+                        batchSelection = null
+                        batchDialog = false
+                      }
+                    "
+                  >
+                    Abbrechen
+                  </v-btn>
+                  <v-btn
+                    color="primary"
+                    text
+                    @click="onBatchEdit()"
+                    :disabled="!batchDialogValid"
+                    >Starten</v-btn
+                  >
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
           </div>
         </v-col>
       </v-row>
@@ -270,8 +332,7 @@
               outlined
               dense
               :readonly="readonly"
-              :value="eventImageValue()"
-              @input="onEventImageInput"
+              v-model="eventImage"
             >
               <template v-slot:item="data">
                 <div class="d-flex align-center my-2">
@@ -534,10 +595,19 @@
 </template>
 
 <script>
-import { mdiPlus, mdiPencil, mdiDelete, mdiFileDocumentMultiple } from '@mdi/js'
+import {
+  mdiPlus,
+  mdiPencil,
+  mdiDelete,
+  mdiFileDocumentMultiple,
+  mdiPencilBoxMultiple,
+  mdiCheckboxMarked,
+  mdiCheckboxBlankOutline,
+} from '@mdi/js'
 import ActionHeader from '~/components/ActionHeader.vue'
 import Notify from '~/components/Notify.vue'
 import FromSelect from '~/components/FromSelect.vue'
+import EventListItem from '~/components/EventListItem.vue'
 import axios from 'axios'
 import { parse, parseISO, format, isBefore, isValid, addDays } from 'date-fns'
 import { isEqual, transform, cloneDeep } from 'lodash-es'
@@ -547,6 +617,7 @@ export default {
     ActionHeader,
     Notify,
     FromSelect,
+    EventListItem,
   },
   metaInfo: {
     title: 'Edit Events',
@@ -556,11 +627,14 @@ export default {
       from: 'Fitness',
       allEvents: [],
       selection: null,
+      batchSelection: null,
       deleteDialog: false,
       newDialog: false,
       newDialogValid: false,
       dupDialog: false,
       dupDialogValid: false,
+      batchDialog: false,
+      batchDialogValid: false,
       dialogID: null,
       trueFalse: [
         { value: true, text: 'Ja' },
@@ -575,6 +649,9 @@ export default {
       mdiPencil,
       mdiFileDocumentMultiple,
       mdiDelete,
+      mdiPencilBoxMultiple,
+      mdiCheckboxMarked,
+      mdiCheckboxBlankOutline,
       editOriginal: null,
       editNew: false,
       editValid: false,
@@ -673,6 +750,14 @@ export default {
             return true
           },
         ],
+        batchSelection: [
+          (val) => {
+            if (val == null || val.length < 2) {
+              return 'Minimum 2 Events müssen ausgewählt werden'
+            }
+            return true
+          },
+        ],
       },
     }
   },
@@ -743,6 +828,19 @@ export default {
         }
       },
     },
+    eventImage: {
+      get() {
+        if (this.selection != null) {
+          return this.eventImages.find((v) => v.image == this.selection.image)
+        }
+        return undefined
+      },
+      set(value) {
+        const eventImage = this.eventImages.find((v) => v.image == value)
+        this.selection.image = eventImage.image
+        this.selection.light = eventImage.light
+      },
+    },
   },
   watch: {
     from() {
@@ -783,17 +881,6 @@ export default {
       this.selection.dates.splice(index, 0, dateString)
       this.dateToAdd = format(addDays(newDate, 7), 'dd-MM-yyyy HH:mm')
     },
-    eventImageValue() {
-      if (this.selection) {
-        return this.eventImages.find((v) => v.image == this.selection.image)
-      }
-      return undefined
-    },
-    onEventImageInput(newSelection) {
-      const eventImage = this.eventImages.find((v) => v.image == newSelection)
-      this.selection.image = eventImage.image
-      this.selection.light = eventImage.light
-    },
     onNew() {
       this.newDialog = false
       this.selection = {
@@ -825,6 +912,12 @@ export default {
       this.dialogID = null
       this.onEdit(true)
       this.$refs.notify.showSuccess('Das Event wurde erfolgreich dupliziert')
+    },
+    onBatchEdit() {
+      this.batchDialog = false
+      this.editNew = false
+      this.selection = this.batchSelection[0]
+      this.editOriginal = JSON.parse(JSON.stringify(this.selection))
     },
     async onDelete() {
       this.loading = true
@@ -861,24 +954,40 @@ export default {
       this.editNew = false
       this.editOriginal = null
       this.dateToAdd = null
+      this.batchSelection = null
     },
     async onSave() {
       if (!this.confirmSave) {
         this.confirmSave = true
         return
       }
-      let objectToSave
-      if (this.editNew) {
-        objectToSave = this.selection
-      } else {
-        objectToSave = this.diff(this.selection, this.editOriginal)
-        objectToSave.id = this.selection.id
-      }
       this.loading = true
       try {
-        const savedEvent = (
-          await axios.post(this.$page.metadata.updateEventURL, objectToSave)
-        ).data
+        let savedEvent = undefined
+        if (this.batchSelection != null) {
+          let changes = this.diff(this.selection, this.editOriginal)
+          for (const event of this.batchSelection) {
+            const objectToSave = JSON.parse(JSON.stringify(changes))
+            objectToSave.id = event.id
+            const result = (
+              await axios.post(this.$page.metadata.updateEventURL, objectToSave)
+            ).data
+            if (savedEvent == undefined) {
+              savedEvent = result
+            }
+          }
+        } else {
+          let objectToSave
+          if (this.editNew) {
+            objectToSave = this.selection
+          } else {
+            objectToSave = this.diff(this.selection, this.editOriginal)
+            objectToSave.id = this.selection.id
+          }
+          savedEvent = (
+            await axios.post(this.$page.metadata.updateEventURL, objectToSave)
+          ).data
+        }
         const fetchedEvents = (
           await axios.get(this.$page.metadata.loadAllEventsURL)
         ).data
@@ -889,7 +998,19 @@ export default {
         this.editNew = false
         this.editOriginal = null
         this.dateToAdd = null
-        this.$refs.notify.showSuccess('Das Event wurde erfolgreich gespeichert')
+        if (this.batchSelection != null) {
+          const count = this.batchSelection.length
+          this.batchSelection = null
+          this.$refs.notify.showSuccess(
+            'Die Änderungen an ' +
+              count +
+              ' Events wurden erfolgreich gespeichert'
+          )
+        } else {
+          this.$refs.notify.showSuccess(
+            'Das Event wurde erfolgreich gespeichert'
+          )
+        }
       } catch (error) {
         console.log(error)
         this.$refs.notify.showError(
@@ -899,6 +1020,7 @@ export default {
         this.loading = false
       }
     },
+
     diff(object, base) {
       function changes(object, base) {
         return transform(object, function (result, value, key) {
