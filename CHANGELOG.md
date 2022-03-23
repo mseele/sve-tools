@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.17.0](https://github.com/mseele/sve-tools/compare/v1.16.0...v1.17.0) (2022-03-23)
+
+
+### Features
+
+* add new replacement placeholders for prebooking ([e5b8da0](https://github.com/mseele/sve-tools/commit/e5b8da062123d609b5b44769226288d78ae77f82))
+
 ## [1.16.0](https://github.com/mseele/sve-tools/compare/v1.15.0...v1.16.0) (2022-03-22)
 
 
