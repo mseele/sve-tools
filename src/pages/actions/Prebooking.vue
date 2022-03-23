@@ -8,6 +8,9 @@
           'Alle benötigten Spalten (siehe oben) zusammen aus der Tabelle kopieren',
           'Es können nur Events/Kurse ausgewählt werden die intern als Beta bezeichnet sind (nicht öffentlich, nur über next.sv-eutingen.de erreichbar)',
           'Zur Linkerzeugung <b>${link}</b> in der Email nutzen',
+          'Zur Event-Nameserzeugung <b>${name}</b> in der Email nutzen',
+          'Zur Terminerzeugung <b>${dates}</b> in der Email nutzen',
+          'Zur Preisanzeige <b>${cost_member}</b> und <b>${cost_non_member}</b> in der Email nutzen',
           'Für Individualisierung <b>${vorname}</b> oder <b>${firstname}</b> für den Vorname in der Email nutzen',
           'Für Individualisierung <b>${nachname}</b> oder <b>${lastname}</b> für den Nachname in der Email nutzen',
         ]"
@@ -84,6 +87,8 @@ import FromSelect from '~/components/FromSelect.vue'
 import { validateEmail, replace, readFile } from '~/utils/actions.js'
 import { Base64 } from 'js-base64'
 import axios from 'axios'
+import { format, parseISO } from 'date-fns'
+import { de } from 'date-fns/locale'
 
 export default {
   components: {
@@ -182,7 +187,7 @@ export default {
       this.disabled = false
     },
     async send() {
-      this.disabled = true
+      // this.disabled = true
       const emails = []
       for (const person of this.people) {
         const data = {
@@ -256,7 +261,40 @@ export default {
         url += 'events'
       }
       url += '?pb=' + hash
-      return content.replace('${link}', url)
+      content = content.replace('${link}', url)
+
+      // get all event properties
+      const event = this.allEvents.find((e) => e.id === this.event)
+      content = content.replace('${name}', event.name)
+      content = content.replace(
+        '${cost_member}',
+        event.costMember.toLocaleString('de-DE', {
+          style: 'currency',
+          currency: 'EUR',
+        })
+      )
+      content = content.replace(
+        '${cost_non_member}',
+        event.costNonMember.toLocaleString('de-DE', {
+          style: 'currency',
+          currency: 'EUR',
+        })
+      )
+
+      if (event.dates != undefined && event.dates.length > 0) {
+        content = content.replace(
+          '${dates}',
+          event.dates
+            .map((d) =>
+              format(parseISO(d), "'-' EE, dd. MMMM yyyy, H:mm 'Uhr'", {
+                locale: de,
+              })
+            )
+            .join('\n')
+        )
+      }
+
+      return content
     },
   },
 }
