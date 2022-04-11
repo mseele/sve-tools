@@ -666,7 +666,7 @@ export default {
         ],
         positiveNumber: [
           (val) =>
-            this.readonly || val > 0 || 'Eine positive Nummer wird benötigt',
+            this.readonly || val >= 0 || 'Eine positive Nummer wird benötigt',
         ],
         maxSubscribers: [
           (val) => {
