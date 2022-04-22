@@ -35,6 +35,33 @@
               truncate-length="50"
               label="CSV Datei auswählen"
             ></v-file-input>
+            <div class="d-flex">
+              <v-checkbox v-model="with_start_date" hide-details></v-checkbox>
+              <v-menu
+                v-model="date_picker"
+                :close-on-content-click="false"
+                :nudge-right="40"
+                transition="scale-transition"
+                offset-y
+                min-width="auto"
+              >
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field
+                    :disabled="!with_start_date"
+                    v-model="start_date"
+                    label="CSV Start Date"
+                    readonly
+                    outlined
+                    v-bind="attrs"
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-date-picker
+                  v-model="start_date"
+                  @input="date_picker = false"
+                ></v-date-picker>
+              </v-menu>
+            </div>
           </v-form>
           <button-area
             :disabled="disabled"
@@ -70,6 +97,9 @@ export default {
     return {
       sheet_id: '',
       csv: undefined,
+      with_start_date: false,
+      start_date: undefined,
+      date_picker: false,
       result: undefined,
       disabled: false,
     }
@@ -78,6 +108,8 @@ export default {
     reset() {
       this.sheet_id = ''
       this.csv = undefined
+      this.with_start_date = false
+      this.start_date = undefined
       this.result = undefined
       this.disabled = false
     },
@@ -101,6 +133,10 @@ export default {
           {
             sheet_id: this.sheet_id,
             csv: attachment,
+            start_date:
+              this.with_start_date && this.start_date
+                ? this.start_date
+                : undefined,
           }
         )
         this.result = response.data
