@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.17.4](https://github.com/mseele/sve-tools/compare/v1.17.3...v1.17.4) (2022-07-12)
+
+
+### Bug Fixes
+
+* correct pre-booking url ([58bfb83](https://github.com/mseele/sve-tools/commit/58bfb83840cf0d9f9aec549e90bccf41aa015031))
+
 ### [1.17.3](https://github.com/mseele/sve-tools/compare/v1.17.2...v1.17.3) (2022-07-12)
 
 
