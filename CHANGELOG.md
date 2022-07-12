@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.17.3](https://github.com/mseele/sve-tools/compare/v1.17.2...v1.17.3) (2022-07-12)
+
+
+### Bug Fixes
+
+* disable on send ([c66d8cd](https://github.com/mseele/sve-tools/commit/c66d8cd1530f2daafc083d672c3cc6b9cc4f686c))
+
 ### [1.17.2](https://github.com/mseele/sve-tools/compare/v1.17.1...v1.17.2) (2022-04-22)
 
 ### [1.17.1](https://github.com/mseele/sve-tools/compare/v1.17.0...v1.17.1) (2022-04-11)
