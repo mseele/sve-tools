@@ -187,7 +187,7 @@ export default {
       this.disabled = false
     },
     async send() {
-      // this.disabled = true
+      this.disabled = true
       const emails = []
       for (const person of this.people) {
         const data = {
