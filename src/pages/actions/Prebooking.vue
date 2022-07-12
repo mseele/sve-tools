@@ -256,11 +256,11 @@ export default {
       const hash = Base64.encode(items.join('#'))
       let url = 'https://www.sv-eutingen.de/'
       if (this.from === 'Fitness') {
-        url += 'fitness'
+        url += 'fitness/buchung'
       } else {
-        url += 'events'
+        url += 'events/buchung'
       }
-      url += '?pb=' + hash
+      url += '?code=' + hash
       content = content.replace('${link}', url)
 
       // get all event properties
