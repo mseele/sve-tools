@@ -1,12 +1,21 @@
-const { mdiConsoleLine } = require('@mdi/js')
 const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 
 module.exports = function (api) {
   api.loadSource((store) => {
     const backend_prefix = 'https://backend.sv-eutingen.de/api/'
     store.addMetadata('sendEmailsURL', backend_prefix + 'contact/emails')
-    store.addMetadata('loadBetaEventsURL', backend_prefix + 'events?beta=true')
-    store.addMetadata('loadAllEventsURL', backend_prefix + 'events?all=true')
+    store.addMetadata(
+      'loadAllEventsURL',
+      backend_prefix + 'events?status=draft,review,published,finished'
+    )
+    store.addMetadata(
+      'loadPrebookingEventsURL',
+      backend_prefix + 'events?review,published'
+    )
+    store.addMetadata(
+      'loadClosedEventsURL',
+      backend_prefix + 'events?status=closed'
+    )
     store.addMetadata('updateEventURL', backend_prefix + 'events/update')
     store.addMetadata('deleteEventURL', backend_prefix + 'events/delete')
     store.addMetadata(

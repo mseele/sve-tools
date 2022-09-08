@@ -6,7 +6,6 @@
         subtitle="Events &amp; Fitnesskurse bearbeiten"
         :help="[
           'Hier können Events & Fitnesskurse bearbeitet werden',
-          'Sheet ID & GID sind die Werte des Google Sheet Dokuments in welches die Buchungen gespeichert werden',
           'In der Beschreibung kann mit HTML-Tags z.B. für eine Liste oder eine fettgedruckte Schrift gerarbeitet werden',
         ]"
       />
@@ -26,8 +25,7 @@
             >
               <template v-slot:item="data">
                 <EventListItem
-                  :visible="data.item.visible"
-                  :beta="data.item.beta"
+                  :status="data.item.status"
                   :text="eventName(data.item)"
                 />
               </template>
@@ -47,15 +45,24 @@
               <v-card>
                 <v-card-title class="text-h5">Neues Event</v-card-title>
                 <v-card-text class="pb-0">
-                  Bitte gib eine ID für das neue Event an:<br />
+                  Wähle ein Vorlage-Event aus:<br />
                   <v-form v-model="newDialogValid" class="mt-2">
-                    <v-text-field
-                      label="ID"
+                    <v-autocomplete
+                      v-model="newEvent"
+                      :items="newEvents"
+                      :item-value="eventValue"
+                      :item-text="eventName"
                       outlined
-                      dense
-                      v-model="dialogID"
-                      :rules="rules.dialogID"
-                    ></v-text-field>
+                      label="Event auswählen"
+                      :rules="rules.newEvent"
+                    >
+                      <template v-slot:item="data">
+                        <EventListItem
+                          :status="data.item.status"
+                          :text="eventName(data.item)"
+                        />
+                      </template>
+                    </v-autocomplete>
                   </v-form>
                 </v-card-text>
                 <v-card-actions>
@@ -65,7 +72,7 @@
                     text
                     @click="
                       () => {
-                        dialogID = null
+                        newEvent = null
                         newDialog = false
                       }
                     "
@@ -90,66 +97,16 @@
             >
               <v-icon>{{ mdiPencil }}</v-icon>
             </v-btn>
-            <v-dialog v-model="dupDialog" persistent max-width="400">
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  icon
-                  color="primary"
-                  :disabled="selection == null || !readonly"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  <v-icon>{{ mdiFileDocumentMultiple }}</v-icon>
-                </v-btn>
-              </template>
-              <v-card>
-                <v-card-title class="text-h5">Event duplizieren</v-card-title>
-                <v-card-text class="pb-0">
-                  Bitte gib eine ID für das zu duplizierende Event
-                  <span class="font-weight-bold">{{
-                    selection != null ? selection.name : selection
-                  }}</span>
-                  an:<br />
-                  <v-form v-model="dupDialogValid" class="mt-2">
-                    <v-text-field
-                      label="ID"
-                      outlined
-                      dense
-                      v-model="dialogID"
-                      :rules="rules.dialogID"
-                    ></v-text-field>
-                  </v-form>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn
-                    color="primary"
-                    text
-                    @click="
-                      () => {
-                        dialogID = null
-                        dupDialog = false
-                      }
-                    "
-                  >
-                    Abbrechen
-                  </v-btn>
-                  <v-btn
-                    color="primary"
-                    text
-                    @click="onDuplicate()"
-                    :disabled="!dupDialogValid"
-                    >Duplizieren</v-btn
-                  >
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
             <v-dialog v-model="deleteDialog" persistent max-width="400">
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
                   icon
                   color="primary"
-                  :disabled="selection == null || !readonly"
+                  :disabled="
+                    selection == null ||
+                    selection.status != 'Draft' ||
+                    !readonly
+                  "
                   v-bind="attrs"
                   v-on="on"
                 >
@@ -181,6 +138,7 @@
                 </v-card-actions>
               </v-card>
             </v-dialog>
+            <!-- TODO: only allow batch events in status Draft,Preview,Published -->
             <v-dialog v-model="batchDialog" persistent max-width="600">
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
@@ -225,8 +183,7 @@
                           {{ mdiCheckboxBlankOutline }}
                         </v-icon>
                         <EventListItem
-                          :visible="data.item.visible"
-                          :beta="data.item.beta"
+                          :status="data.item.status"
                           :text="eventName(data.item)"
                         />
                       </template>
@@ -262,58 +219,7 @@
       </v-row>
       <v-form v-if="selection != null" v-model="editValid" class="mt-8">
         <v-row dense>
-          <v-col cols="6">
-            <v-text-field
-              label="ID"
-              outlined
-              dense
-              readonly
-              v-model="selection.id"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="2">
-            <v-text-field
-              label="Sortier-Index"
-              outlined
-              dense
-              :readonly="readonly"
-              type="number"
-              v-model.number="selection.sortIndex"
-              :rules="rules.positiveNumber"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="4">
-            <v-select
-              :items="itemsVisibility"
-              label="Sichtbarkeit"
-              outlined
-              dense
-              :readonly="readonly"
-              v-model="visibility"
-            ></v-select>
-          </v-col>
-          <v-col cols="8">
-            <v-text-field
-              label="Sheet ID"
-              outlined
-              dense
-              :readonly="readonly"
-              v-model="selection.sheetId"
-              :rules="rules.required"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="4">
-            <v-text-field
-              label="GID"
-              outlined
-              dense
-              :readonly="readonly"
-              type="number"
-              v-model.number="selection.gid"
-              :rules="rules.positiveNumber"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="8">
+          <v-col cols="12">
             <v-text-field
               label="Name"
               outlined
@@ -321,6 +227,17 @@
               :readonly="readonly"
               v-model="selection.name"
               :rules="rules.required"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="4">
+            <v-text-field
+              label="Sortier-Index"
+              outlined
+              dense
+              :readonly="readonly"
+              type="number"
+              v-model.number="selection.sort_index"
+              :rules="rules.positiveNumber"
             ></v-text-field>
           </v-col>
           <v-col cols="4">
@@ -345,6 +262,16 @@
               </template>
             </v-select>
           </v-col>
+          <v-col cols="4">
+            <v-select
+              :items="itemsStatus"
+              label="Status"
+              outlined
+              dense
+              :readonly="readonly"
+              v-model="selection.status"
+            ></v-select>
+          </v-col>
           <v-col cols="12">
             <v-textarea
               label="Kurze Beschreibung"
@@ -352,7 +279,7 @@
               dense
               rows="3"
               :readonly="readonly"
-              v-model="selection.shortDescription"
+              v-model="selection.short_description"
               :rules="rules.required"
             ></v-textarea>
           </v-col>
@@ -418,7 +345,7 @@
                   dense
                   rows="1"
                   :readonly="readonly"
-                  v-model="selection.customDate"
+                  v-model="selection.custom_date"
                 ></v-text-field>
               </v-tab-item>
             </v-tabs-items>
@@ -440,7 +367,7 @@
               dense
               :readonly="readonly"
               type="number"
-              v-model.number="selection.durationInMinutes"
+              v-model.number="selection.duration_in_minutes"
               :rules="rules.positiveNumber"
             ></v-text-field>
           </v-col>
@@ -451,7 +378,7 @@
               dense
               :readonly="readonly"
               type="number"
-              v-model.number="selection.costMember"
+              v-model.number="selection.cost_member"
               :rules="rules.positiveNumber"
             ></v-text-field>
           </v-col>
@@ -462,52 +389,30 @@
               dense
               :readonly="readonly"
               type="number"
-              v-model.number="selection.costNonMember"
+              v-model.number="selection.cost_non_member"
               :rules="rules.positiveNumber"
             ></v-text-field>
           </v-col>
-          <v-col cols="3">
+          <v-col cols="6">
             <v-text-field
               label="Maximale Teilnehmer"
               outlined
               dense
               :readonly="readonly"
               type="number"
-              v-model.number="selection.maxSubscribers"
+              v-model.number="selection.max_subscribers"
               :rules="rules.maxSubscribers"
             ></v-text-field>
           </v-col>
-          <v-col cols="3">
+          <v-col cols="6">
             <v-text-field
-              label="Teilnehmer"
-              outlined
-              dense
-              :readonly="readonly"
-              type="number"
-              v-model.number="selection.subscribers"
-              :rules="rules.subscribers"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="3"
-            ><v-text-field
               label="Maximale Warteliste"
               outlined
               dense
               :readonly="readonly"
               type="number"
-              v-model.number="selection.maxWaitingList"
+              v-model.number="selection.max_waiting_list"
               :rules="rules.positiveNumber"
-            ></v-text-field>
-          </v-col>
-          <v-col cols="3">
-            <v-text-field
-              label="Warteliste"
-              outlined
-              dense
-              :readonly="readonly"
-              type="number"
-              v-model.number="selection.waitingList"
-              :rules="rules.waitingList"
             ></v-text-field>
           </v-col>
           <v-col cols="6">
@@ -516,7 +421,7 @@
               outlined
               dense
               :readonly="readonly"
-              v-model="selection.altBookingButtonText"
+              v-model="selection.alt_booking_button_text"
             ></v-text-field>
           </v-col>
           <v-col cols="6">
@@ -525,16 +430,16 @@
               outlined
               dense
               :readonly="readonly"
-              v-model="selection.altEmailAddress"
+              v-model="selection.alt_email_address"
               :rules="rules.altEmailAddress"
             ></v-text-field>
           </v-col>
-          <v-col cols="6">
+          <v-col cols="12">
             <v-checkbox
               label="Durchführung durch den Förderverein"
               :readonly="readonly"
               dense
-              v-model="selection.externalOperator"
+              v-model="selection.external_operator"
             ></v-checkbox>
           </v-col>
           <v-col cols="12">
@@ -544,7 +449,7 @@
               dense
               rows="10"
               :readonly="readonly"
-              v-model="selection.bookingTemplate"
+              v-model="selection.booking_template"
               :rules="rules.required"
             ></v-textarea>
           </v-col>
@@ -555,7 +460,7 @@
               dense
               rows="10"
               :readonly="readonly"
-              v-model="selection.waitingTemplate"
+              v-model="selection.waiting_template"
               :rules="rules.required"
             ></v-textarea>
           </v-col>
@@ -612,6 +517,8 @@ import axios from 'axios'
 import { parse, parseISO, format, isBefore, isValid, addDays } from 'date-fns'
 import { isEqual, transform, cloneDeep } from 'lodash-es'
 
+// TODO: status finished needs another ui
+
 export default {
   components: {
     ActionHeader,
@@ -626,24 +533,18 @@ export default {
     return {
       from: 'Fitness',
       allEvents: [],
+      closedEvents: [],
       selection: null,
       batchSelection: null,
       deleteDialog: false,
       newDialog: false,
+      newEvent: null,
       newDialogValid: false,
-      dupDialog: false,
-      dupDialogValid: false,
       batchDialog: false,
       batchDialogValid: false,
-      dialogID: null,
       trueFalse: [
         { value: true, text: 'Ja' },
         { value: false, text: 'Nein' },
-      ],
-      itemsVisibility: [
-        { value: 'visible', text: 'Sichtbar' },
-        { value: 'beta', text: 'Beta' },
-        { value: 'invisible', text: 'Unsichtbar' },
       ],
       mdiPlus,
       mdiPencil,
@@ -725,16 +626,10 @@ export default {
             )
           },
         ],
-        dialogID: [
+        newEvent: [
           (val) => {
             if ((val || '').length == 0) {
-              return 'Ein Wert wird benötigt'
-            }
-            if (this.events.findIndex((e) => e.id == val.trim()) >= 0) {
-              return 'Diese ID existiert bereits'
-            }
-            if (val.trim().indexOf(' ') >= 0) {
-              return 'Die ID darf keine Leerzeichen enthalten'
+              return 'Bitte wähle ein Event aus'
             }
             return true
           },
@@ -777,18 +672,21 @@ export default {
       return this.allEvents
         .filter((e) => e.type === this.from)
         .sort((a, b) => {
-          if (a.visible && !b.visible) {
-            return -1
-          } else if (!a.visible && b.visible) {
-            return 1
-          }
-          if (a.beta && !b.beta) {
-            return 1
-          } else if (!a.beta && b.beta) {
-            return -1
+          const value = this.statusIndex(a.status) - this.statusIndex(b.status)
+          if (value != 0) {
+            return value
           }
           return a.sortIndex - b.sortIndex
         })
+    },
+    newEvents() {
+      return this.events.concat(
+        this.closedEvents
+          .filter((e) => e.type === this.from)
+          .sort((a, b) => {
+            return parseISO(a.closed) - parseISO(b.closed)
+          })
+      )
     },
     eventImages() {
       return this.$page.eventImages.edges.map((edge) => edge.node)
@@ -799,34 +697,39 @@ export default {
     isDateToAddValid() {
       return isValid(parse(this.dateToAdd, 'dd-MM-yyyy HH:mm', new Date()))
     },
-    visibility: {
-      get() {
-        if (this.selection != null) {
-          if (this.selection.visible && !this.selection.beta) {
-            return 'visible'
-          } else if (this.selection.visible && this.selection.beta) {
-            return 'beta'
-          }
-          return 'invisible'
-        }
-        return undefined
-      },
-      set(value) {
-        switch (value) {
-          case 'visible':
-            this.selection.visible = true
-            this.selection.beta = false
-            break
-          case 'beta':
-            this.selection.visible = true
-            this.selection.beta = true
-            break
-          case 'invisible':
-            this.selection.visible = false
-            this.selection.beta = false
-            break
-        }
-      },
+    itemsStatus() {
+      const all = [
+        { value: 'Draft', text: 'Entwurf (Unsichtbar)' },
+        { value: 'Review', text: 'Überprüfung (Beta)' },
+        { value: 'Published', text: 'Veröffentlicht (Sichtbar)' },
+        { value: 'Finished', text: 'Fertiggestellt (Unsichtbar)' },
+        { value: 'Closed', text: 'Abgeschlossen (Unsichtbar)' },
+      ]
+      if (this.selection == undefined) {
+        return all
+      }
+      let allowed
+      switch (this.selection.status) {
+        case 'Draft':
+          allowed = ['Draft', 'Review']
+          break
+        case 'Review':
+          allowed = ['Review', 'Published']
+          break
+        case 'Published':
+          allowed = ['Published', 'Finished']
+          break
+        case 'Finished':
+          allowed = ['Finished', 'Closed']
+          break
+        case 'Closed':
+          allowed = ['Closed']
+          break
+      }
+      if (allowed == undefined) {
+        allowed = ['Draft']
+      }
+      return all.filter((v) => allowed.indexOf(v.value) != -1)
     },
     eventImage: {
       get() {
@@ -847,18 +750,29 @@ export default {
       this.selection = null
     },
     dateSelection() {
-      this.selection.customDate = ''
+      this.selection.custom_date = ''
+    },
+    async newDialog(value) {
+      if (value) {
+        this.closedEvents = (
+          await axios.get(this.$page.metadata.loadClosedEventsURL)
+        ).data
+      }
     },
   },
   methods: {
     eventName(event) {
       let visibility
-      if (event.visible && !event.beta) {
-        visibility = 'Sichtbar'
-      } else if (event.visible && event.beta) {
-        visibility = 'Beta'
-      } else {
-        visibility = 'Unsichtbar'
+      switch (event.status) {
+        case 'Draft':
+          visibility = 'Entwurf - Unsichtbar'
+          break
+        case 'Review':
+          visibility = 'Überprüfung - Beta'
+          break
+        case 'Published':
+          visibility = 'Sichtbar'
+          break
       }
       return event.name + ' (' + visibility + ')'
     },
@@ -883,35 +797,17 @@ export default {
     },
     onNew() {
       this.newDialog = false
-      this.selection = {
-        id: this.dialogID,
-        type: this.from,
-        visible: false,
-        beta: true,
-        name: 'Neues Event',
-        dates: [],
-        light: false,
-        subscribers: 0,
-        waitingList: 0,
-        externalOperator: false,
-      }
+      const duplicate = cloneDeep(this.newEvent)
+      duplicate.id = null
+      duplicate.status = 'Draft'
+      this.selection = duplicate
       this.allEvents.push(this.selection)
-      this.dialogID = null
+      this.newEvent = null
       this.onEdit(true)
     },
     onEdit(isNew) {
       this.editNew = isNew
       this.editOriginal = JSON.parse(JSON.stringify(this.selection))
-    },
-    onDuplicate() {
-      this.dupDialog = false
-      const duplicate = cloneDeep(this.selection)
-      duplicate.id = this.dialogID
-      this.selection = duplicate
-      this.allEvents.push(this.selection)
-      this.dialogID = null
-      this.onEdit(true)
-      this.$refs.notify.showSuccess('Das Event wurde erfolgreich dupliziert')
     },
     onBatchEdit() {
       this.batchDialog = false
@@ -1020,7 +916,6 @@ export default {
         this.loading = false
       }
     },
-
     diff(object, base) {
       function changes(object, base) {
         return transform(object, function (result, value, key) {
@@ -1030,6 +925,21 @@ export default {
         })
       }
       return changes(object, base)
+    },
+    statusIndex(status) {
+      switch (status) {
+        case 'Draft':
+          return 2
+        case 'Review':
+          return 1
+        case 'Published':
+          return 0
+        case 'Finished':
+          return 3
+        case 'Closed':
+          return 4
+      }
+      return 5
     },
   },
 }
@@ -1050,6 +960,7 @@ export default {
 query {
   metadata {
     loadAllEventsURL
+    loadClosedEventsURL
     updateEventURL
     deleteEventURL
   }
