@@ -1,5 +1,9 @@
 [
     {
+        "name": "Manage Events",
+        "link": "/actions/events"
+    },
+    {
         "name": "Batch Email",
         "link": "/actions/email"
     },
@@ -12,15 +16,11 @@
         "link": "/actions/prebooking"
     },
     {
-        "name": "Manage Events",
-        "link": "/actions/events"
+        "name": "Verify Payments",
+        "link": "/actions/verifypayments"
     },
     {
         "name": "Re-Deploy Website",
         "link": "/actions/redeploy"
-    },
-    {
-        "name": "Verify Payments",
-        "link": "/actions/verifypayments"
     }
 ]
