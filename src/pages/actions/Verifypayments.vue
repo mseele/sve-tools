@@ -2,7 +2,7 @@
   <Layout>
     <v-container>
       <action-header
-        title="Zahlungen prüfen"
+        title="Verify Payments"
         subtitle="Automatische Zahlungsverifizierung"
         :help="[
           'Google Sheet ID eintragen',

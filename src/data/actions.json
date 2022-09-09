@@ -20,7 +20,7 @@
         "link": "/actions/redeploy"
     },
     {
-        "name": "Zahlungen überprüfen",
+        "name": "Verify Payments",
         "link": "/actions/verifypayments"
     }
 ]
