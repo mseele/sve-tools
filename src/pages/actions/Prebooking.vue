@@ -116,8 +116,7 @@ export default {
   },
   async mounted() {
     try {
-      const res = await axios.get(this.$page.metadata.loadBetaEventsURL)
-      this.allEvents = res.data
+      this.allEvents = await this.loadEvents()
       this.initEvents()
     } catch (error) {
       console.log(error)
@@ -127,6 +126,12 @@ export default {
     }
   },
   methods: {
+    async loadEvents() {
+      const result = await axios.get(
+        this.$page.metadata.loadEventsURL + '?status=review,published'
+      )
+      return result.data
+    },
     paste(event) {
       var clipboardData =
         event.clipboardData ||
@@ -304,7 +309,7 @@ export default {
 query {
   metadata {
     sendEmailsURL
-    loadBetaEventsURL
+    loadEventsURL
   }
 }
 </page-query>

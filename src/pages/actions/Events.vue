@@ -658,8 +658,7 @@ export default {
   },
   async mounted() {
     try {
-      const res = await axios.get(this.$page.metadata.loadAllEventsURL)
-      this.allEvents = res.data
+      this.allEvents = await this.loadEvents()
     } catch (error) {
       console.log(error)
       this.$refs.notify.showError(
@@ -754,13 +753,24 @@ export default {
     },
     async newDialog(value) {
       if (value) {
-        this.closedEvents = (
-          await axios.get(this.$page.metadata.loadClosedEventsURL)
-        ).data
+        this.closedEvents = await this.loadClosedEvents()
       }
     },
   },
   methods: {
+    async loadEvents() {
+      const result = await axios.get(
+        this.$page.metadata.loadEventsURL +
+          '?status=draft,review,published,finished'
+      )
+      return result.data
+    },
+    async loadClosedEvents() {
+      const result = await axios.get(
+        this.$page.metadata.loadEventsURL + '?status=closed'
+      )
+      return result.data
+    },
     eventName(event) {
       let visibility
       switch (event.status) {
@@ -819,9 +829,7 @@ export default {
       this.loading = true
       try {
         await axios.post(this.$page.metadata.deleteEventURL, this.selection)
-        this.allEvents = (
-          await axios.get(this.$page.metadata.loadAllEventsURL)
-        ).data
+        this.allEvents = await this.loadEvents()
         this.selection = null
         this.confirmSave = false
         this.editNew = false
@@ -959,8 +967,7 @@ export default {
 <page-query>
 query {
   metadata {
-    loadAllEventsURL
-    loadClosedEventsURL
+    loadEventsURL
     updateEventURL
     deleteEventURL
   }
