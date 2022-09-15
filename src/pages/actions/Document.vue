@@ -14,7 +14,12 @@
       <v-row>
         <v-col cols="12">
           <v-form :disabled="disabled">
-            <from-select ref="from" v-model="from" @preset="preset" />
+            <EventTypeSelection
+              ref="eventTypeSelection"
+              v-model="eventType"
+              :disabled="disabled"
+              @change="onEventTypeChange"
+            />
             <v-file-input
               v-if="people.length <= 0"
               outlined
@@ -60,7 +65,7 @@ import ActionHeader from '~/components/ActionHeader.vue'
 import Notify from '~/components/Notify.vue'
 import PeopleField from '~/components/PeopleField.vue'
 import ButtonArea from '~/components/ButtonArea.vue'
-import FromSelect from '~/components/FromSelect.vue'
+import EventTypeSelection from '~/components/EventTypeSelection.vue'
 import { validateEmail, replace, readFile } from '~/utils/actions.js'
 import axios from 'axios'
 
@@ -70,14 +75,14 @@ export default {
     Notify,
     PeopleField,
     ButtonArea,
-    FromSelect,
+    EventTypeSelection,
   },
   metaInfo: {
     title: 'Batch Dokument',
   },
   data() {
     return {
-      from: 'Fitness',
+      eventType: 'Fitness',
       files: [],
       people: [],
       filename: '',
@@ -126,12 +131,12 @@ export default {
       }
       this.people = items
     },
-    preset(preset) {
+    onEventTypeChange(preset) {
       this.subject = preset.subject
       this.content = preset.content
     },
     reset() {
-      this.$refs.from.reset()
+      this.$refs.eventTypeSelection.reset()
       this.people = []
       this.disabled = false
     },
@@ -154,7 +159,7 @@ export default {
           return
         }
         emails.push({
-          type: this.from,
+          type: this.eventType,
           to: person.email,
           subject: this.subject,
           content: replace(this.content, person),

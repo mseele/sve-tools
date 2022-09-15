@@ -11,7 +11,7 @@
       />
       <v-row>
         <v-col cols="12">
-          <from-select ref="from" v-model="from" />
+          <EventTypeSelection v-model="eventType" />
           <div class="d-flex align-center">
             <v-autocomplete
               v-model="selection"
@@ -511,7 +511,7 @@ import {
 } from '@mdi/js'
 import ActionHeader from '~/components/ActionHeader.vue'
 import Notify from '~/components/Notify.vue'
-import FromSelect from '~/components/FromSelect.vue'
+import EventTypeSelection from '~/components/EventTypeSelection.vue'
 import EventListItem from '~/components/EventListItem.vue'
 import axios from 'axios'
 import { parse, parseISO, format, isBefore, isValid, addDays } from 'date-fns'
@@ -523,7 +523,7 @@ export default {
   components: {
     ActionHeader,
     Notify,
-    FromSelect,
+    EventTypeSelection,
     EventListItem,
   },
   metaInfo: {
@@ -531,7 +531,7 @@ export default {
   },
   data() {
     return {
-      from: 'Fitness',
+      eventType: 'Fitness',
       allEvents: [],
       closedEvents: [],
       selection: null,
@@ -669,7 +669,7 @@ export default {
   computed: {
     events() {
       return this.allEvents
-        .filter((e) => e.type === this.from)
+        .filter((e) => e.type === this.eventType)
         .sort((a, b) => {
           const value = this.statusIndex(a.status) - this.statusIndex(b.status)
           if (value != 0) {
@@ -681,7 +681,7 @@ export default {
     newEvents() {
       return this.events.concat(
         this.closedEvents
-          .filter((e) => e.type === this.from)
+          .filter((e) => e.type === this.eventType)
           .sort((a, b) => {
             return parseISO(a.closed) - parseISO(b.closed)
           })
@@ -745,7 +745,7 @@ export default {
     },
   },
   watch: {
-    from() {
+    eventType() {
       this.selection = null
     },
     dateSelection() {

@@ -19,13 +19,20 @@
       <v-row>
         <v-col cols="12">
           <v-form :disabled="disabled">
+            <EventTypeSelection
+              ref="eventTypeSelection"
+              v-model="eventType"
+              :disabled="disabled"
+              @change="onEventType"
+            />
             <EventSelection
               ref="eventSelection"
+              :eventType="eventType"
               :eventsURL="eventsURL"
               :disabled="disabled"
               :showBookingGroups="true"
               @error="showError"
-              @change="eventSelectionChanged"
+              @change="onEventSelection"
             />
             <v-text-field
               v-model="subject"
@@ -76,30 +83,30 @@
 </style>
 
 <script>
+import axios from 'axios'
 import ActionHeader from '~/components/ActionHeader.vue'
+import ButtonArea from '~/components/ButtonArea.vue'
+import EventTypeSelection from '~/components/EventTypeSelection.vue'
 import EventSelection from '~/components/EventSelection.vue'
 import Notify from '~/components/Notify.vue'
 import PeopleField from '~/components/PeopleField.vue'
-import ButtonArea from '~/components/ButtonArea.vue'
-import FromSelect from '~/components/FromSelect.vue'
-import { replace, readFile } from '~/utils/actions.js'
-import axios from 'axios'
+import { readFile } from '~/utils/actions.js'
 
 export default {
   components: {
     ActionHeader,
+    EventTypeSelection,
     EventSelection,
     Notify,
     PeopleField,
     ButtonArea,
-    FromSelect,
   },
   metaInfo: {
     title: 'Batch Email',
   },
   data() {
     return {
-      from: 'Fitness',
+      eventType: 'Fitness',
       attachments: [],
       event: null,
       subject: '',
@@ -120,14 +127,17 @@ export default {
     },
   },
   methods: {
-    eventSelectionChanged(data) {
-      this.event = data.event
-      this.bookingList = data.bookingList
-      this.waitingList = data.waitingList
+    onEventType(data) {
       this.subject = data.subject
       this.content = data.content
     },
+    onEventSelection(data) {
+      this.event = data.event
+      this.bookingList = data.bookingList
+      this.waitingList = data.waitingList
+    },
     reset() {
+      this.$refs.eventTypeSelection.reset()
       this.$refs.eventSelection.reset()
       this.attachments = []
       this.disabled = false

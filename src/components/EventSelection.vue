@@ -1,11 +1,5 @@
 <template>
   <div>
-    <from-select
-      ref="from"
-      v-model="from"
-      :disabled="disabled"
-      @preset="changeFrom"
-    />
     <v-autocomplete
       v-model="event"
       :items="events"
@@ -13,7 +7,7 @@
       :item-text="eventName"
       outlined
       hide-details
-      label="Event auswählen"
+      :label="label"
       :disabled="disabled"
     >
       <template v-slot:item="data">
@@ -43,19 +37,25 @@
 </template>
 
 <script>
-import FromSelect from './FromSelect.vue'
 import EventListItem from './EventListItem.vue'
 import axios from 'axios'
 
 export default {
   components: {
-    FromSelect,
     EventListItem,
   },
   props: {
     eventsURL: {
       type: String,
       required: true,
+    },
+    eventType: {
+      type: String,
+      required: true,
+    },
+    label: {
+      type: String,
+      default: 'Event auswählen',
     },
     showBookingGroups: {
       type: Boolean,
@@ -68,11 +68,8 @@ export default {
   },
   data() {
     return {
-      from: 'Fitness',
       allEvents: [],
       event: null,
-      subject: '',
-      content: '',
       bookingList: true,
       waitingList: false,
     }
@@ -89,7 +86,7 @@ export default {
   computed: {
     events() {
       return this.allEvents
-        .filter((e) => e.type === this.from)
+        .filter((e) => e.type === this.eventType)
         .sort((a, b) => {
           const value = this.statusIndex(a.status) - this.statusIndex(b.status)
           if (value != 0) {
@@ -100,8 +97,8 @@ export default {
     },
   },
   watch: {
-    from() {
-      this.emitChanges()
+    events() {
+      this.event = null
     },
     event() {
       this.emitChanges()
@@ -114,12 +111,6 @@ export default {
     },
   },
   methods: {
-    async loadEvents() {
-      const result = await axios.get(
-        this.$page.metadata.loadEventsURL + '?status=review,published'
-      )
-      return result.data
-    },
     eventName(event) {
       let visibility
       switch (event.status) {
@@ -153,15 +144,8 @@ export default {
       }
       return 5
     },
-    changeFrom(preset) {
-      this.subject = preset.subject
-      this.content = preset.content
-    },
     emitChanges() {
       const data = {
-        from: this.from,
-        subject: this.subject,
-        content: this.content,
         event: this.event,
       }
       if (this.showBookingGroups) {
@@ -171,7 +155,6 @@ export default {
       this.$emit('change', data)
     },
     reset() {
-      this.$refs.from.reset()
       this.event = null
       this.bookingList = true
       this.waitingList = false

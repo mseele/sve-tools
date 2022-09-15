@@ -18,14 +18,21 @@
       <v-row>
         <v-col cols="12">
           <v-form :disabled="disabled">
-            <from-select ref="from" v-model="from" @preset="preset" />
-            <v-text-field
-              v-if="people.length <= 0"
-              outlined
-              label="Vorname, Nachname, Straße &amp; Nr, PLZ &amp; Ort, Email, Telefon u. SVE-Mitglied aus Excel kopieren"
-              @paste="paste"
-            ></v-text-field>
-            <people-field v-else :disabled="disabled" v-model="people" />
+            <EventTypeSelection
+              ref="eventTypeSelection"
+              v-model="eventType"
+              :disabled="disabled"
+              @change="onEventType"
+            />
+            <EventSelection
+              ref="eventSelection"
+              :eventsURL="eventsURL"
+              :disabled="disabled"
+              :showBookingGroups="true"
+              @error="showError"
+              @change="eventSelectionChanged"
+            />
+
             <v-autocomplete
               v-model="event"
               :items="events"
@@ -81,9 +88,10 @@
 <script>
 import ActionHeader from '~/components/ActionHeader.vue'
 import Notify from '~/components/Notify.vue'
+import EventSelection from '~/components/EventSelection.vue'
 import PeopleField from '~/components/PeopleField.vue'
 import ButtonArea from '~/components/ButtonArea.vue'
-import FromSelect from '~/components/FromSelect.vue'
+import EventTypeSelection from '~/components/EventTypeSelection.vue'
 import { validateEmail, replace, readFile } from '~/utils/actions.js'
 import { Base64 } from 'js-base64'
 import axios from 'axios'
@@ -93,17 +101,18 @@ import { de } from 'date-fns/locale'
 export default {
   components: {
     ActionHeader,
+    EventSelection,
     Notify,
     PeopleField,
     ButtonArea,
-    FromSelect,
+    EventTypeSelection,
   },
   metaInfo: {
     title: 'Batch Email',
   },
   data() {
     return {
-      from: 'Fitness',
+      eventType: 'Fitness',
       people: [],
       attachments: [],
       allEvents: [],
@@ -124,6 +133,13 @@ export default {
         'Fehler beim Laden der Events. Details siehe Console'
       )
     }
+  },
+  computed: {
+    eventsURL() {
+      return (
+        this.$page.metadata.loadEventsURL + '?status=review,published,finished'
+      )
+    },
   },
   methods: {
     async loadEvents() {
@@ -185,7 +201,7 @@ export default {
       this.initEvents()
     },
     reset() {
-      this.$refs.from.reset()
+      this.$refs.eventTypeSelection.reset()
       this.people = []
       this.attachments = []
       this.initEvents()
@@ -196,7 +212,7 @@ export default {
       const emails = []
       for (const person of this.people) {
         const data = {
-          type: this.from,
+          type: this.eventType,
           to: person.email,
           subject: this.subject,
           content: this.createAndReplaceLink(
@@ -242,7 +258,7 @@ export default {
     initEvents() {
       this.event = null
       this.events = []
-      const items = this.allEvents.filter((e) => e.type === this.from)
+      const items = this.allEvents.filter((e) => e.type === this.eventType)
       for (const item of items) {
         this.events.push({ value: item.id, text: item.name })
       }
@@ -260,7 +276,7 @@ export default {
       ]
       const hash = Base64.encode(items.join('#'))
       let url = 'https://www.sv-eutingen.de/'
-      if (this.from === 'Fitness') {
+      if (this.eventType === 'Fitness') {
         url += 'fitness/buchung'
       } else {
         url += 'events/buchung'
