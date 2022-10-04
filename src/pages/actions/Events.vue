@@ -892,9 +892,7 @@ export default {
             await axios.post(this.$page.metadata.updateEventURL, objectToSave)
           ).data
         }
-        const fetchedEvents = (
-          await axios.get(this.$page.metadata.loadAllEventsURL)
-        ).data
+        const fetchedEvents = await this.loadEvents()
         const index = fetchedEvents.findIndex((e) => e.id == savedEvent.id)
         this.allEvents = fetchedEvents
         this.selection = fetchedEvents[index]
