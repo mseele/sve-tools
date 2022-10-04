@@ -146,7 +146,7 @@ export default {
       for (const person of this.people) {
         const attachment = {
           name: this.filename,
-          mimeType: person.file.type,
+          mime_type: person.file.type,
         }
         try {
           attachment.data = await readFile(person.file)
