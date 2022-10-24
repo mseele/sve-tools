@@ -123,6 +123,13 @@ export default {
         case 'Published':
           visibility = 'Sichtbar'
           break
+        case 'Running':
+          visibility = 'Laufend - Unsichtbar'
+          break
+        case 'Finished':
+          visibility = 'Fertiggestellt - Unsichtbar'
+        case 'Closed':
+          visibility = 'Abgeschlossen - Unsichtbar'
       }
       return event.name + ' (' + visibility + ')'
     },
@@ -132,17 +139,19 @@ export default {
     statusIndex(status) {
       switch (status) {
         case 'Draft':
-          return 2
+          return 3
         case 'Review':
           return 1
         case 'Published':
           return 0
+        case 'Running':
+          return 2
         case 'Finished':
-          return 3
-        case 'Closed':
           return 4
+        case 'Closed':
+          return 5
       }
-      return 5
+      return 6
     },
     emitChanges() {
       const data = {

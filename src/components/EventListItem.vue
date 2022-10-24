@@ -31,6 +31,8 @@ export default {
           return '#FBBF24'
         case 'Published':
           return '#65A30D'
+        case 'Running':
+          return '#2563EB'
         case 'Finished':
           return '#7C3AED'
         case 'Closed':

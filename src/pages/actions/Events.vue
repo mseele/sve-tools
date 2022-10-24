@@ -701,6 +701,7 @@ export default {
         { value: 'Draft', text: 'Entwurf (Unsichtbar)' },
         { value: 'Review', text: 'Überprüfung (Beta)' },
         { value: 'Published', text: 'Veröffentlicht (Sichtbar)' },
+        { value: 'Running', text: 'Laufend (Unsichtbar)' },
         { value: 'Finished', text: 'Fertiggestellt (Unsichtbar)' },
         { value: 'Closed', text: 'Abgeschlossen (Unsichtbar)' },
       ]
@@ -716,7 +717,10 @@ export default {
           allowed = ['Review', 'Published']
           break
         case 'Published':
-          allowed = ['Published', 'Finished']
+          allowed = ['Published', 'Running']
+          break
+        case 'Running':
+          allowed = ['Running', 'Finished']
           break
         case 'Finished':
           allowed = ['Finished', 'Closed']
