@@ -80,12 +80,6 @@
   </Layout>
 </template>
 
-<style lang="scss">
-.colored-border {
-  border-color: rgba(0, 0, 0, 0.42) !important;
-}
-</style>
-
 <script>
 import ActionHeader from '~/components/ActionHeader.vue'
 import Notify from '~/components/Notify.vue'
