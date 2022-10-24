@@ -501,21 +501,21 @@
 
 <script>
 import {
-  mdiPlus,
-  mdiPencil,
+  mdiCheckboxBlankOutline,
+  mdiCheckboxMarked,
   mdiDelete,
   mdiFileDocumentMultiple,
+  mdiPencil,
   mdiPencilBoxMultiple,
-  mdiCheckboxMarked,
-  mdiCheckboxBlankOutline,
+  mdiPlus,
 } from '@mdi/js'
-import ActionHeader from '~/components/ActionHeader.vue'
-import Notify from '~/components/Notify.vue'
-import EventTypeSelection from '~/components/EventTypeSelection.vue'
-import EventListItem from '~/components/EventListItem.vue'
 import axios from 'axios'
-import { parse, parseISO, format, isBefore, isValid, addDays } from 'date-fns'
-import { isEqual, transform, cloneDeep } from 'lodash-es'
+import { addDays, format, isBefore, isValid, parse, parseISO } from 'date-fns'
+import { cloneDeep, isEqual, transform } from 'lodash-es'
+import ActionHeader from '~/components/ActionHeader.vue'
+import EventListItem from '~/components/EventListItem.vue'
+import EventTypeSelection from '~/components/EventTypeSelection.vue'
+import Notify from '~/components/Notify.vue'
 
 // TODO: status finished needs another ui
 
