@@ -13,23 +13,14 @@
         <v-col cols="12">
           <EventTypeSelection v-model="eventType" />
           <div class="d-flex align-center">
-            <v-autocomplete
-              v-model="selection"
-              :items="events"
-              :item-value="eventValue"
-              :item-text="eventName"
-              outlined
+            <EventSelection
+              ref="eventSelection"
+              :eventType="eventType"
+              :eventsURL="eventsURL"
               label="Event auswählen"
-              hide-details
-              :disabled="!readonly"
-            >
-              <template v-slot:item="data">
-                <EventListItem
-                  :status="data.item.status"
-                  :text="eventName(data.item)"
-                />
-              </template>
-            </v-autocomplete>
+              @error="showError"
+              @change="onEventSelection"
+            />
             <v-dialog v-model="newDialog" persistent max-width="400">
               <template v-slot:activator="{ on, attrs }">
                 <v-btn
@@ -514,6 +505,7 @@ import { addDays, format, isBefore, isValid, parse, parseISO } from 'date-fns'
 import { cloneDeep, isEqual, transform } from 'lodash-es'
 import ActionHeader from '~/components/ActionHeader.vue'
 import EventListItem from '~/components/EventListItem.vue'
+import EventSelection from '~/components/EventSelection.vue'
 import EventTypeSelection from '~/components/EventTypeSelection.vue'
 import Notify from '~/components/Notify.vue'
 
@@ -524,6 +516,7 @@ export default {
     ActionHeader,
     Notify,
     EventTypeSelection,
+    EventSelection,
     EventListItem,
   },
   metaInfo: {
@@ -656,17 +649,13 @@ export default {
       },
     }
   },
-  async mounted() {
-    try {
-      this.allEvents = await this.loadEvents()
-    } catch (error) {
-      console.log(error)
-      this.$refs.notify.showError(
-        'Fehler beim Laden der Events. Details siehe Console'
-      )
-    }
-  },
   computed: {
+    eventsURL() {
+      return (
+        this.$page.metadata.loadEventsURL +
+        '?status=draft,review,published,running,finished'
+      )
+    },
     events() {
       return this.allEvents
         .filter((e) => e.type === this.eventType)
@@ -762,12 +751,8 @@ export default {
     },
   },
   methods: {
-    async loadEvents() {
-      const result = await axios.get(
-        this.$page.metadata.loadEventsURL +
-          '?status=draft,review,published,finished'
-      )
-      return result.data
+    onEventSelection(data) {
+      this.selection = data.event
     },
     async loadClosedEvents() {
       const result = await axios.get(
@@ -842,9 +827,7 @@ export default {
         this.$refs.notify.showSuccess('Das Event wurde erfolgreich gelöscht')
       } catch (error) {
         console.log(error)
-        this.$refs.notify.showError(
-          'Fehler beim Löschen des Events. Details siehe Console'
-        )
+        this.showError('Fehler beim Löschen des Events. Details siehe Console')
       } finally {
         this.deleteDialog = false
         this.loading = false
@@ -919,12 +902,15 @@ export default {
         }
       } catch (error) {
         console.log(error)
-        this.$refs.notify.showError(
+        this.showError(
           'Fehler beim Speichern des Events. Details siehe Console'
         )
       } finally {
         this.loading = false
       }
+    },
+    showError(error) {
+      this.$refs.notify.showError(error)
     },
     diff(object, base) {
       function changes(object, base) {
