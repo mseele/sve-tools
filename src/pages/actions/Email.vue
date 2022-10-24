@@ -119,7 +119,8 @@ export default {
   computed: {
     eventsURL() {
       return (
-        this.$page.metadata.loadEventsURL + '?status=review,published,finished'
+        this.$page.metadata.loadEventsURL +
+        '?status=review,published,running,finished'
       )
     },
     editable() {
