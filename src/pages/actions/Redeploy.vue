@@ -55,9 +55,9 @@
 </template>
 
 <script>
+import axios from 'axios'
 import ActionHeader from '~/components/ActionHeader.vue'
 import Notify from '~/components/Notify.vue'
-import axios from 'axios'
 
 export default {
   components: {

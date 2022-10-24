@@ -78,11 +78,11 @@
 </template>
 
 <script>
-import ActionHeader from '~/components/ActionHeader.vue'
-import Notify from '~/components/Notify.vue'
-import ButtonArea from '~/components/ButtonArea.vue'
-import { readFile } from '~/utils/actions.js'
 import axios from 'axios'
+import ActionHeader from '~/components/ActionHeader.vue'
+import ButtonArea from '~/components/ButtonArea.vue'
+import Notify from '~/components/Notify.vue'
+import { readFile } from '~/utils/actions.js'
 
 export default {
   components: {

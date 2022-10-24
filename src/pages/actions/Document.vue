@@ -55,13 +55,13 @@
 </template>
 
 <script>
+import axios from 'axios'
 import ActionHeader from '~/components/ActionHeader.vue'
-import Notify from '~/components/Notify.vue'
-import PeopleField from '~/components/PeopleField.vue'
 import ButtonArea from '~/components/ButtonArea.vue'
 import EventTypeSelection from '~/components/EventTypeSelection.vue'
-import { validateEmail, replace, readFile } from '~/utils/actions.js'
-import axios from 'axios'
+import Notify from '~/components/Notify.vue'
+import PeopleField from '~/components/PeopleField.vue'
+import { readFile, replace, validateEmail } from '~/utils/actions.js'
 
 export default {
   components: {

@@ -81,17 +81,14 @@
 </template>
 
 <script>
-import ActionHeader from '~/components/ActionHeader.vue'
-import Notify from '~/components/Notify.vue'
-import EventSelection from '~/components/EventSelection.vue'
-import PeopleField from '~/components/PeopleField.vue'
-import ButtonArea from '~/components/ButtonArea.vue'
-import EventTypeSelection from '~/components/EventTypeSelection.vue'
-import { replace, readFile } from '~/utils/actions.js'
-import { Base64 } from 'js-base64'
 import axios from 'axios'
-import { format, parseISO } from 'date-fns'
-import { de } from 'date-fns/locale'
+import ActionHeader from '~/components/ActionHeader.vue'
+import ButtonArea from '~/components/ButtonArea.vue'
+import EventSelection from '~/components/EventSelection.vue'
+import EventTypeSelection from '~/components/EventTypeSelection.vue'
+import Notify from '~/components/Notify.vue'
+import PeopleField from '~/components/PeopleField.vue'
+import { readFile } from '~/utils/actions.js'
 
 export default {
   components: {
