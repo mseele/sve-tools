@@ -1,18 +1,17 @@
 <template>
   <v-card class="pa-1 mb-6 colored-border" outlined>
-    <template v-for="(person, index) in people">
-      <v-chip
-        class="ma-2"
-        small
-        label
-        :class="{ primary: !disabled }"
-        :close="!disabled"
-        @click:close="close(index)"
-        :key="index"
-      >
-        {{ person.firstName }} {{ person.lastName }}
-      </v-chip>
-    </template>
+    <v-chip
+      v-for="(person, index) in people"
+      class="ma-2"
+      small
+      label
+      :class="{ primary: !disabled }"
+      :close="!disabled"
+      @click:close="close(index)"
+      :key="index"
+    >
+      {{ person.firstName }} {{ person.lastName }}
+    </v-chip>
   </v-card>
 </template>
 

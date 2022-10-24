@@ -135,13 +135,13 @@ export default {
     statusIndex(status) {
       switch (status) {
         case 'Draft':
-          return 3
+          return 2
         case 'Review':
           return 1
         case 'Published':
           return 0
         case 'Running':
-          return 2
+          return 3
         case 'Finished':
           return 4
         case 'Closed':
@@ -167,8 +167,7 @@ export default {
     addEvent(eventToAdd) {
       this.allEvents.push(eventToAdd)
       this.$nextTick(() => {
-        this.event = eventToAdd
-        this.emitChanges()
+        this.selectEvent(eventToAdd)
       })
     },
     async loadEvents() {
@@ -182,6 +181,10 @@ export default {
           'Fehler beim Laden der Events. Details siehe Console'
         )
       }
+    },
+    selectEvent(event) {
+      this.event = event
+      this.emitChanges()
     },
   },
 }

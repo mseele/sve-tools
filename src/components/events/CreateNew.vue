@@ -12,7 +12,7 @@
         <div class="mt-2 mb-4">
           <EventSelection
             :eventType="eventType"
-            :eventsURL="eventsURL"
+            :eventsURL="loadEventsURL"
             @error="showError"
             @change="onEventSelection"
           />
@@ -43,6 +43,10 @@ export default {
       type: String,
       required: true,
     },
+    loadEventsURL: {
+      type: String,
+      required: true,
+    },
   },
   data() {
     return {
@@ -52,9 +56,6 @@ export default {
     }
   },
   computed: {
-    eventsURL() {
-      return this.$page.metadata.loadEventsURL
-    },
     valid() {
       return this.selection != null
     },
@@ -80,11 +81,3 @@ export default {
   },
 }
 </script>
-
-<page-query>
-query {
-  metadata {
-    loadEventsURL
-  }
-}
-</page-query>
