@@ -129,82 +129,6 @@
                 </v-card-actions>
               </v-card>
             </v-dialog>
-            <!-- TODO: only allow batch events in status Draft,Preview,Published -->
-            <v-dialog v-model="batchDialog" persistent max-width="600">
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  icon
-                  color="primary"
-                  :disabled="!readonly"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  <v-icon>{{ mdiPencilBoxMultiple }}</v-icon>
-                </v-btn>
-              </template>
-              <v-card>
-                <v-card-title class="text-h5">Batch Edit</v-card-title>
-                <v-card-text class="pb-0">
-                  Selektiere alle Events die du gleichzeitig bearbeiten
-                  möchtest:<br />
-                  <v-form v-model="batchDialogValid" class="mt-2">
-                    <v-select
-                      v-model="batchSelection"
-                      :items="events"
-                      :item-value="eventValue"
-                      :item-text="eventName"
-                      outlined
-                      chips
-                      multiple
-                      label="Events auswählen"
-                      :rules="rules.batchSelection"
-                    >
-                      <template v-slot:item="data">
-                        <v-icon
-                          v-if="
-                            batchSelection !== null &&
-                            batchSelection.includes(data.item)
-                          "
-                          color="primary"
-                          class="mr-3"
-                        >
-                          {{ mdiCheckboxMarked }}
-                        </v-icon>
-                        <v-icon v-else class="mr-3">
-                          {{ mdiCheckboxBlankOutline }}
-                        </v-icon>
-                        <EventListItem
-                          :status="data.item.status"
-                          :text="eventName(data.item)"
-                        />
-                      </template>
-                    </v-select>
-                  </v-form>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn
-                    color="primary"
-                    text
-                    @click="
-                      () => {
-                        batchSelection = null
-                        batchDialog = false
-                      }
-                    "
-                  >
-                    Abbrechen
-                  </v-btn>
-                  <v-btn
-                    color="primary"
-                    text
-                    @click="onBatchEdit()"
-                    :disabled="!batchDialogValid"
-                    >Starten</v-btn
-                  >
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
           </div>
         </v-col>
       </v-row>
@@ -528,13 +452,10 @@ export default {
       allEvents: [],
       closedEvents: [],
       selection: null,
-      batchSelection: null,
       deleteDialog: false,
       newDialog: false,
       newEvent: null,
       newDialogValid: false,
-      batchDialog: false,
-      batchDialogValid: false,
       trueFalse: [
         { value: true, text: 'Ja' },
         { value: false, text: 'Nein' },
@@ -634,14 +555,6 @@ export default {
               val !== 'jugendturnier@sv-eutingen.de'
             ) {
               return "Als alternative Email Adresse ist aktuell nur 'jugendturnier@sv-eutingen.de' möglich"
-            }
-            return true
-          },
-        ],
-        batchSelection: [
-          (val) => {
-            if (val == null || val.length < 2) {
-              return 'Minimum 2 Events müssen ausgewählt werden'
             }
             return true
           },
@@ -808,12 +721,6 @@ export default {
       this.editNew = isNew
       this.editOriginal = JSON.parse(JSON.stringify(this.selection))
     },
-    onBatchEdit() {
-      this.batchDialog = false
-      this.editNew = false
-      this.selection = this.batchSelection[0]
-      this.editOriginal = JSON.parse(JSON.stringify(this.selection))
-    },
     async onDelete() {
       this.loading = true
       try {
@@ -845,7 +752,6 @@ export default {
       this.editNew = false
       this.editOriginal = null
       this.dateToAdd = null
-      this.batchSelection = null
     },
     async onSave() {
       if (!this.confirmSave) {
@@ -854,31 +760,16 @@ export default {
       }
       this.loading = true
       try {
-        let savedEvent = undefined
-        if (this.batchSelection != null) {
-          let changes = this.diff(this.selection, this.editOriginal)
-          for (const event of this.batchSelection) {
-            const objectToSave = JSON.parse(JSON.stringify(changes))
-            objectToSave.id = event.id
-            const result = (
-              await axios.post(this.$page.metadata.updateEventURL, objectToSave)
-            ).data
-            if (savedEvent == undefined) {
-              savedEvent = result
-            }
-          }
+        let objectToSave
+        if (this.editNew) {
+          objectToSave = this.selection
         } else {
-          let objectToSave
-          if (this.editNew) {
-            objectToSave = this.selection
-          } else {
-            objectToSave = this.diff(this.selection, this.editOriginal)
-            objectToSave.id = this.selection.id
-          }
-          savedEvent = (
-            await axios.post(this.$page.metadata.updateEventURL, objectToSave)
-          ).data
+          objectToSave = this.diff(this.selection, this.editOriginal)
+          objectToSave.id = this.selection.id
         }
+        const savedEvent = (
+          await axios.post(this.$page.metadata.updateEventURL, objectToSave)
+        ).data
         const fetchedEvents = await this.loadEvents()
         const index = fetchedEvents.findIndex((e) => e.id == savedEvent.id)
         this.allEvents = fetchedEvents
@@ -887,19 +778,7 @@ export default {
         this.editNew = false
         this.editOriginal = null
         this.dateToAdd = null
-        if (this.batchSelection != null) {
-          const count = this.batchSelection.length
-          this.batchSelection = null
-          this.$refs.notify.showSuccess(
-            'Die Änderungen an ' +
-              count +
-              ' Events wurden erfolgreich gespeichert'
-          )
-        } else {
-          this.$refs.notify.showSuccess(
-            'Das Event wurde erfolgreich gespeichert'
-          )
-        }
+        this.$refs.notify.showSuccess('Das Event wurde erfolgreich gespeichert')
       } catch (error) {
         console.log(error)
         this.showError(
