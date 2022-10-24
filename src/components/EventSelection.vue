@@ -128,8 +128,10 @@ export default {
           break
         case 'Finished':
           visibility = 'Fertiggestellt - Unsichtbar'
+          break
         case 'Closed':
           visibility = 'Abgeschlossen - Unsichtbar'
+          break
       }
       return event.name + ' (' + visibility + ')'
     },
