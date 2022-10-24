@@ -21,65 +21,7 @@
               @error="showError"
               @change="onEventSelection"
             />
-            <v-dialog v-model="newDialog" persistent max-width="400">
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  icon
-                  color="primary"
-                  :disabled="!readonly"
-                  v-bind="attrs"
-                  v-on="on"
-                >
-                  <v-icon>{{ mdiPlus }}</v-icon>
-                </v-btn>
-              </template>
-              <v-card>
-                <v-card-title class="text-h5">Neues Event</v-card-title>
-                <v-card-text class="pb-0">
-                  Wähle ein Vorlage-Event aus:<br />
-                  <v-form v-model="newDialogValid" class="mt-2">
-                    <v-autocomplete
-                      v-model="newEvent"
-                      :items="newEvents"
-                      :item-value="eventValue"
-                      :item-text="eventName"
-                      outlined
-                      label="Event auswählen"
-                      :rules="rules.newEvent"
-                    >
-                      <template v-slot:item="data">
-                        <EventListItem
-                          :status="data.item.status"
-                          :text="eventName(data.item)"
-                        />
-                      </template>
-                    </v-autocomplete>
-                  </v-form>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn
-                    color="primary"
-                    text
-                    @click="
-                      () => {
-                        newEvent = null
-                        newDialog = false
-                      }
-                    "
-                  >
-                    Abbrechen
-                  </v-btn>
-                  <v-btn
-                    color="primary"
-                    text
-                    @click="onNew()"
-                    :disabled="!newDialogValid"
-                    >Starten</v-btn
-                  >
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
+            <CreateNew :eventType="eventType" @error="showError" @new="onNew" />
             <v-btn
               icon
               color="primary"
@@ -426,9 +368,10 @@ import {
 } from '@mdi/js'
 import axios from 'axios'
 import { addDays, format, isBefore, isValid, parse, parseISO } from 'date-fns'
-import { cloneDeep, isEqual, transform } from 'lodash-es'
+import { isEqual, transform } from 'lodash-es'
 import ActionHeader from '~/components/ActionHeader.vue'
 import EventListItem from '~/components/EventListItem.vue'
+import CreateNew from '~/components/events/CreateNew.vue'
 import EventSelection from '~/components/EventSelection.vue'
 import EventTypeSelection from '~/components/EventTypeSelection.vue'
 import Notify from '~/components/Notify.vue'
@@ -442,6 +385,7 @@ export default {
     EventTypeSelection,
     EventSelection,
     EventListItem,
+    CreateNew,
   },
   metaInfo: {
     title: 'Edit Events',
@@ -453,9 +397,6 @@ export default {
       closedEvents: [],
       selection: null,
       deleteDialog: false,
-      newDialog: false,
-      newEvent: null,
-      newDialogValid: false,
       trueFalse: [
         { value: true, text: 'Ja' },
         { value: false, text: 'Nein' },
@@ -540,14 +481,6 @@ export default {
             )
           },
         ],
-        newEvent: [
-          (val) => {
-            if ((val || '').length == 0) {
-              return 'Bitte wähle ein Event aus'
-            }
-            return true
-          },
-        ],
         altEmailAddress: [
           (val) => {
             if (
@@ -579,15 +512,6 @@ export default {
           }
           return a.sortIndex - b.sortIndex
         })
-    },
-    newEvents() {
-      return this.events.concat(
-        this.closedEvents
-          .filter((e) => e.type === this.eventType)
-          .sort((a, b) => {
-            return parseISO(a.closed) - parseISO(b.closed)
-          })
-      )
     },
     eventImages() {
       return this.$page.eventImages.edges.map((edge) => edge.node)
@@ -657,20 +581,13 @@ export default {
     dateSelection() {
       this.selection.custom_date = ''
     },
-    async newDialog(value) {
-      if (value) {
-        this.closedEvents = await this.loadClosedEvents()
-      }
-    },
   },
   methods: {
     onEventSelection(data) {
       this.selection = data.event
     },
     async loadClosedEvents() {
-      const result = await axios.get(
-        this.$page.metadata.loadEventsURL + '?status=closed'
-      )
+      const result = await axios.get(this.$page.metadata.loadEventsURL)
       return result.data
     },
     eventName(event) {
@@ -707,15 +624,8 @@ export default {
       this.selection.dates.splice(index, 0, dateString)
       this.dateToAdd = format(addDays(newDate, 7), 'dd-MM-yyyy HH:mm')
     },
-    onNew() {
-      this.newDialog = false
-      const duplicate = cloneDeep(this.newEvent)
-      duplicate.id = null
-      duplicate.status = 'Draft'
-      this.selection = duplicate
-      this.allEvents.push(this.selection)
-      this.newEvent = null
-      this.onEdit(true)
+    onNew(event) {
+      this.$refs.eventSelection.addEvent(event)
     },
     onEdit(isNew) {
       this.editNew = isNew
