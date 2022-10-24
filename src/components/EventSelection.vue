@@ -37,8 +37,8 @@
 </template>
 
 <script>
-import EventListItem from './EventListItem.vue'
 import axios from 'axios'
+import EventListItem from './EventListItem.vue'
 
 export default {
   components: {
@@ -74,14 +74,8 @@ export default {
       waitingList: false,
     }
   },
-  async mounted() {
-    try {
-      this.allEvents = (await axios.get(this.eventsURL)).data
-      this.emitChanges()
-    } catch (error) {
-      console.log(error)
-      this.$emit('error', 'Fehler beim Laden der Events. Details siehe Console')
-    }
+  mounted() {
+    this.loadEvents()
   },
   computed: {
     events() {
@@ -169,6 +163,25 @@ export default {
       this.event = null
       this.bookingList = true
       this.waitingList = false
+    },
+    addEvent(eventToAdd) {
+      this.allEvents.push(eventToAdd)
+      this.$nextTick(() => {
+        this.event = eventToAdd
+        this.emitChanges()
+      })
+    },
+    async loadEvents() {
+      try {
+        this.allEvents = (await axios.get(this.eventsURL)).data
+        this.emitChanges()
+      } catch (error) {
+        console.log(error)
+        this.$emit(
+          'error',
+          'Fehler beim Laden der Events. Details siehe Console'
+        )
+      }
     },
   },
 }
