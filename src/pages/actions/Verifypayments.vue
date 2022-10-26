@@ -5,7 +5,6 @@
         title="Verify Payments"
         subtitle="Automatische Zahlungsverifizierung"
         :help="[
-          'Google Sheet ID eintragen',
           'Kontoauszug als CVS Datei angeben',
           'Überprüfung starten und Auswertung abwarten',
         ]"
@@ -23,11 +22,6 @@
             </div>
           </div>
           <v-form :disabled="disabled" v-else>
-            <v-text-field
-              v-model="sheet_id"
-              outlined
-              label="Sheet-ID"
-            ></v-text-field>
             <v-file-input
               outlined
               v-model="csv"
@@ -95,7 +89,6 @@ export default {
   },
   data() {
     return {
-      sheet_id: '',
       csv: undefined,
       with_start_date: false,
       start_date: undefined,
@@ -106,7 +99,6 @@ export default {
   },
   methods: {
     reset() {
-      this.sheet_id = ''
       this.csv = undefined
       this.with_start_date = false
       this.start_date = undefined
@@ -131,7 +123,6 @@ export default {
         const response = await axios.post(
           this.$page.metadata.verifyPaymentsURL,
           {
-            sheet_id: this.sheet_id,
             csv: attachment,
             start_date:
               this.with_start_date && this.start_date
