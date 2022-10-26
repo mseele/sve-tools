@@ -104,7 +104,7 @@
                 small
                 label
                 close
-                primary
+                color="primary"
                 @click:close="selection.dates.splice(index, 1)"
                 :key="index"
               >
