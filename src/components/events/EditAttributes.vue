@@ -422,7 +422,12 @@ export default {
   },
   methods: {
     formatDate(value) {
-      return format(parseISO(value), 'dd-MM-yyyy HH:mm')
+      const date = parseISO(value)
+      const timezoneOffset = date.getTimezoneOffset() * 60000
+      return format(
+        new Date(date.getTime() + timezoneOffset),
+        'dd-MM-yyyy HH:mm'
+      )
     },
     addDate() {
       const newDate = parse(this.dateToAdd, 'dd-MM-yyyy HH:mm', new Date())
