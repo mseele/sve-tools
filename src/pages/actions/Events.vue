@@ -107,7 +107,7 @@ export default {
     EditFinished,
   },
   metaInfo: {
-    title: 'Edit Events',
+    title: 'Manage Events',
   },
   data() {
     return {
