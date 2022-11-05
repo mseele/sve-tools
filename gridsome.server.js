@@ -6,7 +6,7 @@ module.exports = function (api) {
     store.addMetadata('sendEmailsURL', backend_prefix + 'contact/emails')
     store.addMetadata('loadEventsURL', backend_prefix + 'events')
     store.addMetadata('updateEventURL', backend_prefix + 'events/update')
-    store.addMetadata('deleteEventURL', backend_prefix + 'events/delete')
+    store.addMetadata('deleteEventURL', backend_prefix + 'events/')
     store.addMetadata(
       'verifyPaymentsURL',
       backend_prefix + 'events/verify_payments'

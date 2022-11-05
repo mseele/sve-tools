@@ -162,7 +162,7 @@ export default {
       this.deleteLoading = true
       try {
         await axios.delete(
-          this.$page.metadata.deleteEventURL + '/' + this.selection.id
+          this.$page.metadata.deleteEventURL + this.selection.id
         )
         await this.$refs.eventSelection.loadEvents()
         this.$refs.notify.showSuccess('Das Event wurde erfolgreich gelöscht')
