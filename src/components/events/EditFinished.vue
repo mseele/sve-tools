@@ -62,7 +62,7 @@ export default {
         console.error(error)
         this.$emit(
           'error',
-          'Event schließen ist fehlgeschalgen. Details siehe Console'
+          'Event schließen ist fehlgeschlagen. Details siehe Console'
         )
       } finally {
         this.loadingClose = false
