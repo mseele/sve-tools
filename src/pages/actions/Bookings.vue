@@ -56,6 +56,9 @@ import EventTypeSelection from '~/components/EventTypeSelection.vue'
 import EventListItem from '~/components/EventListItem.vue'
 import EventBookings from '~/components/events/EventBookings.vue'
 
+// TODO: add the possibility to create tn-lists
+// TODO: add the possibility to send certificates
+
 export default {
   components: {
     ActionHeader,
