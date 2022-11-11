@@ -4,6 +4,10 @@
         "link": "/actions/events"
     },
     {
+        "name": "Manage Bookings",
+        "link": "/actions/bookings"
+    },
+    {
         "name": "Batch Email",
         "link": "/actions/email"
     },

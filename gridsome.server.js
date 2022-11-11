@@ -8,6 +8,10 @@ module.exports = function (api) {
     store.addMetadata('updateEventURL', backend_prefix + 'events/update')
     store.addMetadata('deleteEventURL', backend_prefix + 'events/')
     store.addMetadata(
+      'updateEventBookingURL',
+      backend_prefix + 'events/booking/'
+    )
+    store.addMetadata(
       'verifyPaymentsURL',
       backend_prefix + 'events/verify_payments'
     )
