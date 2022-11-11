@@ -7,13 +7,13 @@
         :help="[
           'Event auswählen',
           'Personengruppe auswählen (Buchungen und/oder Warteliste)',
-          'Für Individualisierung <b>${firstname}</b> für den Vorname in der Email nutzen',
-          'Für Individualisierung <b>${lastname}</b> für den Nachname in der Email nutzen',
-          'Für Individualisierung <b>${name}</b> für den Event Name in der Email nutzen',
-          'Für Individualisierung <b>${location}</b> für den Ort in der Email nutzen',
-          'Für Individualisierung <b>${price}</b> für den Preis in der Email nutzen',
-          'Für Individualisierung <b>${dates}</b> für die Termine in der Email nutzen',
-          'Für Individualisierung <b>${payment_id}</b> für die Zahlungsnummer in der Email nutzen',
+          'Für Individualisierung <b>{{firstname}}</b> für den Vorname in der Email nutzen',
+          'Für Individualisierung <b>{{lastname}}</b> für den Nachname in der Email nutzen',
+          'Für Individualisierung <b>{{name}}</b> für den Event Name in der Email nutzen',
+          'Für Individualisierung <b>{{location}}</b> für den Ort in der Email nutzen',
+          'Für Individualisierung <b>{{price}}</b> für den Preis in der Email nutzen',
+          'Für Individualisierung <b>{{dates}}</b> für die Termine in der Email nutzen',
+          'Für Individualisierung <b>{{payment_id}}</b> für die Zahlungsnummer in der Email nutzen',
         ]"
       />
       <v-row>

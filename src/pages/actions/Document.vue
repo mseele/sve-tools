@@ -7,8 +7,8 @@
         :help="[
           'Namenskonvention für Dokumente: Vorname#Nachname#Email.pdf. Z.B.: Michael#Seele#mseele@gmail.com.pdf',
           'Dokumentenname ist der Name der in der Email angezeigt wird. Z.B.: Teilnahmebescheinigung.pdf',
-          'Für Individualisierung <b>${vorname}</b> oder <b>${firstname}</b> für den Vorname in der Email nutzen',
-          'Für Individualisierung <b>${nachname}</b> oder <b>${lastname}</b> für den Nachname in der Email nutzen',
+          'Für Individualisierung <b>{{firstname}}</b> für den Vorname in der Email nutzen',
+          'Für Individualisierung <b>{{lastname}}</b> für den Nachname in der Email nutzen',
         ]"
       />
       <v-row>
