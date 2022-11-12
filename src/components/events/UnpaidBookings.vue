@@ -22,6 +22,25 @@
           item-key="id"
           class="elevation-1 my-4"
         >
+          <template v-slot:item.due_in_days="{ item }">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <div class="d-flex align-center" v-bind="attrs" v-on="on">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16pt"
+                    height="21.333"
+                  >
+                    <path
+                      d="M15.625 10a5.625 5.625 0 11-11.25 0 5.625 5.625 0 0111.25 0z"
+                      :fill="item.due_in_days >= 0 ? 'green' : 'red'"
+                    />
+                  </svg>
+                </div>
+              </template>
+              <span>{{ formatDueInDays(item.due_in_days) }}</span>
+            </v-tooltip>
+          </template>
           <template v-slot:item.cost="{ item }">
             {{ item.cost.replace('.', ',') + '  €' }}
           </template>
@@ -72,6 +91,7 @@ export default {
   data() {
     return {
       headers: [
+        { text: '', value: 'due_in_days' },
         { text: 'Event', value: 'event_name' },
         { text: 'Name', value: 'full_name' },
         { text: 'Payment ID', value: 'payment_id' },
@@ -84,6 +104,19 @@ export default {
     }
   },
   methods: {
+    formatDueInDays(dueInDays) {
+      if (dueInDays < -1) {
+        return 'Zahlung ' + -dueInDays + ' Tage überfällig'
+      } else if (dueInDays == -1) {
+        return 'Zahlung ' + -dueInDays + ' Tag überfällig'
+      } else if (dueInDays == 0) {
+        return 'Zahlung heute fällig'
+      } else if (dueInDays == 1) {
+        return 'Zahlung morgen fällig'
+      } else {
+        return 'Zahlung in ' + dueInDays + ' Tagen fällig'
+      }
+    },
     async markPayed(booking) {
       try {
         await axios.patch(
