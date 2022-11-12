@@ -11,12 +11,8 @@
       />
       <v-row>
         <v-col cols="12">
-          <div v-if="result">
-            <div
-              v-for="(item, index) in result.csv_results"
-              :key="index"
-              class="mb-4"
-            >
+          <div v-if="csv_result">
+            <div v-for="(item, index) in csv_result" :key="index" class="mb-4">
               <h4>{{ item.title }}</h4>
               <ul v-if="item.values.length > 0">
                 <li v-for="(value, idx) in item.values" :key="idx" class="my-1">
@@ -25,53 +21,23 @@
               </ul>
             </div>
             <v-divider class="mb-4" />
-            <template v-if="unpaid_bookings.length > 0">
-              <h4 class="d-flex align-center">
-                <v-icon color="error">{{ mdiCloseCircle }}</v-icon>
-                <span class="ml-1"
-                  >{{ unpaid_bookings.length }} Unbezahlte Buchungen</span
-                >
-              </h4>
-              <v-data-table
-                dense
-                hide-default-footer
-                disable-pagination
-                :headers="unpaid_bookings_headers"
-                :items="unpaid_bookings"
-                item-key="id"
-                class="elevation-1 my-4"
-              >
-                <template v-slot:item.cost="{ item }">
-                  {{ item.cost.replace('.', ',') + '  €' }}
-                </template>
-                <template v-slot:item.actions="{ item }">
-                  <div class="d-flex align-center justify-end">
-                    <template v-if="!item.payed">
-                      <v-tooltip bottom>
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-icon
-                            small
-                            class="mr-2"
-                            @click="markPayed(item)"
-                            v-bind="attrs"
-                            v-on="on"
-                            >{{ mdiCash }}</v-icon
-                          >
-                        </template>
-                        <span>Als Bezahlt markieren</span>
-                      </v-tooltip>
-                    </template>
-                  </div>
-                </template>
-              </v-data-table>
-            </template>
-            <h4 v-else class="d-flex align-center">
-              <v-icon color="success">{{ mdiCheckCircle }}</v-icon>
-              <span class="ml-1">Keine unbezahlten Buchungen</span>
-            </h4>
+            <UnpaidBookings
+              :updateEventBookingURL="$page.metadata.updateEventBookingURL"
+              :bookings="unpaid_bookings"
+              @error="showError"
+              @refresh="loadUnpaidBookings"
+            />
           </div>
           <v-form :disabled="disabled" v-else>
             <EventTypeSelection v-model="event_type" />
+            <UnpaidBookings
+              :updateEventBookingURL="$page.metadata.updateEventBookingURL"
+              :bookings="unpaid_bookings"
+              @error="showError"
+              @refresh="loadUnpaidBookings"
+              class="mb-6"
+            />
+            <v-divider class="mb-6" />
             <v-file-input
               outlined
               v-model="csv"
@@ -110,7 +76,7 @@
           <button-area
             :disabled="disabled"
             send-text="Starten"
-            :send-visible="result == undefined"
+            :send-visible="csv_result == undefined"
             @send="send"
             @reset="reset"
           />
@@ -126,14 +92,18 @@ import { mdiCheckCircle, mdiCloseCircle, mdiCash } from '@mdi/js'
 import axios from 'axios'
 import ActionHeader from '~/components/ActionHeader.vue'
 import EventTypeSelection from '~/components/EventTypeSelection.vue'
+import UnpaidBookings from '~/components/events/UnpaidBookings.vue'
 import ButtonArea from '~/components/ButtonArea.vue'
 import Notify from '~/components/Notify.vue'
 import { readFile } from '~/utils/actions.js'
+
+// TODO: add ability to send reminder email
 
 export default {
   components: {
     ActionHeader,
     EventTypeSelection,
+    UnpaidBookings,
     Notify,
     ButtonArea,
   },
@@ -147,8 +117,9 @@ export default {
       with_start_date: false,
       start_date: undefined,
       date_picker: false,
-      result: undefined,
+      csv_result: undefined,
       disabled: false,
+      unpaid_bookings: undefined,
       unpaid_bookings_headers: [
         { text: 'Event', value: 'event_name' },
         { text: 'Name', value: 'full_name' },
@@ -161,18 +132,17 @@ export default {
       mdiCash,
     }
   },
-  computed: {
-    unpaid_bookings() {
-      return this.result?.unpaid_bookings.filter((b) => b.payed == null) || []
-    },
+  mounted() {
+    this.loadUnpaidBookings()
   },
   methods: {
     reset() {
       this.csv = undefined
       this.with_start_date = false
       this.start_date = undefined
-      this.result = undefined
+      this.csv_result = undefined
       this.disabled = false
+      this.loadUnpaidBookings()
     },
     async send() {
       this.disabled = true
@@ -181,18 +151,16 @@ export default {
         attachment = await readFile(this.csv)
       } catch (error) {
         console.error(error)
-        this.$refs.notify.showError(
+        this.showError(
           'Datei konnte nicht gelesen werden. Details siehe Console'
         )
         this.disabled = false
         return
       }
-
       try {
         const response = await axios.post(
           this.$page.metadata.verifyPaymentsURL,
           {
-            event_type: this.event_type,
             csv: attachment,
             start_date:
               this.with_start_date && this.start_date
@@ -200,28 +168,31 @@ export default {
                 : undefined,
           }
         )
-        this.result = response.data
+        this.csv_result = response.data
+        await this.loadUnpaidBookings()
       } catch (error) {
         console.error(error)
-        this.$refs.notify.showError(
-          'Überprüfung fehlgeschlafen. Details siehe Console'
-        )
+        this.showError('Überprüfung fehlgeschlafen. Details siehe Console')
       } finally {
         this.disabled = false
       }
     },
-    async markPayed(booking) {
+    showError(error) {
+      this.$refs.notify.showError(error)
+    },
+    async loadUnpaidBookings() {
+      this.unpaid_bookings = undefined
       try {
-        await axios.patch(
-          this.$page.metadata.updateEventBookingURL +
-            booking.booking_id +
-            '?update_payment=true'
+        const response = await axios.get(
+          this.$page.metadata.unpaidBookingsURL +
+            '?event_type=' +
+            this.event_type
         )
-        booking.payed = true
+        this.unpaid_bookings = response.data
       } catch (error) {
-        console.log(error)
-        this.$refs.notify.showError(
-          'Als Bezahlt markieren is fehlgeschlagen. Details siehe Console'
+        console.error(error)
+        this.showError(
+          'Abholen unbezahlter Buchungen fehlgeschlafen. Details siehe Console'
         )
       }
     },
@@ -233,6 +204,7 @@ export default {
 query {
   metadata {
     verifyPaymentsURL
+    unpaidBookingsURL
     updateEventBookingURL
   }
 }

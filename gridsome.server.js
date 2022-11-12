@@ -16,6 +16,10 @@ module.exports = function (api) {
       backend_prefix + 'events/verify_payments'
     )
     store.addMetadata(
+      'unpaidBookingsURL',
+      backend_prefix + 'events/unpaid_bookings'
+    )
+    store.addMetadata(
       'deployURL_sveNext',
       'https://api.netlify.com/build_hooks/6127d32c2032942b064c7947'
     )
