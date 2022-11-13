@@ -23,6 +23,7 @@
             <v-divider class="mb-4" />
             <UnpaidBookings
               :updateEventBookingURL="$page.metadata.updateEventBookingURL"
+              :sendPaymentRemindersURL="sendPaymentRemindersURL"
               :bookings="unpaid_bookings"
               @error="showError"
               @refresh="loadUnpaidBookings"
@@ -32,6 +33,7 @@
             <EventTypeSelection v-model="event_type" />
             <UnpaidBookings
               :updateEventBookingURL="$page.metadata.updateEventBookingURL"
+              :sendPaymentRemindersURL="sendPaymentRemindersURL"
               :bookings="unpaid_bookings"
               @error="showError"
               @refresh="loadUnpaidBookings"
@@ -140,6 +142,11 @@ export default {
       this.reset()
     },
   },
+  computed: {
+    sendPaymentRemindersURL() {
+      return this.$page.metadata.sendPaymentReminders + this.event_type
+    },
+  },
   methods: {
     reset() {
       this.csv = undefined
@@ -189,9 +196,7 @@ export default {
       this.unpaid_bookings = undefined
       try {
         const response = await axios.get(
-          this.$page.metadata.unpaidBookingsURL +
-            '?event_type=' +
-            this.event_type
+          this.$page.metadata.unpaidBookingsURL + this.event_type
         )
         this.unpaid_bookings = response.data
       } catch (error) {
@@ -211,6 +216,7 @@ query {
     verifyPaymentsURL
     unpaidBookingsURL
     updateEventBookingURL
+    sendPaymentReminders
   }
 }
 </page-query>

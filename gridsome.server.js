@@ -17,7 +17,11 @@ module.exports = function (api) {
     )
     store.addMetadata(
       'unpaidBookingsURL',
-      backend_prefix + 'events/payments/unpaid'
+      backend_prefix + 'events/payments/unpaid/'
+    )
+    store.addMetadata(
+      'sendPaymentReminders',
+      backend_prefix + 'tasks/send_payment_reminders/'
     )
     store.addMetadata(
       'deployURL_sveNext',
