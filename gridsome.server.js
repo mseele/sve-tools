@@ -12,6 +12,10 @@ module.exports = function (api) {
       backend_prefix + 'events/booking/'
     )
     store.addMetadata(
+      'exportEventBookingsURL',
+      backend_prefix + 'events/booking/export/'
+    )
+    store.addMetadata(
       'verifyPaymentsURL',
       backend_prefix + 'events/payments/verify'
     )

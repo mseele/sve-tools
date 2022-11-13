@@ -17,6 +17,7 @@
       <template v-if="allEvents != undefined">
         <EventBookings
           :updateEventBookingURL="$page.metadata.updateEventBookingURL"
+          :exportEventBookingsURL="$page.metadata.exportEventBookingsURL"
           status="Review"
           :events="events"
           @error="showError"
@@ -24,6 +25,7 @@
         />
         <EventBookings
           :updateEventBookingURL="$page.metadata.updateEventBookingURL"
+          :exportEventBookingsURL="$page.metadata.exportEventBookingsURL"
           status="Published"
           :events="events"
           @error="showError"
@@ -31,6 +33,7 @@
         />
         <EventBookings
           :updateEventBookingURL="$page.metadata.updateEventBookingURL"
+          :exportEventBookingsURL="$page.metadata.exportEventBookingsURL"
           status="Running"
           :events="events"
           @error="showError"
@@ -148,6 +151,7 @@ query {
   metadata {
     loadEventsURL
     updateEventBookingURL
+    exportEventBookingsURL
   }
 }
 </page-query>

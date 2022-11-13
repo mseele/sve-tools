@@ -15,12 +15,21 @@
         :item-class="subscriberClasses"
       >
         <template v-slot:top>
-          <div class="d-flex align-center">
-            <h3 class="px-2 py-1 border">{{ event.name }}</h3>
-            <div>
-              {{ free_bookings(event, true) }} freie Plätze /
-              {{ free_bookings(event, false) }} freie Wartelistplätze
+          <div class="d-flex align-center justify-space-between">
+            <div class="d-flex align-center">
+              <h3 class="px-2 py-1 border">{{ event.name }}</h3>
+              <div>
+                {{ free_bookings(event, true) }} freie Plätze /
+                {{ free_bookings(event, false) }} freie Wartelistplätze
+              </div>
             </div>
+            <v-btn
+              icon
+              color="green darken-2"
+              :href="exportEventBookingsURL + event.id"
+            >
+              <v-icon>{{ mdiMicrosoftExcel }}</v-icon>
+            </v-btn>
           </div>
           <v-divider class="mb-1"></v-divider>
           <v-dialog v-model="cancelBookingDialog" max-width="400px">
@@ -140,7 +149,14 @@
 </template>
 
 <script>
-import { mdiCash, mdiCheck, mdiClose, mdiComment, mdiDelete } from '@mdi/js'
+import {
+  mdiCash,
+  mdiCheck,
+  mdiClose,
+  mdiComment,
+  mdiDelete,
+  mdiMicrosoftExcel,
+} from '@mdi/js'
 import axios from 'axios'
 import EventListItem from '~/components/EventListItem.vue'
 
@@ -148,6 +164,10 @@ export default {
   components: { EventListItem },
   props: {
     updateEventBookingURL: {
+      type: String,
+      required: true,
+    },
+    exportEventBookingsURL: {
       type: String,
       required: true,
     },
@@ -179,6 +199,7 @@ export default {
       mdiComment,
       mdiCash,
       mdiDelete,
+      mdiMicrosoftExcel,
     }
   },
   computed: {
