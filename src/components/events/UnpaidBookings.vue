@@ -22,6 +22,9 @@
           item-key="id"
           class="elevation-1 my-4"
         >
+          <template v-slot:item.first_name="{ item }">
+            {{ item.first_name + ' ' + item.last_name }}
+          </template>
           <template v-slot:item.due_in_days="{ item }">
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
@@ -93,7 +96,7 @@ export default {
       headers: [
         { text: '', value: 'due_in_days' },
         { text: 'Event', value: 'event_name' },
-        { text: 'Name', value: 'full_name' },
+        { text: 'Name', value: 'first_name' },
         { text: 'Payment ID', value: 'payment_id' },
         { text: 'Preis', value: 'cost' },
         { text: '', value: 'actions', sortable: false },

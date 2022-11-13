@@ -66,6 +66,9 @@
             <span>{{ item.enrolled ? 'Gebucht' : 'Warteliste' }}</span>
           </v-tooltip>
         </template>
+        <template v-slot:item.first_name="{ item }">
+          {{ item.first_name + ' ' + item.last_name }}
+        </template>
         <template v-slot:item.member="{ item }">
           <v-icon v-if="item.member">{{ mdiCheck }}</v-icon>
         </template>
@@ -117,7 +120,6 @@
                 <span>Als Bezahlt markieren</span>
               </v-tooltip>
             </template>
-
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
                 <v-icon
@@ -162,8 +164,7 @@ export default {
     return {
       headers: [
         { text: '', value: 'enrolled' },
-        { text: 'Vorname', value: 'first_name' },
-        { text: 'Nachname', value: 'last_name' },
+        { text: 'Name', value: 'first_name' },
         { text: 'Email', value: 'email' },
         { text: 'Mgl.', value: 'member' },
         { text: 'Bezahlt', value: 'payed' },
