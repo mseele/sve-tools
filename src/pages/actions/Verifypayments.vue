@@ -144,7 +144,7 @@ export default {
   },
   computed: {
     sendPaymentRemindersURL() {
-      return this.$page.metadata.sendPaymentReminders + this.event_type
+      return this.$page.metadata.sendPaymentRemindersURL + this.event_type
     },
   },
   methods: {
@@ -216,7 +216,7 @@ query {
     verifyPaymentsURL
     unpaidBookingsURL
     updateEventBookingURL
-    sendPaymentReminders
+    sendPaymentRemindersURL
   }
 }
 </page-query>

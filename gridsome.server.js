@@ -20,7 +20,7 @@ module.exports = function (api) {
       backend_prefix + 'events/payments/unpaid/'
     )
     store.addMetadata(
-      'sendPaymentReminders',
+      'sendPaymentRemindersURL',
       backend_prefix + 'tasks/send_payment_reminders/'
     )
     store.addMetadata(
