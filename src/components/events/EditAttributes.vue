@@ -207,6 +207,16 @@
       </v-col>
       <v-col cols="12">
         <v-textarea
+          label="Kontodaten"
+          outlined
+          dense
+          rows="3"
+          v-model="selection.payment_account"
+          :rules="rules.required"
+        ></v-textarea>
+      </v-col>
+      <v-col cols="12">
+        <v-textarea
           label="Buchungsemail"
           outlined
           dense
