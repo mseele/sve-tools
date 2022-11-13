@@ -135,6 +135,11 @@ export default {
   mounted() {
     this.loadUnpaidBookings()
   },
+  watch: {
+    event_type() {
+      this.reset()
+    },
+  },
   methods: {
     reset() {
       this.csv = undefined
