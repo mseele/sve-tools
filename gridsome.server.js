@@ -13,11 +13,11 @@ module.exports = function (api) {
     )
     store.addMetadata(
       'verifyPaymentsURL',
-      backend_prefix + 'events/verify_payments'
+      backend_prefix + 'events/payments/verify'
     )
     store.addMetadata(
       'unpaidBookingsURL',
-      backend_prefix + 'events/unpaid_bookings'
+      backend_prefix + 'events/payments/unpaid'
     )
     store.addMetadata(
       'deployURL_sveNext',
