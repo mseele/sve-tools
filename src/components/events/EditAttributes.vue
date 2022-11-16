@@ -226,16 +226,6 @@
         ></v-textarea>
       </v-col>
       <v-col cols="12">
-        <v-textarea
-          label="Wartelistenemail"
-          outlined
-          dense
-          rows="10"
-          v-model="selection.waiting_template"
-          :rules="rules.required"
-        ></v-textarea>
-      </v-col>
-      <v-col cols="12">
         <div class="d-flex align-center">
           <v-progress-circular
             v-if="loading"
