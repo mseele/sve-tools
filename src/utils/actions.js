@@ -5,13 +5,9 @@ function validateEmail(email) {
 }
 
 function replace(content, person) {
-  const firstName = person.firstName.trim()
-  const lastName = person.lastName.trim()
   return content
-    .replace(/\$\{vorname\}/gi, firstName)
-    .replace(/\$\{firstname\}/gi, firstName)
-    .replace(/\$\{nachname\}/gi, lastName)
-    .replace(/\$\{lastname\}/gi, lastName)
+    .replace(/\{\{firstname\}\}/gi, person.firstName.trim())
+    .replace(/\{\{lastname\}\}/gi, person.lastName.trim())
 }
 
 function readFile(inputFile) {
