@@ -26,5 +26,9 @@
     {
         "name": "Re-Deploy Website",
         "link": "/actions/redeploy"
+    },
+    {
+        "name": "Batch Email (old)",
+        "link": "/actions/emailold"
     }
 ]
