@@ -1,10 +1,10 @@
 <template>
-  <v-radio-group v-model="from">
+  <v-radio-group v-model="type">
     <v-radio
-      v-for="from in fromItems"
-      :key="from"
-      :label="from"
-      :value="from"
+      v-for="item in types"
+      :key="item"
+      :label="item"
+      :value="item"
       :disabled="disabled"
     ></v-radio>
   </v-radio-group>
@@ -24,15 +24,15 @@ export default {
   },
   data() {
     return {
-      from: this.value,
-      fromItems: ['Fitness', 'Events'],
+      type: this.value,
+      types: ['Fitness', 'Events'],
     }
   },
   mounted() {
     this.onChange(this.value)
   },
   watch: {
-    from(newValue) {
+    type(newValue) {
       this.onChange(newValue)
     },
   },
@@ -63,8 +63,8 @@ Team Events@SVE`,
       })
     },
     select(preset) {
-      this.$emit('input', this.from)
-      this.$emit('preset', preset)
+      this.$emit('input', this.type)
+      this.$emit('change', preset)
     },
     reset() {
       this.from = 'Fitness'

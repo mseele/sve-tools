@@ -1,17 +1,31 @@
-const { mdiConsoleLine } = require('@mdi/js')
 const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 
 module.exports = function (api) {
   api.loadSource((store) => {
     const backend_prefix = 'https://backend.sv-eutingen.de/api/'
     store.addMetadata('sendEmailsURL', backend_prefix + 'contact/emails')
-    store.addMetadata('loadBetaEventsURL', backend_prefix + 'events?beta=true')
-    store.addMetadata('loadAllEventsURL', backend_prefix + 'events?all=true')
+    store.addMetadata('loadEventsURL', backend_prefix + 'events')
     store.addMetadata('updateEventURL', backend_prefix + 'events/update')
-    store.addMetadata('deleteEventURL', backend_prefix + 'events/delete')
+    store.addMetadata('deleteEventURL', backend_prefix + 'events/')
+    store.addMetadata(
+      'updateEventBookingURL',
+      backend_prefix + 'events/booking/'
+    )
+    store.addMetadata(
+      'exportEventBookingsURL',
+      backend_prefix + 'events/booking/export/'
+    )
     store.addMetadata(
       'verifyPaymentsURL',
-      backend_prefix + 'events/verify_payments'
+      backend_prefix + 'events/payments/verify'
+    )
+    store.addMetadata(
+      'unpaidBookingsURL',
+      backend_prefix + 'events/payments/unpaid/'
+    )
+    store.addMetadata(
+      'sendPaymentRemindersURL',
+      backend_prefix + 'tasks/send_payment_reminders/'
     )
     store.addMetadata(
       'deployURL_sveNext',

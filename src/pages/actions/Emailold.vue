@@ -2,11 +2,10 @@
   <Layout>
     <v-container>
       <action-header
-        title="Batch Dokument"
-        subtitle="Individuelles Dokument per Email"
+        title="Batch Email (old)"
+        subtitle="Individuelle Email"
         :help="[
-          'Namenskonvention für Dokumente: Vorname#Nachname#Email.pdf. Z.B.: Michael#Seele#mseele@gmail.com.pdf',
-          'Dokumentenname ist der Name der in der Email angezeigt wird. Z.B.: Teilnahmebescheinigung.pdf',
+          'Vorname, Nachname und Email-Adresse Spalten zusammen aus der Tabelle kopieren',
           'Für Individualisierung <b>{{firstname}}</b> für den Vorname in der Email nutzen',
           'Für Individualisierung <b>{{lastname}}</b> für den Nachname in der Email nutzen',
         ]"
@@ -14,32 +13,40 @@
       <v-row>
         <v-col cols="12">
           <v-form :disabled="disabled">
-            <EventTypeSelection
-              ref="eventTypeSelection"
-              v-model="eventType"
-              :disabled="disabled"
-              @change="onEventTypeChange"
-            />
-            <v-file-input
+            <event-type-selection ref="from" v-model="from" @change="preset" />
+            <v-text-field
               v-if="people.length <= 0"
               outlined
-              multiple
-              @change="fileSelection"
-              prepend-icon=""
-              label="Dokumente auswählen"
-            ></v-file-input>
-            <people-field v-else :disabled="disabled" v-model="people" />
-            <v-text-field
-              v-model="filename"
-              outlined
-              label="Dokumentname in Email"
+              label="Vorname, Nachname u. Email Spalten aus Excel kopieren"
+              @paste="paste"
             ></v-text-field>
+            <people-field v-else :disabled="disabled" v-model="people" />
             <v-text-field
               v-model="subject"
               outlined
               label="Betreff"
             ></v-text-field>
             <v-textarea v-model="content" outlined label="Email"></v-textarea>
+            <v-file-input
+              outlined
+              multiple
+              v-model="attachments"
+              prepend-icon=""
+              :clearable="false"
+              label="Anhänge auswählen"
+            >
+              <template v-slot:selection="{ index, text }">
+                <v-chip
+                  small
+                  label
+                  :color="!disabled ? 'primary' : ''"
+                  :close="!disabled"
+                  @click:close="attachments.splice(index, 1)"
+                >
+                  {{ text }}
+                </v-chip>
+              </template>
+            </v-file-input>
           </v-form>
           <button-area
             :disabled="disabled"
@@ -54,14 +61,20 @@
   </Layout>
 </template>
 
+<style lang="scss">
+.colored-border {
+  border-color: rgba(0, 0, 0, 0.42) !important;
+}
+</style>
+
 <script>
-import axios from 'axios'
 import ActionHeader from '~/components/ActionHeader.vue'
-import ButtonArea from '~/components/ButtonArea.vue'
-import EventTypeSelection from '~/components/EventTypeSelection.vue'
 import Notify from '~/components/Notify.vue'
 import PeopleField from '~/components/PeopleField.vue'
-import { readFile, replace, validateEmail } from '~/utils/actions.js'
+import ButtonArea from '~/components/ButtonArea.vue'
+import EventTypeSelection from '~/components/EventTypeSelection.vue'
+import { validateEmail, replace, readFile } from '~/utils/actions.js'
+import axios from 'axios'
 
 export default {
   components: {
@@ -72,30 +85,34 @@ export default {
     EventTypeSelection,
   },
   metaInfo: {
-    title: 'Batch Dokument',
+    title: 'Batch Email',
   },
   data() {
     return {
-      eventType: 'Fitness',
-      files: [],
+      from: 'Fitness',
       people: [],
-      filename: '',
+      attachments: [],
       subject: '',
       content: '',
       disabled: false,
     }
   },
   methods: {
-    fileSelection(files) {
+    paste(event) {
+      var clipboardData =
+        event.clipboardData ||
+        event.originalEvent.clipboardData ||
+        window.clipboardData
+      const text = clipboardData.getData('text')
       const items = []
-      for (const file of files) {
-        const name = file.name.split('.').slice(0, -1).join('.')
-        var parts = name.split('#')
+      const lines = text.match(/[^\r\n]+/g)
+      for (const line of lines) {
+        var parts = line.split('\t')
         if (parts.length !== 3) {
-          console.log('File could not be splitted into 3 parts: ' + parts)
+          console.log('Line could not be splitted into 3 parts: ' + parts)
           this.$refs.notify.showError(
-            'Datei ' +
-              file.name +
+            'Zeile ' +
+              line +
               ' konnte nicht gelesen werden. Details siehe Console'
           )
           return
@@ -113,7 +130,6 @@ export default {
           firstName: parts[0],
           lastName: parts[1],
           email: parts[2],
-          file: file,
         })
       }
       if (items.length == 0) {
@@ -125,40 +141,47 @@ export default {
       }
       this.people = items
     },
-    onEventTypeChange(preset) {
+    preset(preset) {
       this.subject = preset.subject
       this.content = preset.content
     },
     reset() {
-      this.$refs.eventTypeSelection.reset()
+      this.$refs.from.reset()
       this.people = []
+      this.attachments = []
       this.disabled = false
     },
     async send() {
       this.disabled = true
       const emails = []
       for (const person of this.people) {
-        const attachment = {
-          name: this.filename,
-          mime_type: person.file.type,
-        }
-        try {
-          attachment.data = await readFile(person.file)
-        } catch (error) {
-          console.error(error)
-          this.$refs.notify.showError(
-            'Datei konnte nicht gelesen werden. Details siehe Console'
-          )
-          this.disabled = false
-          return
-        }
-        emails.push({
-          type: this.eventType,
+        const data = {
+          type: this.from,
           to: person.email,
           subject: this.subject,
           content: replace(this.content, person),
-          attachments: [attachment],
-        })
+        }
+        if (this.attachments.length > 0) {
+          data.attachments = []
+          for (const file of this.attachments) {
+            const attachment = {
+              name: file.name,
+              mimeType: file.type,
+            }
+            try {
+              attachment.data = await readFile(file)
+            } catch (error) {
+              console.error(error)
+              this.$refs.notify.showError(
+                'Datei konnte nicht gelesen werden. Details siehe Console'
+              )
+              this.disabled = false
+              return
+            }
+            data.attachments.push(attachment)
+          }
+        }
+        emails.push(data)
       }
       try {
         await axios.post(this.$page.metadata.sendEmailsURL, { emails: emails })
@@ -170,6 +193,7 @@ export default {
         this.disabled = false
         return
       }
+
       this.$refs.notify.showSuccess('Alle Emails wurden erfolgreich versandt')
       this.reset()
     },

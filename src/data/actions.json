@@ -1,5 +1,13 @@
 [
     {
+        "name": "Manage Events",
+        "link": "/actions/events"
+    },
+    {
+        "name": "Manage Bookings",
+        "link": "/actions/bookings"
+    },
+    {
         "name": "Batch Email",
         "link": "/actions/email"
     },
@@ -12,15 +20,15 @@
         "link": "/actions/prebooking"
     },
     {
-        "name": "Manage Events",
-        "link": "/actions/events"
+        "name": "Verify Payments",
+        "link": "/actions/verifypayments"
     },
     {
         "name": "Re-Deploy Website",
         "link": "/actions/redeploy"
     },
     {
-        "name": "Zahlungen überprüfen",
-        "link": "/actions/verifypayments"
+        "name": "Batch Email (old)",
+        "link": "/actions/emailold"
     }
 ]

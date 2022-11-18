@@ -5,28 +5,47 @@
         title="Batch Email"
         subtitle="Individuelle Email"
         :help="[
-          'Vorname, Nachname und Email-Adresse Spalten zusammen aus der Tabelle kopieren',
-          'Für Individualisierung <b>${vorname}</b> oder <b>${firstname}</b> für den Vorname in der Email nutzen',
-          'Für Individualisierung <b>${nachname}</b> oder <b>${lastname}</b> für den Nachname in der Email nutzen',
+          'Event auswählen',
+          'Personengruppe auswählen (Buchungen und/oder Warteliste)',
+          'Für Individualisierung <b>{{firstname}}</b> für den Vorname in der Email nutzen',
+          'Für Individualisierung <b>{{lastname}}</b> für den Nachname in der Email nutzen',
+          'Für Individualisierung <b>{{name}}</b> für den Event Name in der Email nutzen',
+          'Für Individualisierung <b>{{location}}</b> für den Ort in der Email nutzen',
+          'Für Individualisierung <b>{{price}}</b> für den Preis in der Email nutzen',
+          'Für Individualisierung <b>{{dates}}</b> für die Termine in der Email nutzen',
+          'Für Individualisierung <b>{{payment_id}}</b> für die Zahlungsnummer in der Email nutzen',
         ]"
       />
       <v-row>
         <v-col cols="12">
           <v-form :disabled="disabled">
-            <from-select ref="from" v-model="from" @preset="preset" />
-            <v-text-field
-              v-if="people.length <= 0"
-              outlined
-              label="Vorname, Nachname u. Email Spalten aus Excel kopieren"
-              @paste="paste"
-            ></v-text-field>
-            <people-field v-else :disabled="disabled" v-model="people" />
+            <EventTypeSelection
+              ref="eventTypeSelection"
+              v-model="eventType"
+              :disabled="disabled"
+              @change="onEventType"
+            />
+            <EventSelection
+              ref="eventSelection"
+              :eventType="eventType"
+              :eventsURL="eventsURL"
+              :disabled="disabled"
+              :showBookingGroups="true"
+              @error="showError"
+              @change="onEventSelection"
+            />
             <v-text-field
               v-model="subject"
               outlined
               label="Betreff"
+              :disabled="!editable"
             ></v-text-field>
-            <v-textarea v-model="content" outlined label="Email"></v-textarea>
+            <v-textarea
+              v-model="content"
+              outlined
+              label="Email"
+              :disabled="!editable"
+            ></v-textarea>
             <v-file-input
               outlined
               multiple
@@ -34,6 +53,7 @@
               prepend-icon=""
               :clearable="false"
               label="Anhänge auswählen"
+              :disabled="!editable"
             >
               <template v-slot:selection="{ index, text }">
                 <v-chip
@@ -48,12 +68,7 @@
               </template>
             </v-file-input>
           </v-form>
-          <button-area
-            :disabled="disabled"
-            :people="people"
-            @send="send"
-            @reset="reset"
-          />
+          <button-area :disabled="disabled" @send="send" @reset="reset" />
         </v-col>
       </v-row>
     </v-container>
@@ -61,130 +76,103 @@
   </Layout>
 </template>
 
-<style lang="scss">
-.colored-border {
-  border-color: rgba(0, 0, 0, 0.42) !important;
-}
-</style>
-
 <script>
+import axios from 'axios'
 import ActionHeader from '~/components/ActionHeader.vue'
+import ButtonArea from '~/components/ButtonArea.vue'
+import EventSelection from '~/components/EventSelection.vue'
+import EventTypeSelection from '~/components/EventTypeSelection.vue'
 import Notify from '~/components/Notify.vue'
 import PeopleField from '~/components/PeopleField.vue'
-import ButtonArea from '~/components/ButtonArea.vue'
-import FromSelect from '~/components/FromSelect.vue'
-import { validateEmail, replace, readFile } from '~/utils/actions.js'
-import axios from 'axios'
+import { readFile } from '~/utils/actions.js'
 
 export default {
   components: {
     ActionHeader,
+    EventTypeSelection,
+    EventSelection,
     Notify,
     PeopleField,
     ButtonArea,
-    FromSelect,
   },
   metaInfo: {
     title: 'Batch Email',
   },
   data() {
     return {
-      from: 'Fitness',
-      people: [],
+      eventType: 'Fitness',
       attachments: [],
+      event: null,
       subject: '',
       content: '',
+      bookingList: false,
+      waitingList: false,
       disabled: false,
     }
   },
-  methods: {
-    paste(event) {
-      var clipboardData =
-        event.clipboardData ||
-        event.originalEvent.clipboardData ||
-        window.clipboardData
-      const text = clipboardData.getData('text')
-      const items = []
-      const lines = text.match(/[^\r\n]+/g)
-      for (const line of lines) {
-        var parts = line.split('\t')
-        if (parts.length !== 3) {
-          console.log('Line could not be splitted into 3 parts: ' + parts)
-          this.$refs.notify.showError(
-            'Zeile ' +
-              line +
-              ' konnte nicht gelesen werden. Details siehe Console'
-          )
-          return
-        }
-        if (!validateEmail(parts[2])) {
-          console.log('Email address is not valid: ' + parts[2])
-          this.$refs.notify.showError(
-            'Email Adresse ' +
-              parts[2] +
-              ' ist inkorrekt. Details siehe Console'
-          )
-          return
-        }
-        items.push({
-          firstName: parts[0],
-          lastName: parts[1],
-          email: parts[2],
-        })
-      }
-      if (items.length == 0) {
-        console.log('No items found in text: ' + text)
-        this.$refs.notify.showError(
-          'Der kopierte Text konnte nicht verarbeitet werden. Details siehe Console'
-        )
-        return
-      }
-      this.people = items
+  computed: {
+    eventsURL() {
+      return (
+        this.$page.metadata.loadEventsURL +
+        '?status=review,published,running,finished'
+      )
     },
-    preset(preset) {
-      this.subject = preset.subject
-      this.content = preset.content
+    editable() {
+      return this.event != null
+    },
+  },
+  methods: {
+    onEventType(data) {
+      this.subject = data.subject
+      this.content = data.content
+    },
+    onEventSelection(data) {
+      this.event = data.event
+      this.bookingList = data.bookingList
+      this.waitingList = data.waitingList
     },
     reset() {
-      this.$refs.from.reset()
-      this.people = []
+      this.$refs.eventTypeSelection.reset()
+      this.$refs.eventSelection.reset()
       this.attachments = []
       this.disabled = false
     },
+    showError(error) {
+      this.$refs.notify.showError(error)
+    },
     async send() {
       this.disabled = true
-      const emails = []
-      for (const person of this.people) {
-        const data = {
-          type: this.from,
-          to: person.email,
-          subject: this.subject,
-          content: replace(this.content, person),
-        }
-        if (this.attachments.length > 0) {
-          data.attachments = []
-          for (const file of this.attachments) {
-            const attachment = {
-              name: file.name,
-              mimeType: file.type,
-            }
-            try {
-              attachment.data = await readFile(file)
-            } catch (error) {
-              console.error(error)
-              this.$refs.notify.showError(
-                'Datei konnte nicht gelesen werden. Details siehe Console'
-              )
-              this.disabled = false
-              return
-            }
-            data.attachments.push(attachment)
-          }
-        }
-        emails.push(data)
+
+      const data = {
+        event_id: this.event.id,
+        bookings: this.bookingList,
+        waiting_list: this.waitingList,
+        subject: this.subject,
+        body: this.content,
       }
+      if (this.attachments.length > 0) {
+        data.attachments = []
+        for (const file of this.attachments) {
+          const attachment = {
+            name: file.name,
+            mime_type: file.type,
+          }
+          try {
+            attachment.data = await readFile(file)
+          } catch (error) {
+            console.error(error)
+            this.$refs.notify.showError(
+              'Datei konnte nicht gelesen werden. Details siehe Console'
+            )
+            this.disabled = false
+            return
+          }
+          data.attachments.push(attachment)
+        }
+      }
+
       try {
-        await axios.post(this.$page.metadata.sendEmailsURL, { emails: emails })
+        await axios.post(this.$page.metadata.sendEmailsURL, { event: data })
       } catch (error) {
         console.error(error)
         this.$refs.notify.showError(
@@ -204,6 +192,7 @@ export default {
 <page-query>
 query {
   metadata {
+    loadEventsURL
     sendEmailsURL
   }
 }
