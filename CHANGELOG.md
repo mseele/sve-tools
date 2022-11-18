@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.18.0](https://github.com/mseele/sve-tools/compare/v1.17.4...v1.18.0) (2022-11-18)
+
+
+### Features
+
+* add ability to send payment reminders ([975bf5a](https://github.com/mseele/sve-tools/commit/975bf5a19def33fdd0a53e825ffbc4cb4bbd2261))
+* add event booking management ([e1998f7](https://github.com/mseele/sve-tools/commit/e1998f71ed98b1151e807a1cf2348ed4ded6f93e))
+* add excel export ([5ace5d5](https://github.com/mseele/sve-tools/commit/5ace5d5b1bebd3eed2da1253a3c162bfcaa1202f))
+* display due in days for unpaid bookings ([ed9d44a](https://github.com/mseele/sve-tools/commit/ed9d44a09ddfcb67aa5b6c4c24b3f8729ae03ad8))
+* display unpaid booking after verified payments has been run ([c7dd214](https://github.com/mseele/sve-tools/commit/c7dd2141ff288e5d356bb9b9463a18b564a866c1))
+* re-add old batch email action ([7ebeff5](https://github.com/mseele/sve-tools/commit/7ebeff53a5485fa56ae6d53ae562addff2c7f54f))
+
+
+### Bug Fixes
+
+* add break'S ([cf72e6a](https://github.com/mseele/sve-tools/commit/cf72e6afef193a9c2bd86cbb0491caf41e357bc0))
+* align api with server ([0ee954c](https://github.com/mseele/sve-tools/commit/0ee954c6b95ffcb09e5c775ed39843c4b32a9177))
+* correct new attribute name ([6a7e028](https://github.com/mseele/sve-tools/commit/6a7e02805ef5571827ace0651e7a0cd7242bc5bf))
+* correct replace to support new format ([2cba276](https://github.com/mseele/sve-tools/commit/2cba27611f6d0e797933a2e8ebf3a6e2491b5185))
+* correct the color ([0ad8956](https://github.com/mseele/sve-tools/commit/0ad8956bbc7d62e6bf572c6d97ef656b64234547))
+* correct the timezone offset ([cb95a06](https://github.com/mseele/sve-tools/commit/cb95a06bd181ffa9dd114a801b69bae73030eb01))
+* correct typo ([f98466b](https://github.com/mseele/sve-tools/commit/f98466b5bd5f5901b17f8d7316411b28af32d97f))
+* correct url key ([760c7d0](https://github.com/mseele/sve-tools/commit/760c7d028df74889e978f1edfbcc533e5b5c5985))
+* improve page title ([7a1eebb](https://github.com/mseele/sve-tools/commit/7a1eebbc5d2ee6b1e094b5dd73267ce79fa37366))
+* refresh on event type change ([40a5546](https://github.com/mseele/sve-tools/commit/40a554623839fb0f63f250c983d1b5d3cf7ba292))
+* remove batch edit ([836bd03](https://github.com/mseele/sve-tools/commit/836bd03a26fc69bef3a3c3df0657de2ac8a7d4a5))
+* remove no longer needed sheet id ([5285200](https://github.com/mseele/sve-tools/commit/528520026385e8c09fca80b9462ab88fda15b4cc))
+* remove unused styles ([df3ee58](https://github.com/mseele/sve-tools/commit/df3ee58c824659635792b3db3b0d0a421ef5a618))
+* rename to correct ([90415dd](https://github.com/mseele/sve-tools/commit/90415dd1dd30f716f1e24a45e041b5707fa1bc2b))
+* rename to correct ([7c3c3d3](https://github.com/mseele/sve-tools/commit/7c3c3d3aaa9cfd8a75207ddc2b7fff7e936c537d))
+* take as much width as possible ([b8df4c2](https://github.com/mseele/sve-tools/commit/b8df4c20f904157e187a6cd296581203cac3a926))
+* use correct method ([d5178c1](https://github.com/mseele/sve-tools/commit/d5178c19096153ef28168c56a07ff81f1052437e))
+
 ### [1.17.4](https://github.com/mseele/sve-tools/compare/v1.17.3...v1.17.4) (2022-07-12)
 
 
