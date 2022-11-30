@@ -65,8 +65,8 @@
               <span>{{ dueInDaysTooltip(item) }}</span>
             </v-tooltip>
           </template>
-          <template v-slot:item.cost="{ item }">
-            {{ item.cost.replace('.', ',') + '  €' }}
+          <template v-slot:item.price="{ item }">
+            {{ item.price.replace('.', ',') + '  €' }}
           </template>
           <template v-slot:item.actions="{ item }">
             <div class="d-flex align-center justify-end">
@@ -123,7 +123,7 @@ export default {
         { text: 'Event', value: 'event_name' },
         { text: 'Name', value: 'first_name' },
         { text: 'Payment ID', value: 'payment_id' },
-        { text: 'Preis', value: 'cost' },
+        { text: 'Preis', value: 'price' },
         { text: '', value: 'actions', sortable: false },
       ],
       paymentReminderLoading: false,

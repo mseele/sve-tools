@@ -95,7 +95,7 @@
                 <div>{{ item.payment_id }}</div>
               </div>
             </template>
-            <span>{{ cost(event, item.cost) }}</span>
+            <span>{{ price(event, item.price) }}</span>
           </v-tooltip>
         </template>
         <template v-slot:item.comment="{ item }">
@@ -228,9 +228,9 @@ export default {
     subscriberClasses(subscriber) {
       return subscriber.enrolled ? '' : 'grey--text'
     },
-    cost(event, member) {
-      const cost = member ? event.cost_member : event.cost_non_member
-      return cost.replace('.', ',') + '  €'
+    price(event, member) {
+      const price = member ? event.price_member : event.price_non_member
+      return price.replace('.', ',') + '  €'
     },
     free_bookings(event, enrolled) {
       return Math.max(

@@ -143,21 +143,21 @@
       </v-col>
       <v-col cols="4">
         <v-text-field
-          label="Kosten Mitglied €"
+          label="Preis Mitglied €"
           outlined
           dense
           type="number"
-          v-model.number="selection.cost_member"
+          v-model.number="selection.price_member"
           :rules="rules.positiveNumber"
         ></v-text-field>
       </v-col>
       <v-col cols="4">
         <v-text-field
-          label="Kosten Nicht-Mitglied €"
+          label="Preis Nicht-Mitglied €"
           outlined
           dense
           type="number"
-          v-model.number="selection.cost_non_member"
+          v-model.number="selection.price_non_member"
           :rules="rules.positiveNumber"
         ></v-text-field>
       </v-col>

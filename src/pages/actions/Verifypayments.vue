@@ -126,7 +126,7 @@ export default {
         { text: 'Event', value: 'event_name' },
         { text: 'Name', value: 'full_name' },
         { text: 'Payment ID', value: 'payment_id' },
-        { text: 'Preis', value: 'cost' },
+        { text: 'Preis', value: 'price' },
         { text: '', value: 'actions', sortable: false },
       ],
       mdiCheckCircle,
