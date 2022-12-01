@@ -17,7 +17,7 @@
           dense
           type="number"
           v-model.number="selection.sort_index"
-          :rules="rules.positiveNumber"
+          :rules="rules.requiredPositiveNumber"
         ></v-text-field>
       </v-col>
       <v-col cols="4">
@@ -138,7 +138,7 @@
           dense
           type="number"
           v-model.number="selection.price_member"
-          :rules="rules.positiveNumber"
+          :rules="rules.requiredPositiveNumber"
         ></v-text-field>
       </v-col>
       <v-col cols="4">
@@ -148,7 +148,7 @@
           dense
           type="number"
           v-model.number="selection.price_non_member"
-          :rules="rules.positiveNumber"
+          :rules="rules.requiredPositiveNumber"
         ></v-text-field>
       </v-col>
       <v-col cols="4">
@@ -181,7 +181,7 @@
           dense
           type="number"
           v-model.number="selection.max_waiting_list"
-          :rules="rules.positiveNumber"
+          :rules="rules.requiredPositiveNumber"
         ></v-text-field>
       </v-col>
       <v-col cols="4">
@@ -191,7 +191,7 @@
           dense
           type="number"
           v-model.number="selection.duration_in_minutes"
-          :rules="rules.positiveNumber"
+          :rules="rules.requiredPositiveNumber"
         ></v-text-field>
       </v-col>
       <v-col cols="6">
@@ -297,6 +297,11 @@ export default {
       loading: false,
       rules: {
         required: [(val) => (val || '').length > 0 || 'Ein Wert wird benötigt'],
+        requiredPositiveNumber: [
+          (val) =>
+            (val != undefined && val != '' && val >= 0) ||
+            'Eine positive Nummer wird benötigt',
+        ],
         positiveNumber: [
           (val) => val >= 0 || 'Eine positive Nummer wird benötigt',
         ],
