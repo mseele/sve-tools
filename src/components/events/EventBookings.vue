@@ -23,6 +23,19 @@
                 {{ free_bookings(event, false) }} freie Wartelistplätze
               </div>
             </div>
+            <div class="d-flex align-center">
+              <div
+                v-if="finacial_result(event) != undefined"
+                :class="[
+                  'subtitle-2',
+                  finacial_result(event) < 0 ? 'red--text' : 'green--text',
+                ]"
+              >
+                {{ format_price(finacial_result(event).toString()) }}
+              </div>
+              <div v-else class="subtitle-2 grey--text">
+                Preis pro Einheit fehlt
+              </div>
             <v-btn
               icon
               color="green darken-2"
@@ -30,6 +43,7 @@
             >
               <v-icon>{{ mdiMicrosoftExcel }}</v-icon>
             </v-btn>
+          </div>
           </div>
           <v-divider class="mb-1"></v-divider>
           <v-dialog v-model="cancelBookingDialog" max-width="400px">
@@ -229,7 +243,9 @@ export default {
       return subscriber.enrolled ? '' : 'grey--text'
     },
     price(event, member) {
-      const price = member ? event.price_member : event.price_non_member
+      return format_price(member ? event.price_member : event.price_non_member)
+    },
+    format_price(price) {
       return price.replace('.', ',') + '  €'
     },
     free_bookings(event, enrolled) {
@@ -238,6 +254,25 @@ export default {
           event.subscribers.filter((s) => s.enrolled == enrolled).length,
         0
       )
+    },
+    finacial_result(event) {
+      if (event.cost_per_date != undefined) {
+        let date_count = 0
+        if (event.custom_date != undefined) {
+          date_count = 1
+        } else {
+          date_count = event.dates.length
+        }
+        const event_cost = date_count * event.cost_per_date
+
+        const income = event.subscribers
+          .filter((s) => s.enrolled == enrolled)
+          .map((s) => (s.member ? event.price_member : event.price_non_member))
+          .reduce((sum, curr) => sum + curr, 0)
+
+        return -event_cost + income
+      }
+      return undefined
     },
     async markPayed(subscriber) {
       try {

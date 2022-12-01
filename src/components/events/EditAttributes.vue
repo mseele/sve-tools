@@ -133,16 +133,6 @@
       </v-col>
       <v-col cols="4">
         <v-text-field
-          label="Dauer in Minuten"
-          outlined
-          dense
-          type="number"
-          v-model.number="selection.duration_in_minutes"
-          :rules="rules.positiveNumber"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="4">
-        <v-text-field
           label="Preis Mitglied €"
           outlined
           dense
@@ -161,7 +151,20 @@
           :rules="rules.positiveNumber"
         ></v-text-field>
       </v-col>
-      <v-col cols="6">
+      <v-col cols="4">
+        <v-text-field
+          label="Kosten pro Einheit €"
+          outlined
+          dense
+          type="number"
+          :value="selection.cost_per_date"
+          @input="
+            selection.cost_per_date = $event !== '' ? parseFloat($event) : null
+          "
+          :rules="rules.positiveNumber"
+        ></v-text-field>
+      </v-col>
+      <v-col cols="4">
         <v-text-field
           label="Maximale Teilnehmer"
           outlined
@@ -171,13 +174,23 @@
           :rules="rules.maxSubscribers"
         ></v-text-field>
       </v-col>
-      <v-col cols="6">
+      <v-col cols="4">
         <v-text-field
           label="Maximale Warteliste"
           outlined
           dense
           type="number"
           v-model.number="selection.max_waiting_list"
+          :rules="rules.positiveNumber"
+        ></v-text-field>
+      </v-col>
+      <v-col cols="4">
+        <v-text-field
+          label="Dauer in Minuten"
+          outlined
+          dense
+          type="number"
+          v-model.number="selection.duration_in_minutes"
           :rules="rules.positiveNumber"
         ></v-text-field>
       </v-col>
