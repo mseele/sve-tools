@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.19.0](https://github.com/mseele/sve-tools/compare/v1.18.0...v1.19.0) (2022-12-01)
+
+
+### Features
+
+* add cost per date field ([9d10f3d](https://github.com/mseele/sve-tools/commit/9d10f3d5c3dd7c85e9983e1f3835d29c5dc91f30))
+
+
+### Bug Fixes
+
+* add required check for number fields ([9379d5b](https://github.com/mseele/sve-tools/commit/9379d5b7d7662aab60e3e0521c94561ba0eacd6e))
+* use correct field ([2a71cc0](https://github.com/mseele/sve-tools/commit/2a71cc0b824887fed15e8e253de5ddd0d54ab811))
+
 ## [1.18.0](https://github.com/mseele/sve-tools/compare/v1.17.4...v1.18.0) (2022-11-18)
 
 
