@@ -2,7 +2,7 @@ const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 
 module.exports = function (api) {
   api.loadSource((store) => {
-    const backend_prefix = 'http://localhost:8080/api/'
+    const backend_prefix = 'https://backend.sv-eutingen.de/api/'
     store.addMetadata('sendEmailsURL', backend_prefix + 'contact/emails')
     store.addMetadata('loadEventsURL', backend_prefix + 'events')
     store.addMetadata('updateEventURL', backend_prefix + 'events/update')
