@@ -36,14 +36,14 @@
               <div v-else class="subtitle-2 grey--text">
                 Preis pro Einheit fehlt
               </div>
-            <v-btn
-              icon
-              color="green darken-2"
-              :href="exportEventBookingsURL + event.id"
-            >
-              <v-icon>{{ mdiMicrosoftExcel }}</v-icon>
-            </v-btn>
-          </div>
+              <v-btn
+                icon
+                color="green darken-2"
+                :href="exportEventBookingsURL + event.id"
+              >
+                <v-icon>{{ mdiMicrosoftExcel }}</v-icon>
+              </v-btn>
+            </div>
           </div>
           <v-divider class="mb-1"></v-divider>
           <v-dialog v-model="cancelBookingDialog" max-width="400px">
@@ -109,7 +109,7 @@
                 <div>{{ item.payment_id }}</div>
               </div>
             </template>
-            <span>{{ price(event, item.price) }}</span>
+            <span>{{ price(event, item.member) }}</span>
           </v-tooltip>
         </template>
         <template v-slot:item.comment="{ item }">
