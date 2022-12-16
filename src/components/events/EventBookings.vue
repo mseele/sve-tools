@@ -243,7 +243,9 @@ export default {
       return subscriber.enrolled ? '' : 'grey--text'
     },
     price(event, member) {
-      return format_price(member ? event.price_member : event.price_non_member)
+      return this.format_price(
+        member ? event.price_member : event.price_non_member
+      )
     },
     format_price(price) {
       return price.replace('.', ',') + '  €'
