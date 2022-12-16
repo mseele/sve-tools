@@ -268,8 +268,10 @@ export default {
         const event_cost = date_count * event.cost_per_date
 
         const income = event.subscribers
-          .filter((s) => s.enrolled == enrolled)
-          .map((s) => (s.member ? event.price_member : event.price_non_member))
+          .filter((s) => s.enrolled)
+          .map((s) =>
+            Number(s.member ? event.price_member : event.price_non_member)
+          )
           .reduce((sum, curr) => sum + curr, 0)
 
         return -event_cost + income
