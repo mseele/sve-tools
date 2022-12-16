@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.19.2](https://github.com/mseele/sve-tools/compare/v1.19.1...v1.19.2) (2022-12-16)
+
+
+### Bug Fixes
+
+* add this to call method ([fd792dc](https://github.com/mseele/sve-tools/commit/fd792dc4a713be7565c6bfb3c2d986e7662fc616))
+* correct income calculation ([f946b27](https://github.com/mseele/sve-tools/commit/f946b2777fe477f81093d892cb0a8442325aa823))
+
 ### [1.19.1](https://github.com/mseele/sve-tools/compare/v1.19.0...v1.19.1) (2022-12-01)
 
 
