@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.19.3](https://github.com/mseele/sve-tools/compare/v1.19.2...v1.19.3) (2022-12-18)
+
+
+### Bug Fixes
+
+* add missing import ([f8609eb](https://github.com/mseele/sve-tools/commit/f8609eb6b12928072470e9c92c91e5815e82ee2a))
+
 ### [1.19.2](https://github.com/mseele/sve-tools/compare/v1.19.1...v1.19.2) (2022-12-16)
 
 
