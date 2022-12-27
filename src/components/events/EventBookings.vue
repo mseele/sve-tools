@@ -50,13 +50,20 @@
                 </template>
                 <span>Teilnehmerliste herunterladen</span>
               </v-tooltip>
-              <v-btn
-                icon
-                color="green darken-2"
-                :href="exportEventBookingsURL + event.id"
-              >
-                <v-icon>{{ mdiMicrosoftExcel }}</v-icon>
-              </v-btn>
+              <v-tooltip left>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    icon
+                    color="green darken-2"
+                    :href="exportEventBookingsURL + event.id"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-icon>{{ mdiMicrosoftExcel }}</v-icon>
+                  </v-btn>
+                </template>
+                <span>Buchungsliste herunterladen</span>
+              </v-tooltip>
             </div>
           </div>
           <v-divider class="mb-1"></v-divider>
