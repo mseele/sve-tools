@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.20.0](https://github.com/mseele/sve-tools/compare/v1.19.3...v1.20.0) (2022-12-27)
+
+
+### Features
+
+* add participant list download ([6130947](https://github.com/mseele/sve-tools/commit/613094740bece0959a24f22a45141b68b9f3092f))
+
+
+### Bug Fixes
+
+* add booking download tooltip ([336f49e](https://github.com/mseele/sve-tools/commit/336f49e96ef95430cf5eeed8302aa47b390df4a5))
+
 ### [1.19.3](https://github.com/mseele/sve-tools/compare/v1.19.2...v1.19.3) (2022-12-18)
 
 
