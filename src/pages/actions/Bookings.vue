@@ -18,6 +18,9 @@
         <EventBookings
           :updateEventBookingURL="$page.metadata.updateEventBookingURL"
           :exportEventBookingsURL="$page.metadata.exportEventBookingsURL"
+          :exportEventParticipantListURL="
+            $page.metadata.exportEventParticipantListURL
+          "
           status="Review"
           :events="events"
           @error="showError"
@@ -26,6 +29,9 @@
         <EventBookings
           :updateEventBookingURL="$page.metadata.updateEventBookingURL"
           :exportEventBookingsURL="$page.metadata.exportEventBookingsURL"
+          :exportEventParticipantListURL="
+            $page.metadata.exportEventParticipantListURL
+          "
           status="Published"
           :events="events"
           @error="showError"
@@ -34,6 +40,9 @@
         <EventBookings
           :updateEventBookingURL="$page.metadata.updateEventBookingURL"
           :exportEventBookingsURL="$page.metadata.exportEventBookingsURL"
+          :exportEventParticipantListURL="
+            $page.metadata.exportEventParticipantListURL
+          "
           status="Running"
           :events="events"
           @error="showError"
@@ -152,6 +161,7 @@ query {
     loadEventsURL
     updateEventBookingURL
     exportEventBookingsURL
+    exportEventParticipantListURL
   }
 }
 </page-query>

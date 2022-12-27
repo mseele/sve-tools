@@ -36,6 +36,20 @@
               <div v-else class="subtitle-2 grey--text">
                 Preis pro Einheit fehlt
               </div>
+              <v-tooltip left>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    icon
+                    color="red darken-2"
+                    :href="exportEventParticipantListURL + event.id"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-icon>{{ mdiFilePdfBox }}</v-icon>
+                  </v-btn>
+                </template>
+                <span>Teilnehmerliste herunterladen</span>
+              </v-tooltip>
               <v-btn
                 icon
                 color="green darken-2"
@@ -170,6 +184,7 @@ import {
   mdiComment,
   mdiDelete,
   mdiMicrosoftExcel,
+  mdiFilePdfBox,
 } from '@mdi/js'
 import axios from 'axios'
 import EventListItem from '~/components/EventListItem.vue'
@@ -182,6 +197,10 @@ export default {
       required: true,
     },
     exportEventBookingsURL: {
+      type: String,
+      required: true,
+    },
+    exportEventParticipantListURL: {
       type: String,
       required: true,
     },
@@ -214,6 +233,7 @@ export default {
       mdiCash,
       mdiDelete,
       mdiMicrosoftExcel,
+      mdiFilePdfBox,
     }
   },
   computed: {
