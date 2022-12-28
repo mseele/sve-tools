@@ -3,6 +3,27 @@
     <v-col cols="10">
       <v-alert
         prominent
+        :color="
+          confirmParticipationConfirmation ? 'red lighten-2' : 'blue lighten-4'
+        "
+        dense
+      >
+        <v-row align="center">
+          <v-col class="grow">Teilnahmebestätigungen senden</v-col>
+          <v-col class="shrink">
+            <v-btn
+              :loading="loadingParticipationConfirmation"
+              :disabled="loadingParticipationConfirmation"
+              @click="sendParticipationConfirmation()"
+              >{{
+                confirmParticipationConfirmation ? 'Sicher?' : 'Starten'
+              }}</v-btn
+            >
+          </v-col>
+        </v-row>
+      </v-alert>
+      <v-alert
+        prominent
         :color="confirmClose ? 'red lighten-2' : 'blue lighten-4'"
         dense
       >
@@ -35,6 +56,10 @@ export default {
       type: String,
       required: true,
     },
+    sendParticipationConfirmationURL: {
+      type: String,
+      required: true,
+    },
     eventImageNodes: {
       type: Object,
       required: true,
@@ -44,9 +69,35 @@ export default {
     return {
       confirmClose: false,
       loadingClose: false,
+      confirmParticipationConfirmation: false,
+      loadingParticipationConfirmation: false,
     }
   },
   methods: {
+    async sendParticipationConfirmation() {
+      if (!this.confirmParticipationConfirmation) {
+        this.confirmParticipationConfirmation = true
+        return
+      }
+      this.confirmParticipationConfirmation = false
+      this.loadingParticipationConfirmation = true
+      try {
+        await axios.get(this.sendParticipationConfirmationURL + this.event.id)
+        this.$emit(
+          'success',
+          this.event,
+          'Die Teilnahmebestätigungen wurden erfolgreich versandt.'
+        )
+      } catch (error) {
+        console.error(error)
+        this.$emit(
+          'error',
+          'Teilnahmebestätigungen senden ist fehlgeschlagen. Details siehe Console'
+        )
+      } finally {
+        this.loadingParticipationConfirmation = false
+      }
+    },
     async closeEvent() {
       if (!this.confirmClose) {
         this.confirmClose = true

@@ -73,6 +73,9 @@
         :is="contents"
         :event="selection"
         :updateEventURL="$page.metadata.updateEventURL"
+        :sendParticipationConfirmationURL="
+          $page.metadata.sendParticipationConfirmationURL
+        "
         :eventImageNodes="$page.eventImages"
         @error="showError"
         @success="onUpdate"
@@ -187,6 +190,7 @@ query {
     loadEventsURL
     updateEventURL
     deleteEventURL
+    sendParticipationConfirmationURL
   }
   eventImages: allEventImages(sortBy: "name", order: ASC) {
     edges {

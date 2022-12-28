@@ -32,6 +32,10 @@ module.exports = function (api) {
       backend_prefix + 'tasks/send_payment_reminders/'
     )
     store.addMetadata(
+      'sendParticipationConfirmationURL',
+      backend_prefix + 'tasks/send_participation_confirmation/'
+    )
+    store.addMetadata(
       'deployURL_sveNext',
       'https://api.netlify.com/build_hooks/6127d32c2032942b064c7947'
     )
