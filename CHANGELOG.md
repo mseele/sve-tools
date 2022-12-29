@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.21.0](https://github.com/mseele/sve-tools/compare/v1.20.0...v1.21.0) (2022-12-29)
+
+
+### Features
+
+* add send participation confirmation action ([420ea5b](https://github.com/mseele/sve-tools/commit/420ea5b721c4e12f072f43812a317dd8fa5d24f7))
+
 ## [1.20.0](https://github.com/mseele/sve-tools/compare/v1.19.3...v1.20.0) (2022-12-27)
 
 
