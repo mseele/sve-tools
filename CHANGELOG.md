@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.22.0](https://github.com/mseele/sve-tools/compare/v1.21.0...v1.22.0) (2023-02-19)
+
+
+### Features
+
+* add last date at event selection ([df41904](https://github.com/mseele/sve-tools/commit/df41904210bc7873eb1044994d6c2c9d0d9c10fa))
+
 ## [1.21.0](https://github.com/mseele/sve-tools/compare/v1.20.0...v1.21.0) (2022-12-29)
 
 
