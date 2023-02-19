@@ -32,6 +32,7 @@
               :eventsURL="fromEventsURL"
               :disabled="disabled"
               showBookingGroups
+              showDate
               @error="showError"
               @change="onFromEventSelection"
             />

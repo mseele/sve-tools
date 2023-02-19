@@ -38,6 +38,7 @@
 
 <script>
 import axios from 'axios'
+import { format, parseISO } from 'date-fns'
 import EventListItem from './EventListItem.vue'
 
 export default {
@@ -62,6 +63,10 @@ export default {
       default: false,
     },
     disabled: {
+      type: Boolean,
+      default: false,
+    },
+    showDate: {
       type: Boolean,
       default: false,
     },
@@ -127,7 +132,15 @@ export default {
           visibility = 'Abgeschlossen - Unsichtbar'
           break
       }
-      return event.name + ' (' + visibility + ')'
+      let name = event.name
+      if (this.showDate) {
+        if (event.custom_date != undefined) {
+          name += ' ' + event.custom_date
+        } else if (event.dates != undefined) {
+          name += ' ' + this.formatDate(event.dates[event.dates.length - 1])
+        }
+      }
+      return name + ' (' + visibility + ')'
     },
     eventValue(event) {
       return event
@@ -148,6 +161,14 @@ export default {
           return 5
       }
       return 6
+    },
+    formatDate(value) {
+      const date = parseISO(value)
+      const timezoneOffset = date.getTimezoneOffset() * 60000
+      return format(
+        new Date(date.getTime() + timezoneOffset),
+        'dd-MM-yyyy HH:mm'
+      )
     },
     emitChanges() {
       const data = {
