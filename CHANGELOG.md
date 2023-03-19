@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.22.1](https://github.com/mseele/sve-tools/compare/v1.22.0...v1.22.1) (2023-03-19)
+
+
+### Bug Fixes
+
+* add running events to prebooking selection ([42b047c](https://github.com/mseele/sve-tools/commit/42b047c81bd5db90b01c4055bb1b0c70762c4b65))
+
 ## [1.22.0](https://github.com/mseele/sve-tools/compare/v1.21.0...v1.22.0) (2023-02-19)
 
 
