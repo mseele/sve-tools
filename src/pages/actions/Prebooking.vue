@@ -118,7 +118,9 @@ export default {
   },
   computed: {
     fromEventsURL() {
-      return this.$page.metadata.loadEventsURL + '?status=finished,closed'
+      return (
+        this.$page.metadata.loadEventsURL + '?status=running,finished,closed'
+      )
     },
     toEventsURL() {
       return this.$page.metadata.loadEventsURL + '?status=review,published'
