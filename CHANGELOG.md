@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.22.2](https://github.com/mseele/sve-tools/compare/v1.22.1...v1.22.2) (2023-03-27)
+
+
+### Bug Fixes
+
+* allow going back to draft for status review ([62398b3](https://github.com/mseele/sve-tools/commit/62398b3c6e95a07f4cbcf51d691c6380ef57baef))
+* remove unused actions and components ([db6acdc](https://github.com/mseele/sve-tools/commit/db6acdce69f41fcd4695d51ada5fd495c686d6b8))
+
 ### [1.22.1](https://github.com/mseele/sve-tools/compare/v1.22.0...v1.22.1) (2023-03-19)
 
 
