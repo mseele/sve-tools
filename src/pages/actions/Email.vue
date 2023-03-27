@@ -83,7 +83,6 @@ import ButtonArea from '~/components/ButtonArea.vue'
 import EventSelection from '~/components/EventSelection.vue'
 import EventTypeSelection from '~/components/EventTypeSelection.vue'
 import Notify from '~/components/Notify.vue'
-import PeopleField from '~/components/PeopleField.vue'
 import { readFile } from '~/utils/actions.js'
 
 export default {
@@ -92,7 +91,6 @@ export default {
     EventTypeSelection,
     EventSelection,
     Notify,
-    PeopleField,
     ButtonArea,
   },
   metaInfo: {

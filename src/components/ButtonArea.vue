@@ -1,13 +1,5 @@
 <template>
   <div class="d-flex align-center">
-    <div v-if="!disabled && people.length > 0">
-      {{
-        people.length +
-        (people.length == 1
-          ? ' Email wird versandt'
-          : ' Emails werden verstandt')
-      }}
-    </div>
     <v-progress-circular
       v-if="disabled"
       size="32"
@@ -38,10 +30,6 @@ export default {
     disabled: {
       type: Boolean,
       default: false,
-    },
-    people: {
-      type: Array,
-      default: () => [],
     },
     sendText: {
       type: String,
