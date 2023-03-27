@@ -406,7 +406,7 @@ export default {
           allowed = ['Draft', 'Review']
           break
         case 'Review':
-          allowed = ['Review', 'Published']
+          allowed = ['Draft', 'Review', 'Published']
           break
         case 'Published':
           allowed = ['Published', 'Running']
