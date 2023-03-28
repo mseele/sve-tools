@@ -12,10 +12,6 @@
         "link": "/actions/email"
     },
     {
-        "name": "Batch Dokument",
-        "link": "/actions/document"
-    },
-    {
         "name": "Pre-Booking Email",
         "link": "/actions/prebooking"
     },
@@ -26,9 +22,5 @@
     {
         "name": "Re-Deploy Website",
         "link": "/actions/redeploy"
-    },
-    {
-        "name": "Batch Email (old)",
-        "link": "/actions/emailold"
     }
 ]
