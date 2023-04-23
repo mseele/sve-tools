@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.22.4](https://github.com/mseele/sve-tools/compare/v1.22.3...v1.22.4) (2023-04-23)
+
+
+### Bug Fixes
+
+* clear closed value on new event ([5013085](https://github.com/mseele/sve-tools/commit/5013085f0c3a8a8ce2bea1fe5371bf4b461dbab5))
+
 ### [1.22.3](https://github.com/mseele/sve-tools/compare/v1.22.2...v1.22.3) (2023-03-28)
 
 
