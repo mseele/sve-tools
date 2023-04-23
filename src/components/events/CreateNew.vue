@@ -72,6 +72,7 @@ export default {
       const duplicate = cloneDeep(this.selection)
       duplicate.id = null
       duplicate.status = 'Draft'
+      duplicate.closed = undefined
       this.$emit('new', duplicate)
       this.onCancel()
     },
