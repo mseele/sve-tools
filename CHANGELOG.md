@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.24.0](https://github.com/mseele/sve-tools/compare/v1.23.0...v1.24.0) (2023-09-13)
+
+
+### Features
+
+* switch back to google backend ([0660558](https://github.com/mseele/sve-tools/commit/0660558551945dae0c7e20e2ea586d7ef35c8827))
+
 ## [1.23.0](https://github.com/mseele/sve-tools/compare/v1.22.5...v1.23.0) (2023-09-12)
 
 
