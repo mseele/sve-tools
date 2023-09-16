@@ -5,7 +5,7 @@
   "author": "mseele",
   "private": true,
   "scripts": {
-    "develop": "gridsome develop",
+    "dev": "gridsome develop",
     "build": "gridsome build",
     "explore": "gridsome explore",
     "release": "standard-version"
