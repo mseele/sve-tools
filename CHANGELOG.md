@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.25.0](https://github.com/mseele/sve-tools/compare/v1.24.0...v1.25.0) (2023-09-16)
+
+
+### Features
+
+* switch to aws backend ([9af83b7](https://github.com/mseele/sve-tools/commit/9af83b7ff08994f3d9fb57a7e26b8814c22fdc0e))
+
 ## [1.24.0](https://github.com/mseele/sve-tools/compare/v1.23.0...v1.24.0) (2023-09-13)
 
 
