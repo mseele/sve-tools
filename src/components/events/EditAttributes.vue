@@ -1,60 +1,254 @@
+<script setup lang="ts">
+import { updateEvent } from '@/api'
+import { useNotifyStore } from '@/stores/notify'
+import { LifecycleStatus, type Event } from '@/types'
+import { mdiPlus } from '@mdi/js'
+import { addDays, format, isBefore, isValid, parseISO } from 'date-fns'
+import { isEqual, transform } from 'lodash-es'
+import { computed, ref } from 'vue'
+
+interface Image {
+  name: string
+  light: boolean
+  url: string
+}
+
+const images: Image[] = []
+for (const url of Object.values(
+  import.meta.glob('@/assets/events/*.jpg', { eager: true, as: 'url' })
+)) {
+  let text = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.jpg'))
+  const name = text.substring(0, text.lastIndexOf('_')) + '.jpg'
+  images.push({ name, light: text.endsWith('_light'), url })
+}
+
+const props = defineProps<{
+  event: Event
+}>()
+
+const emit = defineEmits<{
+  success: [event?: Event]
+}>()
+
+const notify = useNotifyStore()
+
+const selection = ref<Event>(JSON.parse(JSON.stringify(props.event)))
+const valid = ref(false)
+const dateSelection = ref<'dates' | 'free_date'>(
+  selection.value.custom_date != undefined ? 'free_date' : 'dates'
+)
+const dateToAdd = ref<string>('')
+const confirmSave = ref(false)
+const loading = ref(false)
+
+const isDateToAddValid = computed(() => isValid(parseISO(dateToAdd.value)))
+
+const costPerDate = computed({
+  get: () => selection.value.cost_per_date,
+  set: (value) => (selection.value.cost_per_date = typeof value === 'number' ? value : undefined)
+})
+
+function itemsStatus() {
+  const all = [
+    { value: LifecycleStatus.Draft, title: 'Entwurf (Unsichtbar)' },
+    { value: LifecycleStatus.Review, title: 'Überprüfung (Beta)' },
+    { value: LifecycleStatus.Published, title: 'Veröffentlicht (Sichtbar)' },
+    { value: LifecycleStatus.Running, title: 'Laufend (Unsichtbar)' },
+    { value: LifecycleStatus.Finished, title: 'Fertiggestellt (Unsichtbar)' },
+    { value: LifecycleStatus.Closed, title: 'Abgeschlossen (Unsichtbar)' }
+  ]
+  let allowed: LifecycleStatus[] = [LifecycleStatus.Draft]
+  switch (props.event.status) {
+    case LifecycleStatus.Draft:
+      allowed = [LifecycleStatus.Draft, LifecycleStatus.Review]
+      break
+    case LifecycleStatus.Review:
+      allowed = [LifecycleStatus.Draft, LifecycleStatus.Review, LifecycleStatus.Published]
+      break
+    case 'Published':
+      allowed = [LifecycleStatus.Published, LifecycleStatus.Running]
+      break
+    case 'Running':
+      allowed = [LifecycleStatus.Running, LifecycleStatus.Finished]
+      break
+    case 'Finished':
+      allowed = [LifecycleStatus.Finished, LifecycleStatus.Closed]
+      break
+    case 'Closed':
+      allowed = [LifecycleStatus.Closed]
+      break
+  }
+  return all.filter((v) => allowed.indexOf(v.value) != -1)
+}
+
+const eventImage = computed({
+  get: () => images.find((v) => v.name == selection.value.image),
+  set: (value?: Image) => {
+    const eventImage = images.find((v) => v.name === value?.name)
+    if (eventImage !== undefined) {
+      selection.value.image = eventImage.name
+      selection.value.light = eventImage.light
+    }
+  }
+})
+
+function formatDate(value: string) {
+  const date = parseISO(value)
+  const timezoneOffset = date.getTimezoneOffset() * 60000
+  return format(new Date(date.getTime() + timezoneOffset), 'dd-MM-yyyy HH:mm')
+}
+
+function addDate() {
+  const newDate = parseISO(dateToAdd.value)
+  let index = 0
+  for (const current of selection.value.dates) {
+    if (isBefore(newDate, parseISO(current))) {
+      break
+    }
+    index++
+  }
+  const dateString = format(newDate, "yyyy-MM-dd'T'HH:mm':00Z'")
+  selection.value.dates.splice(index, 0, dateString)
+  dateToAdd.value = format(addDays(newDate, 7), "yyyy-MM-dd'T'HH:mm")
+}
+
+function onReset() {
+  emit('success', props.event.id !== undefined ? props.event : undefined)
+  notify.showSuccess('Die Änderungen wurden erfolgreich zurückgesetzt')
+}
+
+async function onSave() {
+  if (!confirmSave.value) {
+    confirmSave.value = true
+    return
+  }
+  loading.value = true
+  try {
+    if (dateSelection.value == 'dates') {
+      selection.value.custom_date = undefined
+    } else if (dateSelection.value == 'free_date') {
+      selection.value.dates = []
+    }
+    let objectToSave
+    if (props.event.id != null) {
+      objectToSave = diff(selection.value, props.event)
+      objectToSave.id = props.event.id
+    } else {
+      objectToSave = selection.value
+    }
+    const savedEvent = (await updateEvent(objectToSave.id, objectToSave)).data
+    notify.showSuccess('Das Event wurde erfolgreich gespeichert')
+    emit('success', savedEvent)
+  } catch (error) {
+    console.log(error)
+    notify.showError('Fehler beim Speichern des Events. Details siehe Console')
+  } finally {
+    loading.value = false
+  }
+}
+
+function diff<T extends object>(object: T, base: T) {
+  function changes(object: T, base: T) {
+    return transform(object, function (result: T, value, key) {
+      if (!isEqual(value, base[key])) {
+        result[key] = value
+      }
+    })
+  }
+  return changes(object, base)
+}
+
+const rules = {
+  required: [(val: string) => (val || '').length > 0 || 'Ein Wert wird benötigt'],
+  requiredPositiveNumber: [
+    (val: any) => (val != '' && Number(val) >= 0) || 'Eine positive Nummer wird benötigt'
+  ],
+  positiveNumber: [
+    (val: number) => val === undefined || val >= 0 || 'Eine positive Nummer wird benötigt'
+  ],
+  maxSubscribers: [
+    (val: number) => {
+      if (val == -1 || val > 0) {
+        return true
+      }
+      return '-1 oder eine positive Nummer wird benötigt'
+    }
+  ],
+  newEvent: [
+    (val: any) => {
+      if ((val || '').length == 0) {
+        return 'Bitte wähle ein Event aus'
+      }
+      return true
+    }
+  ],
+  altEmailAddress: [
+    (val: any) => {
+      if ((val || '').length > 0 && val !== 'jugendturnier@sv-eutingen.de') {
+        return "Als alternative Email Adresse ist aktuell nur 'jugendturnier@sv-eutingen.de' möglich"
+      }
+      return true
+    }
+  ]
+}
+</script>
+
 <template>
-  <v-form v-if="selection != null" v-model="valid">
+  <v-form v-model="valid">
     <v-row dense>
       <v-col cols="12">
         <v-text-field
           label="Name"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           v-model="selection.name"
           :rules="rules.required"
-        ></v-text-field>
+        />
       </v-col>
-      <v-col cols="4">
+      <v-col cols="12" sm="2">
         <v-text-field
           label="Sortier-Index"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           type="number"
           v-model.number="selection.sort_index"
           :rules="rules.requiredPositiveNumber"
-        ></v-text-field>
+        />
       </v-col>
-      <v-col cols="4">
+      <v-col cols="12" sm="5">
         <v-select
-          :items="eventImages"
-          item-value="image"
-          item-text="image"
+          :items="images"
+          :item-value="(v) => v"
+          item-title="name"
           label="Bild"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           v-model="eventImage"
         >
-          <template v-slot:item="data">
-            <div class="d-flex align-center my-2">
-              <img
-                :src="require('~/assets/events/' + data.item.name)"
-                class="event-img"
-              />
-              <div class="ml-2">{{ data.item.image }}</div>
-            </div>
+          <template v-slot:item="{ props, item }">
+            <v-list-item v-bind="props" title="">
+              <div class="d-flex align-center my-2">
+                <img :src="item.raw.url" class="event-img" />
+                <div class="ml-2">{{ item.raw.name }}</div>
+              </div>
+            </v-list-item>
           </template>
         </v-select>
       </v-col>
-      <v-col cols="4">
+      <v-col cols="12" sm="5">
         <v-select
-          :items="itemsStatus"
+          :items="itemsStatus()"
           label="Status"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           v-model="selection.status"
         ></v-select>
       </v-col>
       <v-col cols="12">
         <v-textarea
           label="Kurze Beschreibung"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           rows="3"
           v-model="selection.short_description"
           :rules="rules.required"
@@ -63,8 +257,8 @@
       <v-col cols="12">
         <v-textarea
           label="Beschreibung"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           rows="7"
           v-model="selection.description"
           :rules="rules.required"
@@ -72,28 +266,34 @@
       </v-col>
       <v-col cols="12">
         <v-tabs class="mb-2" v-model="dateSelection">
-          <v-tab>Termine ({{ selection.dates.length }})</v-tab>
-          <v-tab>Individuelles Datum (Freitext)</v-tab>
+          <v-tab value="dates">Termine ({{ selection.dates.length }})</v-tab>
+          <v-tab vvalue="free_date">Individuelles Datum (Freitext)</v-tab>
         </v-tabs>
-        <v-tabs-items v-model="dateSelection">
-          <v-tab-item>
-            <div class="d-flex align-center">
+        <v-window v-model="dateSelection">
+          <v-window-item class="mt-2" value="dates">
+            <div class="d-flex align-center mb-4">
               <v-text-field
-                label="Datum hinzufügen (DD-MM-YYYY HH:MM)"
+                variant="outlined"
+                density="compact"
+                hide-details
+                label="Datum hinzufügen"
+                type="datetime-local"
                 v-model="dateToAdd"
               ></v-text-field>
               <v-btn
+                variant="text"
+                size="small"
                 icon
                 color="primary"
                 :disabled="!isDateToAddValid"
-                @click="addDate()"
+                @click="addDate"
               >
                 <v-icon>{{ mdiPlus }}</v-icon>
               </v-btn>
             </div>
-            <v-card class="pa-1 mb-6 colored-border" outlined>
+            <v-card class="pa-1 mb-6 colored-border" variant="outlined">
               <div
-                v-if="selection.dates && selection.dates.length == 0"
+                v-if="selection.dates === undefined || selection.dates.length === 0"
                 style="height: 40px"
               >
                 &nbsp;
@@ -101,112 +301,109 @@
               <v-chip
                 v-for="(date, index) in selection.dates"
                 class="ma-2"
-                small
+                size="small"
                 label
-                close
+                closable
                 color="primary"
                 @click:close="selection.dates.splice(index, 1)"
-                :key="index"
+                :key="date"
               >
                 {{ formatDate(date) }}
               </v-chip>
             </v-card>
-          </v-tab-item>
-          <v-tab-item>
+          </v-window-item>
+          <v-window-item class="mt-2" value="free_date">
             <v-text-field
-              outlined
-              dense
+              variant="outlined"
+              density="compact"
               rows="1"
               v-model="selection.custom_date"
             ></v-text-field>
-          </v-tab-item>
-        </v-tabs-items>
+          </v-window-item>
+        </v-window>
       </v-col>
       <v-col cols="12">
         <v-text-field
           label="Ort"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           v-model="selection.location"
           :rules="rules.required"
         ></v-text-field>
       </v-col>
-      <v-col cols="4">
+      <v-col cols="12" sm="4">
         <v-text-field
           label="Preis Mitglied €"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           type="number"
           v-model.number="selection.price_member"
           :rules="rules.requiredPositiveNumber"
         ></v-text-field>
       </v-col>
-      <v-col cols="4">
+      <v-col cols="12" sm="4">
         <v-text-field
           label="Preis Nicht-Mitglied €"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           type="number"
           v-model.number="selection.price_non_member"
           :rules="rules.requiredPositiveNumber"
         ></v-text-field>
       </v-col>
-      <v-col cols="4">
+      <v-col cols="12" sm="4">
         <v-text-field
           label="Kosten pro Einheit €"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           type="number"
-          :value="selection.cost_per_date"
-          @input="
-            selection.cost_per_date = $event !== '' ? parseFloat($event) : null
-          "
+          v-model.number="costPerDate"
           :rules="rules.positiveNumber"
         ></v-text-field>
       </v-col>
-      <v-col cols="4">
+      <v-col cols="12" sm="4">
         <v-text-field
           label="Maximale Teilnehmer"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           type="number"
           v-model.number="selection.max_subscribers"
           :rules="rules.maxSubscribers"
         ></v-text-field>
       </v-col>
-      <v-col cols="4">
+      <v-col cols="12" sm="4">
         <v-text-field
           label="Maximale Warteliste"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           type="number"
           v-model.number="selection.max_waiting_list"
           :rules="rules.requiredPositiveNumber"
         ></v-text-field>
       </v-col>
-      <v-col cols="4">
+      <v-col cols="12" sm="4">
         <v-text-field
           label="Dauer in Minuten"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           type="number"
           v-model.number="selection.duration_in_minutes"
           :rules="rules.requiredPositiveNumber"
         ></v-text-field>
       </v-col>
-      <v-col cols="6">
+      <v-col cols="12" sm="6">
         <v-text-field
           label="Alternativer Button Text"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           v-model="selection.alt_booking_button_text"
         ></v-text-field>
       </v-col>
-      <v-col cols="6">
+      <v-col cols="12" sm="6">
         <v-text-field
           label="Alternative Versand-Emailadresse"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           v-model="selection.alt_email_address"
           :rules="rules.altEmailAddress"
         ></v-text-field>
@@ -214,15 +411,15 @@
       <v-col cols="12">
         <v-checkbox
           label="Durchführung durch den Förderverein"
-          dense
+          density="compact"
           v-model="selection.external_operator"
         ></v-checkbox>
       </v-col>
       <v-col cols="12">
         <v-textarea
           label="Kontodaten"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           rows="3"
           v-model="selection.payment_account"
         ></v-textarea>
@@ -230,8 +427,8 @@
       <v-col cols="12">
         <v-textarea
           label="Buchungsemail"
-          outlined
-          dense
+          variant="outlined"
+          density="compact"
           rows="10"
           v-model="selection.booking_template"
           :rules="rules.required"
@@ -264,263 +461,11 @@
   </v-form>
 </template>
 
-<script>
-import { mdiPencil, mdiPlus } from '@mdi/js'
-import axios from 'axios'
-import { addDays, format, isBefore, isValid, parse, parseISO } from 'date-fns'
-import { isEqual, transform } from 'lodash-es'
-
-export default {
-  props: {
-    event: {
-      type: Object,
-      required: true,
-    },
-    updateEventURL: {
-      type: String,
-      required: true,
-    },
-    eventImageNodes: {
-      type: Object,
-      required: true,
-    },
-  },
-  data() {
-    return {
-      selection: null,
-      mdiPlus,
-      mdiPencil,
-      valid: false,
-      dateSelection: 0,
-      dateToAdd: null,
-      confirmSave: false,
-      loading: false,
-      rules: {
-        required: [(val) => (val || '').length > 0 || 'Ein Wert wird benötigt'],
-        requiredPositiveNumber: [
-          (val) =>
-            (val != undefined && val != '' && val >= 0) ||
-            'Eine positive Nummer wird benötigt',
-        ],
-        positiveNumber: [
-          (val) => val >= 0 || 'Eine positive Nummer wird benötigt',
-        ],
-        maxSubscribers: [
-          (val) => {
-            if (val == -1 || val > 0) {
-              return true
-            }
-            return '-1 oder eine positive Nummer wird benötigt'
-          },
-        ],
-        subscribers: [
-          (val) => {
-            if (
-              !this.selection.maxSubscribers ||
-              (val >= 0 &&
-                (this.selection.maxSubscribers == -1 ||
-                  val <= this.selection.maxSubscribers))
-            ) {
-              return true
-            }
-            if (this.selection.maxSubscribers == -1) {
-              return 'Ein Wert größer/gleich 0 wird benötigt'
-            }
-            return (
-              'Ein Wert zwischen 0 und ' +
-              this.selection.maxSubscribers +
-              ' wird benötigt'
-            )
-          },
-        ],
-        waitingList: [
-          (val) => {
-            if (
-              !this.selection.maxWaitingList ||
-              (val >= 0 &&
-                (this.selection.maxWaitingList == -1 ||
-                  val <= this.selection.maxWaitingList))
-            ) {
-              return true
-            }
-            if (this.selection.maxWaitingList == -1) {
-              return 'Ein Wert größer/gleich 0 wird benötigt'
-            }
-            return (
-              'Ein Wert zwischen 0 und ' +
-              this.selection.maxWaitingList +
-              ' wird benötigt'
-            )
-          },
-        ],
-        newEvent: [
-          (val) => {
-            if ((val || '').length == 0) {
-              return 'Bitte wähle ein Event aus'
-            }
-            return true
-          },
-        ],
-        altEmailAddress: [
-          (val) => {
-            if (
-              (val || '').length > 0 &&
-              val !== 'jugendturnier@sv-eutingen.de'
-            ) {
-              return "Als alternative Email Adresse ist aktuell nur 'jugendturnier@sv-eutingen.de' möglich"
-            }
-            return true
-          },
-        ],
-      },
-    }
-  },
-  mounted() {
-    this.selection = JSON.parse(JSON.stringify(this.event))
-    if (this.selection.custom_date != undefined) {
-      this.dateSelection = 1
-    }
-  },
-  computed: {
-    eventImages() {
-      return this.eventImageNodes.edges.map((edge) => edge.node)
-    },
-    isDateToAddValid() {
-      return isValid(parse(this.dateToAdd, 'dd-MM-yyyy HH:mm', new Date()))
-    },
-    itemsStatus() {
-      const all = [
-        { value: 'Draft', text: 'Entwurf (Unsichtbar)' },
-        { value: 'Review', text: 'Überprüfung (Beta)' },
-        { value: 'Published', text: 'Veröffentlicht (Sichtbar)' },
-        { value: 'Running', text: 'Laufend (Unsichtbar)' },
-        { value: 'Finished', text: 'Fertiggestellt (Unsichtbar)' },
-        { value: 'Closed', text: 'Abgeschlossen (Unsichtbar)' },
-      ]
-      if (this.event == undefined) {
-        return all
-      }
-      let allowed
-      switch (this.event.status) {
-        case 'Draft':
-          allowed = ['Draft', 'Review']
-          break
-        case 'Review':
-          allowed = ['Draft', 'Review', 'Published']
-          break
-        case 'Published':
-          allowed = ['Published', 'Running']
-          break
-        case 'Running':
-          allowed = ['Running', 'Finished']
-          break
-        case 'Finished':
-          allowed = ['Finished', 'Closed']
-          break
-        case 'Closed':
-          allowed = ['Closed']
-          break
-      }
-      if (allowed == undefined) {
-        allowed = ['Draft']
-      }
-      return all.filter((v) => allowed.indexOf(v.value) != -1)
-    },
-    eventImage: {
-      get() {
-        return this.eventImages.find((v) => v.image == this.selection.image)
-      },
-      set(value) {
-        const eventImage = this.eventImages.find((v) => v.image == value)
-        this.selection.image = eventImage.image
-        this.selection.light = eventImage.light
-      },
-    },
-  },
-  methods: {
-    formatDate(value) {
-      const date = parseISO(value)
-      const timezoneOffset = date.getTimezoneOffset() * 60000
-      return format(
-        new Date(date.getTime() + timezoneOffset),
-        'dd-MM-yyyy HH:mm'
-      )
-    },
-    addDate() {
-      const newDate = parse(this.dateToAdd, 'dd-MM-yyyy HH:mm', new Date())
-      let index = 0
-      for (const current of this.selection.dates) {
-        if (isBefore(newDate, parseISO(current))) {
-          break
-        }
-        index++
-      }
-      const dateString = format(newDate, "yyyy-MM-dd'T'HH:mm:ss'Z")
-      this.selection.dates.splice(index, 0, dateString)
-      this.dateToAdd = format(addDays(newDate, 7), 'dd-MM-yyyy HH:mm')
-    },
-    onReset() {
-      const message = 'Die Änderungen wurden erfolgreich zurückgesetzt'
-      if (this.event.id != null) {
-        this.$emit('success', this.event, message)
-      } else {
-        this.$emit('success', null, message)
-      }
-    },
-    async onSave() {
-      if (!this.confirmSave) {
-        this.confirmSave = true
-        return
-      }
-      this.loading = true
-      try {
-        if (this.dateSelection == 0) {
-          this.selection.custom_date = undefined
-        } else if (this.dateSelection == 1) {
-          this.selection.dates = []
-        }
-        let objectToSave
-        if (this.event.id != null) {
-          objectToSave = this.diff(this.selection, this.event)
-          objectToSave.id = this.event.id
-        } else {
-          objectToSave = this.selection
-        }
-        const savedEvent = (await axios.post(this.updateEventURL, objectToSave))
-          .data
-        this.$emit(
-          'success',
-          savedEvent,
-          'Das Event wurde erfolgreich gespeichert'
-        )
-      } catch (error) {
-        console.log(error)
-        this.$emit(
-          'error',
-          'Fehler beim Speichern des Events. Details siehe Console'
-        )
-      } finally {
-        this.loading = false
-      }
-    },
-    diff(object, base) {
-      function changes(object, base) {
-        return transform(object, function (result, value, key) {
-          if (!isEqual(value, base[key])) {
-            result[key] = value
-          }
-        })
-      }
-      return changes(object, base)
-    },
-  },
-}
-</script>
-
-<style lang="scss">
+<style>
 .colored-border {
   border-color: rgba(0, 0, 0, 0.42) !important;
 }
+
 .event-img {
   width: 120px;
   height: 70px;

@@ -1,75 +1,38 @@
-<template>
-  <v-radio-group v-model="type">
-    <v-radio
-      v-for="item in types"
-      :key="item"
-      :label="item"
-      :value="item"
-      :disabled="disabled"
-    ></v-radio>
-  </v-radio-group>
-</template>
+<script setup lang="ts">
+import { EventType } from '@/types'
+import { computed } from 'vue'
 
-<script>
-export default {
-  props: {
-    value: {
-      type: String,
-      default: 'Fitness',
-    },
-    disabled: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      type: this.value,
-      types: ['Fitness', 'Events'],
-    }
-  },
-  mounted() {
-    this.onChange(this.value)
-  },
-  watch: {
-    type(newValue) {
-      this.onChange(newValue)
-    },
-  },
-  methods: {
-    onChange(newValue) {
-      if (newValue === 'Fitness') {
-        this.selectFitness()
-      } else {
-        this.selectEvents()
-      }
-    },
-    selectFitness() {
-      this.select({
-        subject: '[Fitness@SVE] ',
-        content: `
+const props = withDefaults(
+  defineProps<{
+    modelValue?: EventType
+    disabled?: boolean
+  }>(),
+  {
+    value: EventType.Fitness,
+    disabled: false
+  }
+)
 
-Herzliche Grüße
-Team Fitness@SVE`,
-      })
-    },
-    selectEvents() {
-      this.select({
-        subject: '[Events@SVE] ',
-        content: `
+const emit = defineEmits<{
+  'update:modelValue': [value: EventType]
+}>()
 
-Herzliche Grüße
-Team Events@SVE`,
-      })
-    },
-    select(preset) {
-      this.$emit('input', this.type)
-      this.$emit('change', preset)
-    },
-    reset() {
-      this.from = 'Fitness'
-      this.selectFitness()
-    },
-  },
-}
+const selectedType = computed({
+  get: () => props.modelValue!,
+  set: (value) => emit('update:modelValue', value)
+})
 </script>
+
+<template>
+  <v-tabs
+    v-model="selectedType"
+    color="primary"
+    align-tabs="center"
+    density="comfortable"
+    class="mb-4"
+  >
+    <v-tab v-for="item in Object.keys(EventType)" :key="item" :value="item" :disabled="disabled">
+      {{ item }}
+    </v-tab>
+  </v-tabs>
+</template>

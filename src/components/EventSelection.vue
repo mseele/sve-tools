@@ -1,20 +1,154 @@
+<script setup lang="ts">
+import { loadEvents as loadRequiredEvents } from '@/api'
+import { useNotifyStore } from '@/stores/notify'
+import { EventType, LifecycleStatus, type Event } from '@/types'
+import { statusIndex } from '@/utils'
+import { format, parseISO } from 'date-fns'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
+
+const props = withDefaults(
+  defineProps<{
+    eventType: EventType
+    eventStatus?: LifecycleStatus[]
+    label?: string
+    showBookingGroups?: boolean
+    disabled?: boolean
+    showDate?: boolean
+  }>(),
+  {
+    label: 'Event auswählen',
+    showBookingGroups: false,
+    disabled: false,
+    showDate: false
+  }
+)
+
+const emit = defineEmits<{
+  change: [{ event: Event; bookingList?: boolean; waitingList?: boolean }]
+}>()
+
+defineExpose({ reset, addEvent, selectEvent, loadEvents })
+
+const notify = useNotifyStore()
+
+onMounted(loadEvents)
+
+const allEvents = ref<Event[]>([])
+const event = ref<Event>()
+const bookingList = ref(true)
+const waitingList = ref(false)
+
+const events = computed(() => {
+  return allEvents.value
+    .filter((e) => e.type === props.eventType)
+    .sort((a, b) => {
+      const value = statusIndex(a.status) - statusIndex(b.status)
+      if (value != 0) {
+        return value
+      }
+      return a.sort_index - b.sort_index
+    })
+})
+
+watch(events, () => (event.value = undefined))
+watch(event, emitChanges)
+watch(bookingList, emitChanges)
+watch(waitingList, emitChanges)
+
+// any is needed to make vuetify happy
+function eventName(event: any) {
+  let visibility
+  switch ((event as Event).status) {
+    case LifecycleStatus.Draft:
+      visibility = 'Entwurf - Unsichtbar'
+      break
+    case LifecycleStatus.Review:
+      visibility = 'Überprüfung - Beta'
+      break
+    case LifecycleStatus.Published:
+      visibility = 'Sichtbar'
+      break
+    case LifecycleStatus.Running:
+      visibility = 'Laufend - Unsichtbar'
+      break
+    case LifecycleStatus.Finished:
+      visibility = 'Fertiggestellt - Unsichtbar'
+      break
+    case LifecycleStatus.Closed:
+      visibility = 'Abgeschlossen - Unsichtbar'
+      break
+  }
+  let name = event.name
+  if (props.showDate) {
+    if (event.custom_date != undefined) {
+      name += ' ' + event.custom_date
+    } else if (event.dates != undefined) {
+      name += ' ' + formatDate(event.dates[event.dates.length - 1])
+    }
+  }
+  return name + ' (' + visibility + ')'
+}
+
+function formatDate(value: string) {
+  const date = parseISO(value)
+  const timezoneOffset = date.getTimezoneOffset() * 60000
+  return format(new Date(date.getTime() + timezoneOffset), 'dd-MM-yyyy HH:mm')
+}
+
+function emitChanges() {
+  const data: { event: Event; bookingList?: boolean; waitingList?: boolean } = {
+    event: event.value!
+  }
+  if (props.showBookingGroups) {
+    data.bookingList = bookingList.value
+    data.waitingList = waitingList.value
+  }
+  emit('change', data)
+}
+
+async function loadEvents() {
+  try {
+    allEvents.value = (await loadRequiredEvents(props.eventStatus)).data
+    emitChanges()
+  } catch (error) {
+    console.log(error)
+    notify.showError('Fehler beim Laden der Events. Details siehe Console')
+  }
+}
+
+function reset() {
+  event.value = undefined
+  bookingList.value = true
+  waitingList.value = false
+}
+
+function addEvent(eventToAdd: Event) {
+  allEvents.value.push(eventToAdd)
+  nextTick(() => selectEvent(eventToAdd))
+}
+
+function selectEvent(e: Event) {
+  event.value = e
+  emitChanges()
+}
+</script>
+
 <template>
   <div style="width: 100%">
     <v-autocomplete
       v-model="event"
       :items="events"
-      :item-value="eventValue"
-      :item-text="eventName"
-      outlined
+      :item-value="(v) => v"
+      :item-title="eventName"
+      variant="outlined"
       hide-details
       :label="label"
       :disabled="disabled"
     >
-      <template v-slot:item="data">
-        <EventListItem
-          :status="data.item.status"
-          :text="eventName(data.item)"
-        />
+      <template v-slot:item="{ props, item }">
+        <v-list-item v-bind="props" title="">
+          <EventListItem :status="item.raw.status" :text="eventName(item.raw)" />
+        </v-list-item>
       </template>
     </v-autocomplete>
     <v-row v-if="showBookingGroups">
@@ -35,178 +169,3 @@
     </v-row>
   </div>
 </template>
-
-<script>
-import axios from 'axios'
-import { format, parseISO } from 'date-fns'
-import EventListItem from './EventListItem.vue'
-
-export default {
-  components: {
-    EventListItem,
-  },
-  props: {
-    eventsURL: {
-      type: String,
-      required: true,
-    },
-    eventType: {
-      type: String,
-      required: true,
-    },
-    label: {
-      type: String,
-      default: 'Event auswählen',
-    },
-    showBookingGroups: {
-      type: Boolean,
-      default: false,
-    },
-    disabled: {
-      type: Boolean,
-      default: false,
-    },
-    showDate: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      allEvents: [],
-      event: null,
-      bookingList: true,
-      waitingList: false,
-    }
-  },
-  mounted() {
-    this.loadEvents()
-  },
-  computed: {
-    events() {
-      return this.allEvents
-        .filter((e) => e.type === this.eventType)
-        .sort((a, b) => {
-          const value = this.statusIndex(a.status) - this.statusIndex(b.status)
-          if (value != 0) {
-            return value
-          }
-          return a.sortIndex - b.sortIndex
-        })
-    },
-  },
-  watch: {
-    events() {
-      this.event = null
-    },
-    event() {
-      this.emitChanges()
-    },
-    bookingList() {
-      this.emitChanges()
-    },
-    waitingList() {
-      this.emitChanges()
-    },
-  },
-  methods: {
-    eventName(event) {
-      let visibility
-      switch (event.status) {
-        case 'Draft':
-          visibility = 'Entwurf - Unsichtbar'
-          break
-        case 'Review':
-          visibility = 'Überprüfung - Beta'
-          break
-        case 'Published':
-          visibility = 'Sichtbar'
-          break
-        case 'Running':
-          visibility = 'Laufend - Unsichtbar'
-          break
-        case 'Finished':
-          visibility = 'Fertiggestellt - Unsichtbar'
-          break
-        case 'Closed':
-          visibility = 'Abgeschlossen - Unsichtbar'
-          break
-      }
-      let name = event.name
-      if (this.showDate) {
-        if (event.custom_date != undefined) {
-          name += ' ' + event.custom_date
-        } else if (event.dates != undefined) {
-          name += ' ' + this.formatDate(event.dates[event.dates.length - 1])
-        }
-      }
-      return name + ' (' + visibility + ')'
-    },
-    eventValue(event) {
-      return event
-    },
-    statusIndex(status) {
-      switch (status) {
-        case 'Draft':
-          return 2
-        case 'Review':
-          return 1
-        case 'Published':
-          return 0
-        case 'Running':
-          return 3
-        case 'Finished':
-          return 4
-        case 'Closed':
-          return 5
-      }
-      return 6
-    },
-    formatDate(value) {
-      const date = parseISO(value)
-      const timezoneOffset = date.getTimezoneOffset() * 60000
-      return format(
-        new Date(date.getTime() + timezoneOffset),
-        'dd-MM-yyyy HH:mm'
-      )
-    },
-    emitChanges() {
-      const data = {
-        event: this.event,
-      }
-      if (this.showBookingGroups) {
-        data.bookingList = this.bookingList
-        data.waitingList = this.waitingList
-      }
-      this.$emit('change', data)
-    },
-    reset() {
-      this.event = null
-      this.bookingList = true
-      this.waitingList = false
-    },
-    addEvent(eventToAdd) {
-      this.allEvents.push(eventToAdd)
-      this.$nextTick(() => {
-        this.selectEvent(eventToAdd)
-      })
-    },
-    async loadEvents() {
-      try {
-        this.allEvents = (await axios.get(this.eventsURL)).data
-        this.emitChanges()
-      } catch (error) {
-        console.log(error)
-        this.$emit(
-          'error',
-          'Fehler beim Laden der Events. Details siehe Console'
-        )
-      }
-    },
-    selectEvent(event) {
-      this.event = event
-      this.emitChanges()
-    },
-  },
-}
-</script>
