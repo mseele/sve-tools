@@ -1,126 +1,49 @@
-<template>
-  <v-row class="my-5" justify="center">
-    <v-col cols="10">
-      <v-alert
-        prominent
-        :color="
-          confirmParticipationConfirmation ? 'red lighten-2' : 'blue lighten-4'
-        "
-        dense
-      >
-        <v-row align="center">
-          <v-col class="grow">Teilnahmebestätigungen senden</v-col>
-          <v-col class="shrink">
-            <v-btn
-              :loading="loadingParticipationConfirmation"
-              :disabled="loadingParticipationConfirmation"
-              @click="sendParticipationConfirmation()"
-              >{{
-                confirmParticipationConfirmation ? 'Sicher?' : 'Starten'
-              }}</v-btn
-            >
-          </v-col>
-        </v-row>
-      </v-alert>
-      <v-alert
-        prominent
-        :color="confirmClose ? 'red lighten-2' : 'blue lighten-4'"
-        dense
-      >
-        <v-row align="center">
-          <v-col class="grow">Event abschließen</v-col>
-          <v-col class="shrink">
-            <v-btn
-              :loading="loadingClose"
-              :disabled="loadingClose"
-              @click="closeEvent()"
-              >{{ confirmClose ? 'Sicher?' : 'Starten' }}</v-btn
-            >
-          </v-col>
-        </v-row>
-      </v-alert>
-    </v-col>
-  </v-row>
-</template>
+<script setup lang="ts">
+import { sendParticipationConfirmation, updateEvent } from '@/api'
+import { useNotifyStore } from '@/stores/notify'
+import { LifecycleStatus, type Event } from '@/types'
 
-<script>
-import axios from 'axios'
+const props = defineProps<{
+  event: Event
+}>()
 
-export default {
-  props: {
-    event: {
-      type: Object,
-      required: true,
-    },
-    updateEventURL: {
-      type: String,
-      required: true,
-    },
-    sendParticipationConfirmationURL: {
-      type: String,
-      required: true,
-    },
-    eventImageNodes: {
-      type: Object,
-      required: true,
-    },
-  },
-  data() {
-    return {
-      confirmClose: false,
-      loadingClose: false,
-      confirmParticipationConfirmation: false,
-      loadingParticipationConfirmation: false,
-    }
-  },
-  methods: {
-    async sendParticipationConfirmation() {
-      if (!this.confirmParticipationConfirmation) {
-        this.confirmParticipationConfirmation = true
-        return
-      }
-      this.confirmParticipationConfirmation = false
-      this.loadingParticipationConfirmation = true
-      try {
-        await axios.get(this.sendParticipationConfirmationURL + this.event.id)
-        this.$emit(
-          'success',
-          this.event,
-          'Die Teilnahmebestätigungen wurden erfolgreich versandt.'
-        )
-      } catch (error) {
-        console.error(error)
-        this.$emit(
-          'error',
-          'Teilnahmebestätigungen senden ist fehlgeschlagen. Details siehe Console'
-        )
-      } finally {
-        this.loadingParticipationConfirmation = false
-      }
-    },
-    async closeEvent() {
-      if (!this.confirmClose) {
-        this.confirmClose = true
-        return
-      }
-      this.confirmClose = false
-      this.loadingClose = true
-      try {
-        await axios.post(this.updateEventURL, {
-          id: this.event.id,
-          status: 'Closed',
-        })
-        this.$emit('success', null, 'Das Event wurde erfolgreich geschlossen.')
-      } catch (error) {
-        console.error(error)
-        this.$emit(
-          'error',
-          'Event schließen ist fehlgeschlagen. Details siehe Console'
-        )
-      } finally {
-        this.loadingClose = false
-      }
-    },
-  },
+const emit = defineEmits<{
+  success: [event?: Event]
+}>()
+
+const notify = useNotifyStore()
+
+async function sendConfirmation(onFinish: () => void) {
+  try {
+    await sendParticipationConfirmation(props.event.id)
+    notify.showSuccess('Die Teilnahmebestätigungen wurden erfolgreich versandt.')
+    emit('success', props.event)
+  } catch (error) {
+    console.error(error)
+    notify.showError('Teilnahmebestätigungen senden ist fehlgeschlagen. Details siehe Console')
+  } finally {
+    onFinish()
+  }
+}
+
+async function closeEvent(onFinish: () => void) {
+  try {
+    let update: Partial<Event> = { status: LifecycleStatus.Closed }
+    await updateEvent(props.event.id, update)
+    notify.showSuccess('Das Event wurde erfolgreich geschlossen.')
+    emit('success')
+  } catch (error) {
+    console.error(error)
+    notify.showError('Event schließen ist fehlgeschlagen. Details siehe Console')
+  } finally {
+    onFinish()
+  }
 }
 </script>
+
+<template>
+  <v-row class="my-5" justify="center">
+    <ActionColumn text="Teilnahmebestätigungen senden" @action="sendConfirmation" />
+    <ActionColumn text="Event abschließen" @action="closeEvent" />
+  </v-row>
+</template>

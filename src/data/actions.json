@@ -1,26 +1,26 @@
 [
-    {
-        "name": "Manage Events",
-        "link": "/actions/events"
-    },
-    {
-        "name": "Manage Bookings",
-        "link": "/actions/bookings"
-    },
-    {
-        "name": "Batch Email",
-        "link": "/actions/email"
-    },
-    {
-        "name": "Pre-Booking Email",
-        "link": "/actions/prebooking"
-    },
-    {
-        "name": "Verify Payments",
-        "link": "/actions/verifypayments"
-    },
-    {
-        "name": "Re-Deploy Website",
-        "link": "/actions/redeploy"
-    }
+  {
+    "name": "Manage Events",
+    "link": "/actions/events"
+  },
+  {
+    "name": "Manage Bookings",
+    "link": "/actions/bookings"
+  },
+  {
+    "name": "Batch Email",
+    "link": "/actions/email"
+  },
+  {
+    "name": "Pre-Booking Email",
+    "link": "/actions/prebooking"
+  },
+  {
+    "name": "Verify Payments",
+    "link": "/actions/payments"
+  },
+  {
+    "name": "Re-Deploy Website",
+    "link": "/actions/deploy"
+  }
 ]

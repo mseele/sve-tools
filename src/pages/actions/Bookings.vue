@@ -1,167 +1,71 @@
-<template>
-  <Layout>
-    <v-container>
-      <action-header
-        title="Manage Bookings"
-        subtitle="Event & Fitnessbuchungen bearbeiten"
-        :help="['Anzeige und Bearbeitung aller aktuellen Buchungen']"
-      />
-      <v-row>
-        <v-col cols="12" class="d-flex align-center justify-space-between pb-0">
-          <EventTypeSelection v-model="eventType" />
-          <v-btn icon color="primary" @click="refresh()">
-            <v-icon>{{ mdiRefresh }}</v-icon>
-          </v-btn>
-        </v-col>
-      </v-row>
-      <template v-if="allEvents != undefined">
-        <EventBookings
-          :updateEventBookingURL="$page.metadata.updateEventBookingURL"
-          :exportEventBookingsURL="$page.metadata.exportEventBookingsURL"
-          :exportEventParticipantListURL="
-            $page.metadata.exportEventParticipantListURL
-          "
-          status="Review"
-          :events="events"
-          @error="showError"
-          @refresh="loadEvents"
-        />
-        <EventBookings
-          :updateEventBookingURL="$page.metadata.updateEventBookingURL"
-          :exportEventBookingsURL="$page.metadata.exportEventBookingsURL"
-          :exportEventParticipantListURL="
-            $page.metadata.exportEventParticipantListURL
-          "
-          status="Published"
-          :events="events"
-          @error="showError"
-          @refresh="loadEvents"
-        />
-        <EventBookings
-          :updateEventBookingURL="$page.metadata.updateEventBookingURL"
-          :exportEventBookingsURL="$page.metadata.exportEventBookingsURL"
-          :exportEventParticipantListURL="
-            $page.metadata.exportEventParticipantListURL
-          "
-          status="Running"
-          :events="events"
-          @error="showError"
-          @refresh="loadEvents"
-        />
-        <v-row v-if="events.length == 0" class="text-center">
-          <v-col cols="12">
-            Keine aktiven {{ eventType == 'Fitness' ? 'Kurse' : 'Events' }}
-          </v-col>
-        </v-row>
-      </template>
-    </v-container>
-    <notify ref="notify" />
-  </Layout>
-</template>
-
-<script>
+<script setup lang="ts">
+import { loadEvents } from '@/api'
+import { useNotifyStore } from '@/stores/notify'
+import { EventType, LifecycleStatus, type Event } from '@/types'
+import { statusIndex } from '@/utils'
 import { mdiRefresh } from '@mdi/js'
-import axios from 'axios'
-import ActionHeader from '~/components/ActionHeader.vue'
-import Notify from '~/components/Notify.vue'
-import EventTypeSelection from '~/components/EventTypeSelection.vue'
-import EventListItem from '~/components/EventListItem.vue'
-import EventBookings from '~/components/events/EventBookings.vue'
+import { useHead } from '@unhead/vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
-// TODO: add the possibility to create tn-lists
-// TODO: add the possibility to send certificates
+const title = 'Manage Bookings'
+useHead({ title })
 
-export default {
-  components: {
-    ActionHeader,
-    Notify,
-    EventTypeSelection,
-    EventListItem,
-    EventBookings,
-  },
-  metaInfo: {
-    title: 'Manage Bookings',
-  },
-  data() {
-    return {
-      eventType: 'Fitness',
-      allEvents: undefined,
-      mdiRefresh,
-    }
-  },
-  mounted() {
-    this.loadEvents()
-  },
-  computed: {
-    events() {
-      if (this.allEvents == undefined) {
-        return []
+const notify = useNotifyStore()
+
+onMounted(refresh)
+
+const eventType = ref(EventType.Fitness)
+const allEvents = ref<Event[]>([])
+
+watch(eventType, refresh)
+
+const events = computed(() => {
+  return allEvents.value
+    .filter((e) => e.type === eventType.value)
+    .sort((a, b) => {
+      const value = statusIndex(a.status) - statusIndex(b.status)
+      if (value != 0) {
+        return value
       }
-      return this.allEvents
-        .filter((e) => e.type === this.eventType)
-        .sort((a, b) => {
-          const value = this.statusIndex(a.status) - this.statusIndex(b.status)
-          if (value != 0) {
-            return value
-          }
-          return a.sortIndex - b.sortIndex
-        })
-    },
-  },
-  watch: {
-    eventType() {
-      this.refresh()
-    },
-  },
-  methods: {
-    async loadEvents() {
-      try {
-        this.allEvents = (
-          await axios.get(
-            this.$page.metadata.loadEventsURL +
-              '?status=review,published,running&subscribers=true'
-          )
-        ).data
-      } catch (error) {
-        console.log(error)
-        this.showError('Fehler beim Laden der Events. Details siehe Console')
-      }
-    },
-    statusIndex(status) {
-      switch (status) {
-        case 'Draft':
-          return 2
-        case 'Review':
-          return 1
-        case 'Published':
-          return 0
-        case 'Running':
-          return 3
-        case 'Finished':
-          return 4
-        case 'Closed':
-          return 5
-      }
-      return 6
-    },
-    showError(error) {
-      this.$refs.notify.showError(error)
-    },
-    async refresh() {
-      this.allEvents = undefined
-      this.loadEvents()
-    },
-  },
+      return a.sort_index - b.sort_index
+    })
+})
+
+async function refresh() {
+  try {
+    allEvents.value = (
+      await loadEvents(
+        [LifecycleStatus.Review, LifecycleStatus.Published, LifecycleStatus.Running],
+        true
+      )
+    ).data
+  } catch (error) {
+    console.error(error)
+    notify.showError('Fehler beim Laden der Events. Details siehe Console')
+    allEvents.value = []
+  }
 }
 </script>
 
-<page-query>
-query {
-  metadata {
-    loadEventsURL
-    updateEventBookingURL
-    exportEventBookingsURL
-    exportEventParticipantListURL
-  }
-}
-</page-query>
+<template>
+  <ActionsLayout :title="title" :help="['Anzeige und Bearbeitung aller aktuellen Buchungen']">
+    <v-row>
+      <v-col cols="12" class="d-flex align-center justify-space-between pb-0">
+        <EventTypeSelection v-model="eventType" />
+        <v-btn variant="text" icon color="primary" @click="refresh()">
+          <v-icon>{{ mdiRefresh }}</v-icon>
+        </v-btn>
+      </v-col>
+    </v-row>
+    <template v-if="allEvents.length > 0">
+      <EventBookings status="Review" :events="events" @refresh="refresh" />
+      <EventBookings status="Published" :events="events" @refresh="refresh" />
+      <EventBookings status="Running" :events="events" @refresh="refresh" />
+      <v-row v-if="events.length == 0" class="text-center">
+        <v-col cols="12">
+          Keine aktiven {{ eventType == EventType.Fitness ? 'Kurse' : 'Events' }}
+        </v-col>
+      </v-row>
+    </template>
+  </ActionsLayout>
+</template>
