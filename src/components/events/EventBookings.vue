@@ -231,45 +231,45 @@ function refresh() {
                     <svg xmlns="http://www.w3.org/2000/svg" width="16pt" height="21.333">
                       <path
                         d="M15.625 10a5.625 5.625 0 11-11.25 0 5.625 5.625 0 0111.25 0z"
-                        :fill="item.raw.enrolled ? 'green' : 'red'"
+                        :fill="item.enrolled ? 'green' : 'red'"
                       />
                     </svg>
                   </div>
                 </template>
-                <span>{{ item.raw.enrolled ? 'Gebucht' : 'Warteliste' }}</span>
+                <span>{{ item.enrolled ? 'Gebucht' : 'Warteliste' }}</span>
               </v-tooltip>
             </td>
-            <td>{{ `${item.raw.first_name} ${item.raw.last_name}` }}</td>
-            <td>{{ item.raw.email }}</td>
+            <td>{{ `${item.first_name} ${item.last_name}` }}</td>
+            <td>{{ item.email }}</td>
             <td>
-              <v-icon v-if="item.raw.member">{{ mdiCheck }}</v-icon>
+              <v-icon v-if="item.member">{{ mdiCheck }}</v-icon>
             </td>
             <td>
               <v-tooltip bottom>
                 <template v-slot:activator="{ props }">
                   <div class="d-flex align-center text-no-wrap" v-bind="props">
-                    <v-icon :color="item.raw.payed ? 'green' : 'red'">{{
-                      item.raw.payed ? mdiCheck : mdiClose
+                    <v-icon :color="item.payed ? 'green' : 'red'">{{
+                      item.payed ? mdiCheck : mdiClose
                     }}</v-icon>
-                    <div>{{ item.raw.payment_id }}</div>
+                    <div>{{ item.payment_id }}</div>
                   </div>
                 </template>
-                <span>{{ price(event, item.raw.member) }}</span>
+                <span>{{ price(event, item.member) }}</span>
               </v-tooltip>
             </td>
             <td>
               <v-tooltip bottom>
                 <template v-slot:activator="{ props }">
-                  <v-icon size="xs" v-if="item.raw.comment != undefined" v-bind="props">{{
+                  <v-icon size="xs" v-if="item.comment != undefined" v-bind="props">{{
                     mdiComment
                   }}</v-icon>
                 </template>
-                <span>{{ item.raw.comment }}</span>
+                <span>{{ item.comment }}</span>
               </v-tooltip>
             </td>
             <td>
               <div class="d-flex align-center justify-end">
-                <template v-if="!item.raw.payed">
+                <template v-if="!item.payed">
                   <v-tooltip bottom>
                     <template v-slot:activator="{ props }">
                       <v-icon size="xs" class="mr-2" @click="markPayed(item.raw)" v-bind="props">{{

@@ -133,24 +133,24 @@ async function sendingPaymentReminders() {
                       <svg xmlns="http://www.w3.org/2000/svg" width="16pt" height="21.333">
                         <path
                           d="M15.625 10a5.625 5.625 0 11-11.25 0 5.625 5.625 0 0111.25 0z"
-                          :fill="dueInDaysColor(item.raw)"
+                          :fill="dueInDaysColor(item)"
                         />
                       </svg>
                     </div>
                   </template>
-                  <span>{{ dueInDaysTooltip(item.raw) }}</span>
+                  <span>{{ dueInDaysTooltip(item) }}</span>
                 </v-tooltip>
               </td>
-              <td>{{ item.raw.event_name }}</td>
-              <td>{{ `${item.raw.first_name} ${item.raw.last_name}` }}</td>
-              <td>{{ item.raw.payment_id }}</td>
-              <td>{{ formatPrice(item.raw.price) }}</td>
+              <td>{{ item.event_name }}</td>
+              <td>{{ `${item.first_name} ${item.last_name}` }}</td>
+              <td>{{ item.payment_id }}</td>
+              <td>{{ formatPrice(item.price) }}</td>
               <td>
                 <div class="d-flex align-center justify-end">
-                  <template v-if="!item.raw.payed">
+                  <template v-if="!item.payed">
                     <v-tooltip left>
                       <template v-slot:activator="{ props }">
-                        <v-icon small class="mr-2" @click="markPayed(item.raw)" v-bind="props">{{
+                        <v-icon small class="mr-2" @click="markPayed(item)" v-bind="props">{{
                           mdiCash
                         }}</v-icon>
                       </template>
