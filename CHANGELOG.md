@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.1](https://github.com/mseele/sve-tools/compare/v2.0.0...v2.0.1) (2023-09-26)
+
+
+### Bug Fixes
+
+* correct item access ([546c5ed](https://github.com/mseele/sve-tools/commit/546c5ed28151dd41b0430b2d2d9fe36327c2ae78))
+* correct pages names ([e0bb6b2](https://github.com/mseele/sve-tools/commit/e0bb6b25a8bbe36609ddd2aaa04ec01ba0d88566))
+* move dev deps to deps ([cd21307](https://github.com/mseele/sve-tools/commit/cd213073a76fe56095f71b3c55065a531796df2b))
+
 ## [2.0.0](https://github.com/mseele/sve-tools/compare/v1.25.0...v2.0.0) (2023-09-26)
 
 
