@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/mseele/sve-tools/compare/v1.25.0...v2.0.0) (2023-09-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* migrate to vue 3 and vuetify 3
+
+### Features
+
+* migrate to vue 3 and vuetify 3 ([8d3b4f0](https://github.com/mseele/sve-tools/commit/8d3b4f0ad26bab9cb24a55561b4ebc5e144d34d9))
+
 ## [1.25.0](https://github.com/mseele/sve-tools/compare/v1.24.0...v1.25.0) (2023-09-16)
 
 
