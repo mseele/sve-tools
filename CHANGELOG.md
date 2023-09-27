@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.2](https://github.com/mseele/sve-tools/compare/v2.0.1...v2.0.2) (2023-09-27)
+
+
+### Bug Fixes
+
+* add netlify redirects file ([2b1667b](https://github.com/mseele/sve-tools/commit/2b1667b01c7ba934a87298613c5337b89f0c283a))
+
 ### [2.0.1](https://github.com/mseele/sve-tools/compare/v2.0.0...v2.0.1) (2023-09-26)
 
 
