@@ -1,7 +1,7 @@
 import type { EventEmail, EventType, LifecycleStatus, UnpaidBooking, Event } from '@/types'
 import axios, { type AxiosResponse } from 'axios'
 
-const backend_prefix = 'https://backend2.sv-eutingen.de/api'
+const backend_prefix = 'https://backend.sv-eutingen.de/api'
 
 export async function loadEvents(status?: LifecycleStatus[], subscribers?: boolean) {
   let url = `${backend_prefix}/events`
