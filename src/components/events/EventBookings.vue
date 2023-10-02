@@ -272,7 +272,7 @@ function refresh() {
                 <template v-if="!item.payed">
                   <v-tooltip bottom>
                     <template v-slot:activator="{ props }">
-                      <v-icon size="xs" class="mr-2" @click="markPayed(item.raw)" v-bind="props">{{
+                      <v-icon size="xs" class="mr-2" @click="markPayed(item)" v-bind="props">{{
                         mdiCash
                       }}</v-icon>
                     </template>
@@ -281,12 +281,9 @@ function refresh() {
                 </template>
                 <v-tooltip bottom>
                   <template v-slot:activator="{ props }">
-                    <v-icon
-                      size="xs"
-                      @click="displayCancelBookingDialog(item.raw)"
-                      v-bind="props"
-                      >{{ mdiDelete }}</v-icon
-                    >
+                    <v-icon size="xs" @click="displayCancelBookingDialog(item)" v-bind="props">{{
+                      mdiDelete
+                    }}</v-icon>
                   </template>
                   <span>Buchung stornieren</span>
                 </v-tooltip>
