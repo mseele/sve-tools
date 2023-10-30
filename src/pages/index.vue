@@ -3,6 +3,8 @@ import Cookies from 'js-cookie'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
+const router = useRouter()
+
 onMounted(() => {
   if (Cookies.get('sve_backend_tools') === 'verified') {
     redirect()
@@ -19,7 +21,6 @@ function login() {
 }
 
 function redirect() {
-  const router = useRouter()
   router.push({ name: 'default_action' })
 }
 </script>
