@@ -45,7 +45,7 @@ export async function sendPaymentReminders(type: EventType) {
 }
 
 export async function sendParticipationConfirmation(event_id: string) {
-  return axios.get(`${backend_prefix}tasks/send_participation_confirmation//${event_id}`)
+  return axios.get(`${backend_prefix}/tasks/send_participation_confirmation/${event_id}`)
 }
 
 export async function markEventBookingAsPayed(subscriber_id: string) {
