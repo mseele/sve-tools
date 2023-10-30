@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.5](https://github.com/mseele/sve-tools/compare/v2.0.4...v2.0.5) (2023-10-30)
+
+
+### Bug Fixes
+
+* correct backend link ([4c8e909](https://github.com/mseele/sve-tools/commit/4c8e9091adc12d13de9cb65deaa0d14472549c6b))
+* correct undefined router ([def8072](https://github.com/mseele/sve-tools/commit/def80725265c9a9e779126dc398b4270fd6cfc70))
+
 ### [2.0.4](https://github.com/mseele/sve-tools/compare/v2.0.3...v2.0.4) (2023-10-02)
 
 
