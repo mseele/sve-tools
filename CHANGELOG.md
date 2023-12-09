@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.6](https://github.com/mseele/sve-tools/compare/v2.0.5...v2.0.6) (2023-12-09)
+
+
+### Bug Fixes
+
+* allow 0 as valid number ([f76079a](https://github.com/mseele/sve-tools/commit/f76079a7ab9c5a675b827b2788d116e82387c45a))
+
 ### [2.0.5](https://github.com/mseele/sve-tools/compare/v2.0.4...v2.0.5) (2023-10-30)
 
 
