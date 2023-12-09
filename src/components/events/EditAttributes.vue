@@ -161,7 +161,7 @@ function diff<T extends object>(object: T, base: T) {
 const rules = {
   required: [(val: string) => (val || '').length > 0 || 'Ein Wert wird benötigt'],
   requiredPositiveNumber: [
-    (val: any) => (val != '' && Number(val) >= 0) || 'Eine positive Nummer wird benötigt'
+    (val: any) => (val === 0 || val != '' && Number(val) >= 0) || 'Eine positive Nummer wird benötigt'
   ],
   positiveNumber: [
     (val: number) => val === undefined || val >= 0 || 'Eine positive Nummer wird benötigt'
