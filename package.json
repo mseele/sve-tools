@@ -1,6 +1,6 @@
 {
   "name": "sve-tools2",
-  "version": "2.0.11",
+  "version": "2.0.12",
   "private": true,
   "scripts": {
     "dev": "vite",

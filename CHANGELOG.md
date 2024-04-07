@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.12](https://github.com/mseele/sve-tools/compare/v2.0.11...v2.0.12) (2024-04-07)
+
+
+### Bug Fixes
+
+* correct event image color ([14054d6](https://github.com/mseele/sve-tools/commit/14054d63be64c069baa504264f9b771dc993a054))
+
 ### [2.0.11](https://github.com/mseele/sve-tools/compare/v2.0.10...v2.0.11) (2024-04-07)
 
 
