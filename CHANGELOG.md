@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.9](https://github.com/mseele/sve-tools/compare/v2.0.8...v2.0.9) (2024-04-07)
+
+
+### Bug Fixes
+
+* correct vuetify version ([f3d179e](https://github.com/mseele/sve-tools/commit/f3d179ec3bd01a54bffb21596f2c7ab5a2d14312))
+
 ### [2.0.8](https://github.com/mseele/sve-tools/compare/v2.0.7...v2.0.8) (2024-04-07)
 
 
