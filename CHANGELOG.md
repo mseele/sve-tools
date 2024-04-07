@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.8](https://github.com/mseele/sve-tools/compare/v2.0.7...v2.0.8) (2024-04-07)
+
+
+### Bug Fixes
+
+* correct lockfile ([071b4db](https://github.com/mseele/sve-tools/commit/071b4dbbeffcc80df6cf7bf2a85467219c7e5b97))
+
 ### [2.0.7](https://github.com/mseele/sve-tools/compare/v2.0.6...v2.0.7) (2024-04-07)
 
 
