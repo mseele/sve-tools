@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.13](https://github.com/mseele/sve-tools/compare/v2.0.12...v2.0.13) (2024-08-01)
+
+
+### Bug Fixes
+
+* add dance image ([ec73578](https://github.com/mseele/sve-tools/commit/ec7357896cd8f5a7700a9d854d57df1ac58989f0))
+
 ### [2.0.12](https://github.com/mseele/sve-tools/compare/v2.0.11...v2.0.12) (2024-04-07)
 
 
