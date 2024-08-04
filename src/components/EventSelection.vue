@@ -138,7 +138,7 @@ function selectEvent(e: Event) {
     <v-autocomplete
       v-model="event"
       :items="events"
-      :item-value="(v) => v"
+      :item-value="(v: any) => v"
       :item-title="eventName"
       variant="outlined"
       hide-details

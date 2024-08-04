@@ -15,8 +15,8 @@ interface Image {
 
 const images: Image[] = []
 for (const url of Object.values(
-  import.meta.glob('@/assets/events/*.jpg', { eager: true, as: 'url' })
-)) {
+  import.meta.glob('@/assets/events/*.jpg', { eager: true, query: '?url', import: 'default' })
+) as string[]) {
   let text = url.substring(url.lastIndexOf('/') + 1, url.lastIndexOf('.jpg'))
   const name = text.substring(0, text.lastIndexOf('_')) + '.jpg'
   images.push({ name, light: text.endsWith('_light'), url })
@@ -81,7 +81,7 @@ function itemsStatus() {
   return all.filter((v) => allowed.indexOf(v.value) != -1)
 }
 
-const eventImage = computed({
+const eventImage: any = computed({
   get: () => images.find((v) => v.name == selection.value.image),
   set: (value?: Image) => {
     const eventImage = images.find((v) => v.name === value?.name)
@@ -161,7 +161,8 @@ function diff<T extends object>(object: T, base: T) {
 const rules = {
   required: [(val: string) => (val || '').length > 0 || 'Ein Wert wird benötigt'],
   requiredPositiveNumber: [
-    (val: any) => (val === 0 || val != '' && Number(val) >= 0) || 'Eine positive Nummer wird benötigt'
+    (val: any) =>
+      val === 0 || (val != '' && Number(val) >= 0) || 'Eine positive Nummer wird benötigt'
   ],
   positiveNumber: [
     (val: number) => val === undefined || val >= 0 || 'Eine positive Nummer wird benötigt'
@@ -218,7 +219,7 @@ const rules = {
       <v-col cols="12" sm="5">
         <v-select
           :items="images"
-          :item-value="(v) => v"
+          :item-value="(v: any) => v"
           item-title="name"
           label="Bild"
           variant="outlined"
