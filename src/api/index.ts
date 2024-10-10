@@ -58,7 +58,7 @@ export async function cancelBooking(subscriber_id: string) {
 
 export async function triggerDeploy(prod: boolean) {
   const url = prod
-    ? 'https://api.netlify.com/build_hooks/6127d409612b8830aa05d286'
+    ? 'https://api.netlify.com/build_hooks/67081838b3ea234af2ebd0b2'
     : 'https://api.netlify.com/build_hooks/6127d32c2032942b064c7947'
   return axios.post(url)
 }
