@@ -147,16 +147,14 @@ async function sendingPaymentReminders() {
               <td>{{ formatPrice(item.price) }}</td>
               <td>
                 <div class="d-flex align-center justify-end">
-                  <template v-if="!item.payed">
-                    <v-tooltip left>
-                      <template v-slot:activator="{ props }">
-                        <v-icon small class="mr-2" @click="markPayed(item)" v-bind="props">{{
-                          mdiCash
-                        }}</v-icon>
-                      </template>
-                      <span>Als Bezahlt markieren</span>
-                    </v-tooltip>
-                  </template>
+                  <v-tooltip left>
+                    <template v-slot:activator="{ props }">
+                      <v-icon small class="mr-2" @click="markPayed(item)" v-bind="props">{{
+                        mdiCash
+                      }}</v-icon>
+                    </template>
+                    <span>Als Bezahlt markieren</span>
+                  </v-tooltip>
                 </div>
               </td>
             </tr>
