@@ -47,6 +47,9 @@ importers:
       pinia:
         specifier: ^2.2.4
         version: 2.2.4(typescript@5.6.3)(vue@3.5.11(typescript@5.6.3))
+      typescript:
+        specifier: ^5.6.3
+        version: 5.6.3
       unplugin-vue-components:
         specifier: ^0.27.4
         version: 0.27.4(@babel/parser@7.25.3)(rollup@4.20.0)(vue@3.5.11(typescript@5.6.3))(webpack-sources@3.2.3)
@@ -93,9 +96,6 @@ importers:
       standard-version:
         specifier: ^9.5.0
         version: 9.5.0
-      typescript:
-        specifier: ~5.6.3
-        version: 5.6.3
 
 packages:
 
