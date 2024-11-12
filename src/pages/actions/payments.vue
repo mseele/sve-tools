@@ -16,7 +16,7 @@ onMounted(loadUnpaidBookings)
 const unpaidBookings = ref<UnpaidBooking[]>()
 const eventType = ref(EventType.Fitness)
 const disabled = ref(false)
-const csv = ref<File[]>()
+const csv = ref<File>()
 const csvResult = ref()
 const startDate = ref()
 
@@ -42,13 +42,13 @@ function reset() {
 }
 
 async function send() {
-  if (csv.value === undefined || csv.value.length < 1) {
+  if (csv.value === undefined) {
     return
   }
   disabled.value = true
   let attachment
   try {
-    attachment = await readFile(csv.value[0])
+    attachment = await readFile(csv.value)
   } catch (error) {
     console.error(error)
     notify.showError('Datei konnte nicht gelesen werden. Details siehe Console')
