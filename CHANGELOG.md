@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.14](https://github.com/mseele/sve-tools/compare/v2.0.13...v2.0.14) (2024-11-12)
+
+
+### Bug Fixes
+
+* correct csv upload ([3d3d08d](https://github.com/mseele/sve-tools/commit/3d3d08dd9e08b0462eb92ecfd6acb99b7d9e308c))
+* remove wrong check ([b6d84ca](https://github.com/mseele/sve-tools/commit/b6d84ca7d90ac2c482e8fbabfe77c8b6e6d3664e))
+* use new prod build hook ([d1386ec](https://github.com/mseele/sve-tools/commit/d1386ec6d010275e51efefb1d75c8e015209e9dd))
+
 ### [2.0.13](https://github.com/mseele/sve-tools/compare/v2.0.12...v2.0.13) (2024-08-01)
 
 
