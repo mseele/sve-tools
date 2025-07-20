@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { updateEvent } from '@/api'
 import { useNotifyStore } from '@/stores/notify'
-import { LifecycleStatus, type Event } from '@/types'
+import { LifecycleStatus, type Event, type EventCustomField } from '@/types'
 import { mdiPlus } from '@mdi/js'
 import { addDays, format, isBefore, isValid, parseISO } from 'date-fns'
 import { isEqual, transform } from 'lodash-es'
@@ -24,6 +24,7 @@ for (const url of Object.values(
 
 const props = defineProps<{
   event: Event
+  customFields: EventCustomField[]
 }>()
 
 const emit = defineEmits<{
@@ -80,6 +81,27 @@ function itemsStatus() {
   }
   return all.filter((v) => allowed.indexOf(v.value) != -1)
 }
+
+function itemsCustomFields() {
+  return props.customFields.map((field) => ({
+    value: field,
+    title: field.name
+  }))
+}
+
+const customFields: any = computed({
+  get: () =>
+    props.customFields.filter((field) =>
+      selection.value.custom_fields.map((v) => v.id).includes(field.id)
+    ),
+  set: (value) => {
+    if (Array.isArray(value)) {
+      selection.value.custom_fields = value
+    } else {
+      selection.value.custom_fields = []
+    }
+  }
+})
 
 const eventImage: any = computed({
   get: () => images.find((v) => v.name == selection.value.image),
@@ -190,6 +212,10 @@ const rules = {
       }
       return true
     }
+  ],
+  customFields: [
+    (val: any[]) =>
+      (Array.isArray(val) && val.length <= 4) || 'Bitte wähle maximal 4 Zusatzfelder aus'
   ]
 }
 </script>
@@ -408,6 +434,17 @@ const rules = {
           v-model="selection.alt_email_address"
           :rules="rules.altEmailAddress"
         ></v-text-field>
+      </v-col>
+      <v-col cols="12">
+        <v-select
+          :items="itemsCustomFields()"
+          label="Zusatzfelder"
+          variant="outlined"
+          density="compact"
+          multiple
+          v-model="customFields"
+          :rules="rules.customFields"
+        ></v-select>
       </v-col>
       <v-col cols="12">
         <v-checkbox

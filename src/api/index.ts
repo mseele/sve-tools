@@ -1,4 +1,11 @@
-import type { EventEmail, EventType, LifecycleStatus, UnpaidBooking, Event } from '@/types'
+import type {
+  EventEmail,
+  EventType,
+  LifecycleStatus,
+  UnpaidBooking,
+  Event,
+  EventCustomField
+} from '@/types'
 import axios, { type AxiosResponse } from 'axios'
 
 const backend_prefix = `${import.meta.env.VITE_BACKEND_URL}/api`
@@ -26,6 +33,10 @@ export async function updateEvent(
 
 export async function deleteEvent(event_id: string) {
   return axios.delete(`${backend_prefix}/events/${event_id}`)
+}
+
+export async function loadCustomFields(): Promise<AxiosResponse<EventCustomField[]>> {
+  return axios.get(`${backend_prefix}/events/custom_fields`)
 }
 
 export async function sendEmails(data: EventEmail) {

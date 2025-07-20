@@ -23,6 +23,7 @@ export interface Event {
   alt_booking_button_text?: string
   alt_email_address?: string
   external_operator: boolean
+  custom_fields: EventCustomField[]
   subscribers?: EventSubscriber[]
 }
 
@@ -39,6 +40,19 @@ export enum LifecycleStatus {
   Finished = 'Finished',
   Closed = 'Closed',
   Archived = 'Archived'
+}
+
+export interface EventCustomField {
+  id: string
+  name: string
+  type: EventCustomFieldType
+  min_value?: number
+  max_value?: number
+}
+
+export enum EventCustomFieldType {
+  Text = 'Text',
+  Number = 'Number'
 }
 
 export interface UnpaidBooking {
@@ -83,5 +97,6 @@ export interface EventSubscriber {
   member: boolean
   payment_id: string
   payed: boolean
-  comment?: String
+  comment?: string
+  custom_values: string[]
 }

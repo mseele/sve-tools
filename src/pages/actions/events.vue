@@ -3,13 +3,13 @@
 </route>
 
 <script setup lang="ts">
-import { deleteEvent } from '@/api'
+import { deleteEvent, loadCustomFields } from '@/api'
 import EventSelection from '@/components/EventSelection.vue'
 import { useNotifyStore } from '@/stores/notify'
-import { EventType, LifecycleStatus, type Event } from '@/types'
+import { EventType, LifecycleStatus, type Event, type EventCustomField } from '@/types'
 import { mdiDelete } from '@mdi/js'
 import { useHead } from '@unhead/vue'
-import { nextTick, ref, watch } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 
 const title = 'Manage Events'
 useHead({ title })
@@ -21,6 +21,7 @@ const selection = ref<Event>()
 const deleteDialog = ref(false)
 const deleteLoading = ref(false)
 const eventSelection = ref<InstanceType<typeof EventSelection> | null>(null)
+const customFields = ref<EventCustomField[]>([])
 
 watch(eventType, () => (selection.value = undefined))
 
@@ -31,6 +32,16 @@ const eventStatus = [
   LifecycleStatus.Running,
   LifecycleStatus.Finished
 ]
+
+onMounted(async () => {
+  try {
+    const response = await loadCustomFields()
+    customFields.value = response.data
+  } catch (error) {
+    console.error(error)
+    notify.showError('Laden der benutzerdefinierten Felder fehlgeschlagen. Details siehe Console')
+  }
+})
 
 function onEventSelection(data: { event: Event }) {
   selection.value = data.event
@@ -137,6 +148,7 @@ async function onDelete() {
       <EditAttributes
         v-else
         :event="selection"
+        :custom-fields="customFields"
         @success="onUpdate"
         :key="selection.id"
         class="mt-8"
