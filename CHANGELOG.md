@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/mseele/sve-tools/compare/v2.0.14...v2.1.0) (2025-07-20)
+
+
+### Features
+
+* add support for custom fields ([1c4e7d2](https://github.com/mseele/sve-tools/commit/1c4e7d25602448d4fccb0ed1e0bb50014939261c))
+
 ### [2.0.14](https://github.com/mseele/sve-tools/compare/v2.0.13...v2.0.14) (2024-11-12)
 
 
