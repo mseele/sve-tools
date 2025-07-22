@@ -158,7 +158,7 @@ async function onSave() {
     } else {
       objectToSave = selection.value
     }
-    const savedEvent = (await updateEvent(objectToSave.id, objectToSave)).data
+    const savedEvent = (await updateEvent(objectToSave.id, objectToSave))
     notify.showSuccess('Das Event wurde erfolgreich gespeichert')
     emit('success', savedEvent)
   } catch (error) {

@@ -35,8 +35,7 @@ const eventStatus = [
 
 onMounted(async () => {
   try {
-    const response = await loadCustomFields()
-    customFields.value = response.data
+    customFields.value = (await loadCustomFields())
   } catch (error) {
     console.error(error)
     notify.showError('Laden der benutzerdefinierten Felder fehlgeschlagen. Details siehe Console')

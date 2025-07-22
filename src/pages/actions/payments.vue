@@ -26,7 +26,7 @@ async function loadUnpaidBookings() {
   unpaidBookings.value = undefined
   try {
     const response = await getUnpaidBookings(eventType.value)
-    unpaidBookings.value = response.data
+    unpaidBookings.value = response
   } catch (error) {
     console.error(error)
     notify.showError('Abholen unbezahlter Buchungen fehlgeschlafen. Details siehe Console')
@@ -57,7 +57,7 @@ async function send() {
   }
   try {
     const response = await verifyPayments(attachment, startDate.value)
-    csvResult.value = response.data
+    csvResult.value = response
     await loadUnpaidBookings()
   } catch (error) {
     console.error(error)

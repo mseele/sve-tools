@@ -38,7 +38,7 @@ async function refresh() {
         [LifecycleStatus.Review, LifecycleStatus.Published, LifecycleStatus.Running],
         true
       )
-    ).data
+    )
   } catch (error) {
     console.error(error)
     notify.showError('Fehler beim Laden der Events. Details siehe Console')
