@@ -42,7 +42,7 @@ export async function updateEvent(
 export async function deleteEvent(event_id: string) {
   const res = await fetch(`${backend_prefix}/events/${event_id}`, { method: 'DELETE' })
   if (!res.ok) throw new Error(await res.text())
-  return res.json()
+  return { status: res.status, statusText: res.statusText }
 }
 
 export async function loadCustomFields(): Promise<EventCustomField[]> {
@@ -56,7 +56,7 @@ export async function sendEmails(data: EventEmail) {
     body: JSON.stringify({ event: data })
   })
   if (!res.ok) throw new Error(await res.text())
-  return res.json()
+  return { status: res.status, statusText: res.statusText }
 }
 
 export async function getUnpaidBookings(type: EventType): Promise<UnpaidBooking[]> {
@@ -74,11 +74,15 @@ export async function verifyPayments(csv: string, start_date?: string) {
 }
 
 export async function sendPaymentReminders(type: EventType) {
-  return fetchJson(`${backend_prefix}/tasks/send_payment_reminders/${type}`)
+  const res = await fetch(`${backend_prefix}/tasks/send_payment_reminders/${type}`)
+  if (!res.ok) throw new Error(await res.text())
+  return { status: res.status, statusText: res.statusText }
 }
 
 export async function sendParticipationConfirmation(event_id: string) {
-  return fetchJson(`${backend_prefix}/tasks/send_participation_confirmation/${event_id}`)
+  const res = await fetch(`${backend_prefix}/tasks/send_participation_confirmation/${event_id}`)
+  if (!res.ok) throw new Error(await res.text())
+  return { status: res.status, statusText: res.statusText }
 }
 
 export async function markEventBookingAsPayed(subscriber_id: string) {
@@ -86,13 +90,13 @@ export async function markEventBookingAsPayed(subscriber_id: string) {
     method: 'PATCH'
   })
   if (!res.ok) throw new Error(await res.text())
-  return res.json()
+  return { status: res.status, statusText: res.statusText }
 }
 
 export async function cancelBooking(subscriber_id: string) {
   const res = await fetch(`${backend_prefix}/events/booking/${subscriber_id}`, { method: 'DELETE' })
   if (!res.ok) throw new Error(await res.text())
-  return res.json()
+  return { status: res.status, statusText: res.statusText }
 }
 
 export async function triggerDeploy(prod: boolean) {

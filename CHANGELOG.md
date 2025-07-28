@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.2](https://github.com/mseele/sve-tools/compare/v2.1.1...v2.1.2) (2025-07-28)
+
+
+### Bug Fixes
+
+* update triggerDeploy to return status and statusText instead of JSON ([f8bbdd9](https://github.com/mseele/sve-tools/commit/f8bbdd974823ed435da80f8b333c3d4c19de4449))
+
 ### [2.1.1](https://github.com/mseele/sve-tools/compare/v2.1.0...v2.1.1) (2025-07-21)
 
 ## [2.1.0](https://github.com/mseele/sve-tools/compare/v2.0.14...v2.1.0) (2025-07-20)
