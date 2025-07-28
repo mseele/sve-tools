@@ -101,7 +101,7 @@ export async function triggerDeploy(prod: boolean) {
     : 'https://api.netlify.com/build_hooks/6127d32c2032942b064c7947'
   const res = await fetch(url, { method: 'POST' })
   if (!res.ok) throw new Error(await res.text())
-  return res.json()
+  return { status: res.status, statusText: res.statusText }
 }
 
 export function exportEventBookingsURL(event_id: string) {
