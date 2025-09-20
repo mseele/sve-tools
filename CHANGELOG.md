@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.3](https://github.com/mseele/sve-tools/compare/v2.1.1...v2.1.3) (2025-09-20)
+
+
+### Bug Fixes
+
+* protect all routes ([437b965](https://github.com/mseele/sve-tools/commit/437b965225acb79ce707d2c27307601358683fac))
+* update sendEmails to return status and statusText instead of JSON ([4f69d1b](https://github.com/mseele/sve-tools/commit/4f69d1b4e5aa74973519b4255379244806ae3e28))
+* update triggerDeploy to return status and statusText instead of JSON ([f8bbdd9](https://github.com/mseele/sve-tools/commit/f8bbdd974823ed435da80f8b333c3d4c19de4449))
+
 ### [2.1.2](https://github.com/mseele/sve-tools/compare/v2.1.1...v2.1.2) (2025-07-28)
 
 
