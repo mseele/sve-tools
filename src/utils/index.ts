@@ -20,7 +20,9 @@ export function readFile(inputFile: File): Promise<string> {
     reader.onload = () => {
       const dataUrl = reader.result as string
       const base64 = dataUrl.split(',')[1]
-      resolve(base64)
+      if (base64) {
+        resolve(base64)
+      }
     }
     reader.readAsDataURL(inputFile)
   })
