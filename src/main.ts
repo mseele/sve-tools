@@ -9,14 +9,21 @@ import * as directives from 'vuetify/directives'
 import { aliases, mdi } from 'vuetify/iconsets/mdi-svg'
 import 'vuetify/styles'
 import App from './App.vue'
+import Cookies from 'js-cookie'
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes
+})
+router.beforeEach((to, _from, next) => {
+  if (to.path !== '/' && Cookies.get('sve_backend_tools') !== 'verified') {
+    return next({ path: '/' })
+  }
+  next()
+})
 
 createApp(App)
-  .use(
-    createRouter({
-      history: createWebHistory(),
-      routes
-    })
-  )
+  .use(router)
   .use(createPinia())
   .use(createHead())
   .use(
