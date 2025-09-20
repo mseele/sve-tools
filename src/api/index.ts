@@ -26,10 +26,7 @@ export async function loadEvents(status?: LifecycleStatus[], subscribers?: boole
   return fetchJson<Event[]>(url)
 }
 
-export async function updateEvent(
-  event_id: string,
-  update: Partial<Event>
-): Promise<Event> {
+export async function updateEvent(event_id: string, update: Partial<Event>): Promise<Event> {
   const res = await fetch(`${backend_prefix}/events/update`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

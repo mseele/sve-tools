@@ -33,11 +33,9 @@ const events = computed(() => {
 
 async function refresh() {
   try {
-    allEvents.value = (
-      await loadEvents(
-        [LifecycleStatus.Review, LifecycleStatus.Published, LifecycleStatus.Running],
-        true
-      )
+    allEvents.value = await loadEvents(
+      [LifecycleStatus.Review, LifecycleStatus.Published, LifecycleStatus.Running],
+      true
     )
   } catch (error) {
     console.error(error)

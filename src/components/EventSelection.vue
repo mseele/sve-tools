@@ -108,7 +108,7 @@ function emitChanges() {
 
 async function loadEvents() {
   try {
-    allEvents.value = (await loadRequiredEvents(props.eventStatus))
+    allEvents.value = await loadRequiredEvents(props.eventStatus)
     emitChanges()
   } catch (error) {
     console.log(error)
