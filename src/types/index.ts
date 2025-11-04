@@ -59,6 +59,7 @@ export interface UnpaidBooking {
   event_id: string
   event_name: string
   booking_id: string
+  booking_date: string
   first_name: string
   last_name: string
   email: string

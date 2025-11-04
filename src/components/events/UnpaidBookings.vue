@@ -4,6 +4,7 @@ import { useNotifyStore } from '@/stores/notify'
 import { EventType, type UnpaidBooking } from '@/types'
 import { formatPrice } from '@/utils'
 import { mdiCash, mdiCashClock, mdiCheckCircle, mdiCloseCircle } from '@mdi/js'
+import { format, parseISO } from 'date-fns'
 import { computed, ref } from 'vue'
 
 const props = defineProps<{
@@ -25,6 +26,7 @@ const headers = [
   { title: '', key: 'due_in_days' },
   { title: 'Event', key: 'event_name' },
   { title: 'Name', key: 'first_name' },
+  { title: 'Buchungsdatum', key: 'booking_date' },
   { title: 'Payment ID', key: 'payment_id' },
   { title: 'Preis', key: 'price' },
   { title: '', key: 'actions', sortable: false }
@@ -80,6 +82,13 @@ async function sendingPaymentReminders() {
     paymentReminderLoading.value = false
   }
   emit('refresh')
+}
+
+
+function formatDate(value: string) {
+  const date = parseISO(value)
+  const timezoneOffset = date.getTimezoneOffset() * 60000
+  return format(new Date(date.getTime() + timezoneOffset), 'dd-MM-yyyy HH:mm')
 }
 </script>
 
@@ -143,6 +152,7 @@ async function sendingPaymentReminders() {
               </td>
               <td>{{ item.event_name }}</td>
               <td>{{ `${item.first_name} ${item.last_name}` }}</td>
+              <td>{{ formatDate(item.booking_date) }}</td>
               <td>{{ item.payment_id }}</td>
               <td>{{ formatPrice(item.price) }}</td>
               <td>
