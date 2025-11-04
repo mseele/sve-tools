@@ -1,6 +1,6 @@
 export interface Event {
   id: string
-  closed?: Date
+  closed?: string
   type: EventType
   status: LifecycleStatus
   name: string
@@ -65,7 +65,7 @@ export interface UnpaidBooking {
   price: string
   payment_id: string
   due_in_days: number
-  payment_reminder_sent?: Date
+  payment_reminder_sent?: string
 }
 
 export interface EventEmail {
@@ -86,7 +86,7 @@ export interface EmailAttachment {
 
 export interface EventSubscriber {
   id: string
-  created: Date
+  created: string
   first_name: string
   last_name: string
   street: string
