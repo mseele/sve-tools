@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/mseele/sve-tools/compare/v2.1.3...v2.2.0) (2025-11-04)
+
+
+### Features
+
+* display booking date for unpaid bookings ([b0e6812](https://github.com/mseele/sve-tools/commit/b0e6812643171305d2751192b55923a7872586c9))
+
+
+### Bug Fixes
+
+* correct date type ([2de5cf4](https://github.com/mseele/sve-tools/commit/2de5cf465a97afc5ea462c80385ba4da20305b76))
+* ensure base64 is resolved only when available in readFile function ([d770549](https://github.com/mseele/sve-tools/commit/d7705498b0f92a14376eff538151a5498abf76d4))
+
 ### [2.1.3](https://github.com/mseele/sve-tools/compare/v2.1.1...v2.1.3) (2025-09-20)
 
 
