@@ -84,7 +84,6 @@ async function sendingPaymentReminders() {
   emit('refresh')
 }
 
-
 function formatDate(value: string) {
   const date = parseISO(value)
   const timezoneOffset = date.getTimezoneOffset() * 60000
