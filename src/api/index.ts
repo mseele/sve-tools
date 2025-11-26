@@ -91,7 +91,9 @@ export async function markEventBookingAsPayed(subscriber_id: string) {
 }
 
 export async function cancelBooking(subscriber_id: string) {
-  const res = await fetch(`${backend_prefix}/events/booking/${subscriber_id}`, { method: 'DELETE' })
+  const res = await fetch(`${backend_prefix}/events/booking/${subscriber_id}`, {
+    method: 'DELETE'
+  })
   if (!res.ok) throw new Error(await res.text())
   return { status: res.status, statusText: res.statusText }
 }

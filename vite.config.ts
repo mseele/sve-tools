@@ -7,11 +7,7 @@ import components from 'unplugin-vue-components/vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    vue(),
-    vueRouter(),
-    components()
-  ],
+  plugins: [vue(), vueRouter(), components()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
