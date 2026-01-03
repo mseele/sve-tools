@@ -2,8 +2,10 @@
 import { computed, ref } from 'vue'
 import { useDisplay } from 'vuetify'
 import actions from '@/data/actions.json'
-import { mdiHelp, mdiCloseCircle, mdiClose } from '@mdi/js'
+import { mdiHelp, mdiCloseCircle, mdiClose, mdiLogout } from '@mdi/js'
 import { useNotifyStore } from '@/stores/notify'
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
 
 const props = defineProps<{
   title: string
@@ -12,6 +14,8 @@ const props = defineProps<{
 
 const { mdAndUp } = useDisplay()
 const notify = useNotifyStore()
+const auth = useAuthStore()
+const router = useRouter()
 
 const navToggle = ref(false)
 const helpToggle = ref(false)
@@ -35,6 +39,11 @@ const notifySnackbar = computed({
     }
   }
 })
+
+function handleLogout() {
+  auth.logout()
+  router.push('/')
+}
 </script>
 
 <template>
@@ -48,6 +57,9 @@ const notifySnackbar = computed({
       <template v-if="hasHelp" v-slot:append>
         <v-btn variant="text" icon @click="helpToggle = true">
           <v-icon size="x-small">{{ mdiHelp }}</v-icon>
+        </v-btn>
+        <v-btn variant="text" icon @click="handleLogout" title="Logout">
+          <v-icon size="x-small">{{ mdiLogout }}</v-icon>
         </v-btn>
       </template>
     </v-app-bar>
@@ -86,9 +98,12 @@ const notifySnackbar = computed({
         </v-sheet>
       </v-bottom-sheet>
 
-      <v-snackbar v-model="notifySnackbar" bottom :color="notify.type">
+      <v-snackbar v-model="notifySnackbar" bottom :color="notify.type" :timeout="4000">
         {{ notify.message }}
         <template v-slot:actions>
+          <v-btn v-if="notify.actionLabel" variant="text" @click="notify.onAction?.()">
+            {{ notify.actionLabel }}
+          </v-btn>
           <v-btn variant="text" @click="notify.hideMessage()">
             <v-icon>{{ mdiClose }}</v-icon>
           </v-btn>

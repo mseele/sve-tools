@@ -19,8 +19,10 @@ async function sendConfirmation(onFinish: () => void) {
     notify.showSuccess('Die Teilnahmebestätigungen wurden erfolgreich versandt.')
     emit('success', props.event)
   } catch (error) {
-    console.error(error)
-    notify.showError('Teilnahmebestätigungen senden ist fehlgeschlagen. Details siehe Console')
+    if (error !== null) {
+      console.error(error)
+      notify.showError('Teilnahmebestätigungen senden ist fehlgeschlagen. Details siehe Console')
+    }
   } finally {
     onFinish()
   }
@@ -33,8 +35,10 @@ async function closeEvent(onFinish: () => void) {
     notify.showSuccess('Das Event wurde erfolgreich geschlossen.')
     emit('success')
   } catch (error) {
-    console.error(error)
-    notify.showError('Event schließen ist fehlgeschlagen. Details siehe Console')
+    if (error !== null) {
+      console.error(error)
+      notify.showError('Event schließen ist fehlgeschlagen. Details siehe Console')
+    }
   } finally {
     onFinish()
   }

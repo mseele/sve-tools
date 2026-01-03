@@ -9,17 +9,20 @@ import * as directives from 'vuetify/directives'
 import { aliases, mdi } from 'vuetify/iconsets/mdi-svg'
 import 'vuetify/styles'
 import App from './App.vue'
-import Cookies from 'js-cookie'
+import { useAuthStore } from './stores/auth'
 
 const router = createRouter({
   history: createWebHistory(),
   routes
 })
-router.beforeEach((to, _from, next) => {
-  if (to.path !== '/' && Cookies.get('sve_backend_tools') !== 'verified') {
-    return next({ path: '/' })
+router.beforeEach((to) => {
+  const auth = useAuthStore()
+  if (to.path !== '/' && !auth.isAuthenticated) {
+    auth.initFromStorage()
+    if (!auth.isAuthenticated) {
+      return { path: '/' }
+    }
   }
-  next()
 })
 
 createApp(App)

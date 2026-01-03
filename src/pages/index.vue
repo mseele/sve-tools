@@ -1,24 +1,41 @@
 <script setup lang="ts">
-import Cookies from 'js-cookie'
+import { useAuthStore } from '@/stores/auth'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
+const auth = useAuthStore()
+const buttonRef = ref<HTMLElement>()
 
 onMounted(() => {
-  if (Cookies.get('sve_backend_tools') === 'verified') {
+  auth.initFromStorage()
+  if (auth.isAuthenticated) {
     redirect()
+    return
+  }
+
+  if (typeof window !== 'undefined' && window.google?.accounts?.id) {
+    window.google.accounts.id.initialize({
+      client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
+      callback: (response: { credential: string }) => {
+        auth.setCredential(response.credential)
+        redirect()
+      },
+      auto_select: false,
+      cancel_on_tap_outside: true
+    })
+
+    if (buttonRef.value) {
+      window.google.accounts.id.renderButton(buttonRef.value, {
+        theme: 'outline',
+        size: 'large',
+        text: 'signin_with',
+        shape: 'rectangular',
+        width: 300
+      })
+    }
   }
 })
-
-const password = ref('')
-
-function login() {
-  if (window.btoa(password.value) === 'd29ya0BzdmU=') {
-    Cookies.set('sve_backend_tools', 'verified', { expires: 28 })
-    redirect()
-  }
-}
 
 function redirect() {
   router.push({ name: 'default_action' })
@@ -31,14 +48,7 @@ function redirect() {
       <v-container class="fill-height" fluid>
         <v-row align="center" justify="center">
           <v-col cols="12" sm="8" md="4">
-            <v-text-field
-              label="Passwort"
-              name="password"
-              type="password"
-              variant="outlined"
-              v-model="password"
-              @keyup.enter="login"
-            ></v-text-field>
+            <div ref="buttonRef" class="d-flex justify-center"></div>
           </v-col>
         </v-row>
       </v-container>

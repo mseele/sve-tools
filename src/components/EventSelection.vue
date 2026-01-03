@@ -111,8 +111,10 @@ async function loadEvents() {
     allEvents.value = await loadRequiredEvents(props.eventStatus)
     emitChanges()
   } catch (error) {
-    console.log(error)
-    notify.showError('Fehler beim Laden der Events. Details siehe Console')
+    if (error !== null) {
+      console.log(error)
+      notify.showError('Fehler beim Laden der Events. Details siehe Console')
+    }
   }
 }
 

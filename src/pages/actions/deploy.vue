@@ -13,8 +13,10 @@ async function redeployNext(onFinish: () => void) {
     await triggerDeploy(false)
     notify.showSuccess('Re-Deploy von next.sv-eutingen.de wurde erfolgreich gestartet')
   } catch (error) {
-    console.error(error)
-    notify.showError('Re-Deploy fehlgeschalgen. Details siehe Console')
+    if (error !== null) {
+      console.error(error)
+      notify.showError('Re-Deploy fehlgeschalgen. Details siehe Console')
+    }
   } finally {
     onFinish()
   }
@@ -25,8 +27,10 @@ async function redeployRelease(onFinish: () => void) {
     await triggerDeploy(true)
     notify.showSuccess('Re-Deploy von www.sv-eutingen.de wurde erfolgreich gestartet')
   } catch (error) {
-    console.error(error)
-    notify.showError('Re-Deploy fehlgeschalgen. Details siehe Console')
+    if (error !== null) {
+      console.error(error)
+      notify.showError('Re-Deploy fehlgeschalgen. Details siehe Console')
+    }
   } finally {
     onFinish()
   }

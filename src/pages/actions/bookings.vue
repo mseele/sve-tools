@@ -38,8 +38,10 @@ async function refresh() {
       true
     )
   } catch (error) {
-    console.error(error)
-    notify.showError('Fehler beim Laden der Events. Details siehe Console')
+    if (error !== null) {
+      console.error(error)
+      notify.showError('Fehler beim Laden der Events. Details siehe Console')
+    }
     allEvents.value = []
   }
 }

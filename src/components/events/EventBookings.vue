@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import {
   cancelBooking,
-  exportEventBookingsURL,
-  exportEventParticipantListURL,
+  exportEventBookings,
+  exportEventParticipantList,
   markEventBookingAsPayed
 } from '@/api'
 import { useNotifyStore } from '@/stores/notify'
@@ -103,8 +103,10 @@ async function markPayed(subscriber: EventSubscriber) {
   try {
     await markEventBookingAsPayed(subscriber.id)
   } catch (error) {
-    console.error(error)
-    notify.showError('Als Bezahlt markieren is fehlgeschlagen. Details siehe Console')
+    if (error !== null) {
+      console.error(error)
+      notify.showError('Als Bezahlt markieren is fehlgeschlagen. Details siehe Console')
+    }
   }
   refresh()
 }
@@ -125,8 +127,10 @@ async function confirmCancelBooking() {
   try {
     await cancelBooking(cancelBookingId.value)
   } catch (error) {
-    console.error(error)
-    notify.showError('Die Stornierung is fehlgeschlagen. Details siehe Console')
+    if (error !== null) {
+      console.error(error)
+      notify.showError('Die Stornierung is fehlgeschlagen. Details siehe Console')
+    }
   }
   cancelBookingDialog.value = false
   cancelBookingLoading.value = false
@@ -135,6 +139,28 @@ async function confirmCancelBooking() {
 
 function refresh() {
   emit('refresh')
+}
+
+async function downloadParticipantList(event: Event) {
+  try {
+    await exportEventParticipantList(event.id)
+  } catch (error) {
+    if (error !== null) {
+      console.error(error)
+      notify.showError('Download der Teilnehmerliste fehlgeschlagen. Details sie Console')
+    }
+  }
+}
+
+async function downloadBookings(event: Event) {
+  try {
+    await exportEventBookings(event.id)
+  } catch (error) {
+    if (error !== null) {
+      console.error(error)
+      notify.showError('Download der Buchungen fehlgeschlagen. Details sie Console')
+    }
+  }
 }
 </script>
 
@@ -175,7 +201,7 @@ function refresh() {
                     icon
                     variant="text"
                     color="red darken-2"
-                    :href="exportEventParticipantListURL(event.id)"
+                    @click="downloadParticipantList(event)"
                     v-bind="props"
                   >
                     <v-icon>{{ mdiFilePdfBox }}</v-icon>
@@ -189,7 +215,7 @@ function refresh() {
                     icon
                     variant="text"
                     color="green darken-2"
-                    :href="exportEventBookingsURL(event.id)"
+                    @click="downloadBookings(event)"
                     v-bind="props"
                   >
                     <v-icon>{{ mdiMicrosoftExcel }}</v-icon>

@@ -79,8 +79,10 @@ async function send() {
     notify.showSuccess('Alle Emails wurden erfolgreich versandt')
     reset()
   } catch (error) {
-    console.error(error)
-    notify.showError('Senden fehlgeschlafen. Details siehe Console')
+    if (error !== null) {
+      console.error(error)
+      notify.showError('Senden fehlgeschlafen. Details siehe Console')
+    }
     disabled.value = false
   }
 }

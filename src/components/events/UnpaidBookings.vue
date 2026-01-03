@@ -65,8 +65,10 @@ async function markPayed(booking: UnpaidBooking) {
   try {
     await markEventBookingAsPayed(booking.booking_id)
   } catch (error) {
-    console.error(error)
-    notify.showError('Als Bezahlt markieren ist fehlgeschlagen. Details siehe Console')
+    if (error !== null) {
+      console.error(error)
+      notify.showError('Als Bezahlt markieren ist fehlgeschlagen. Details siehe Console')
+    }
   }
   emit('refresh')
 }
@@ -76,8 +78,10 @@ async function sendingPaymentReminders() {
   try {
     await sendPaymentReminders(props.eventType)
   } catch (error) {
-    console.error(error)
-    notify.showError('Senden der Zahlungserinnerungen ist fehlgeschlagen. Details siehe Console')
+    if (error !== null) {
+      console.error(error)
+      notify.showError('Senden der Zahlungserinnerungen ist fehlgeschlagen. Details siehe Console')
+    }
   } finally {
     paymentReminderLoading.value = false
   }

@@ -37,8 +37,10 @@ onMounted(async () => {
   try {
     customFields.value = await loadCustomFields()
   } catch (error) {
-    console.error(error)
-    notify.showError('Laden der benutzerdefinierten Felder fehlgeschlagen. Details siehe Console')
+    if (error !== null) {
+      console.error(error)
+      notify.showError('Laden der benutzerdefinierten Felder fehlgeschlagen. Details siehe Console')
+    }
   }
 })
 
@@ -73,8 +75,10 @@ async function onDelete() {
     await eventSelection.value?.loadEvents()
     notify.showSuccess('Das Event wurde erfolgreich gelöscht')
   } catch (error) {
-    console.log(error)
-    notify.showError('Fehler beim Löschen des Events. Details siehe Console')
+    if (error !== null) {
+      console.log(error)
+      notify.showError('Fehler beim Löschen des Events. Details siehe Console')
+    }
   } finally {
     deleteDialog.value = false
     deleteLoading.value = false

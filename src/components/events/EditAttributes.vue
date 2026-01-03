@@ -162,8 +162,10 @@ async function onSave() {
     notify.showSuccess('Das Event wurde erfolgreich gespeichert')
     emit('success', savedEvent)
   } catch (error) {
-    console.log(error)
-    notify.showError('Fehler beim Speichern des Events. Details siehe Console')
+    if (error !== null) {
+      console.log(error)
+      notify.showError('Fehler beim Speichern des Events. Details siehe Console')
+    }
   } finally {
     loading.value = false
   }

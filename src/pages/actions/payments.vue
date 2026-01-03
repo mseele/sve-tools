@@ -28,8 +28,10 @@ async function loadUnpaidBookings() {
     const response = await getUnpaidBookings(eventType.value)
     unpaidBookings.value = response
   } catch (error) {
-    console.error(error)
-    notify.showError('Abholen unbezahlter Buchungen fehlgeschlafen. Details siehe Console')
+    if (error !== null) {
+      console.error(error)
+      notify.showError('Abholen unbezahlter Buchungen fehlgeschlafen. Details siehe Console')
+    }
   }
 }
 
@@ -60,8 +62,10 @@ async function send() {
     csvResult.value = response
     await loadUnpaidBookings()
   } catch (error) {
-    console.error(error)
-    notify.showError('Überprüfung fehlgeschlafen. Details siehe Console')
+    if (error !== null) {
+      console.error(error)
+      notify.showError('Überprüfung fehlgeschlafen. Details siehe Console')
+    }
   } finally {
     disabled.value = false
   }
