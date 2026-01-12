@@ -2,12 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-## [2.3.0](https://github.com/mseele/sve-tools/compare/v2.2.1...v2.3.0) (2026-01-11)
+### [2.3.1](https://github.com/mseele/sve-tools/compare/v2.3.0...v2.3.1) (2026-01-12)
 
+
+### Bug Fixes
+
+* correct export file name ([20956f0](https://github.com/mseele/sve-tools/commit/20956f0828d36183a8d11b464fb1cf3b15c2a022))
+
+## [2.3.0](https://github.com/mseele/sve-tools/compare/v2.2.1...v2.3.0) (2026-01-11)
 
 ### Features
 
-* implement oauth ([c5fdbfc](https://github.com/mseele/sve-tools/commit/c5fdbfca47e55c5e21ee150e0b51dba27f938c57))
+- implement oauth ([c5fdbfc](https://github.com/mseele/sve-tools/commit/c5fdbfca47e55c5e21ee150e0b51dba27f938c57))
 
 ### [2.2.1](https://github.com/mseele/sve-tools/compare/v2.2.0...v2.2.1) (2025-11-26)
 
