@@ -143,7 +143,7 @@ function refresh() {
 
 async function downloadParticipantList(event: Event) {
   try {
-    await exportEventParticipantList(event.id)
+    await exportEventParticipantList(event)
   } catch (error) {
     if (error !== null) {
       console.error(error)
@@ -154,7 +154,7 @@ async function downloadParticipantList(event: Event) {
 
 async function downloadBookings(event: Event) {
   try {
-    await exportEventBookings(event.id)
+    await exportEventBookings(event)
   } catch (error) {
     if (error !== null) {
       console.error(error)

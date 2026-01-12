@@ -158,17 +158,17 @@ export async function triggerDeploy(prod: boolean) {
   return { status: res.status, statusText: res.statusText }
 }
 
-export async function exportEventBookings(event_id: string) {
+export async function exportEventBookings(event: Event) {
   await downloadFile(
-    `${backend_prefix}/admin/events/booking/export/${event_id}`,
-    `buchungen-${event_id}.xlsx`
+    `${backend_prefix}/admin/events/booking/export/${event.id}`,
+    `buchungen-${event.name}.xlsx`
   )
 }
 
-export async function exportEventParticipantList(event_id: string) {
+export async function exportEventParticipantList(event: Event) {
   await downloadFile(
-    `${backend_prefix}/admin/events/booking/participants_list/${event_id}`,
-    `teilnehmerliste-${event_id}.pdf`
+    `${backend_prefix}/admin/events/booking/participants_list/${event.id}`,
+    `teilnehmerliste-${event.name}.pdf`
   )
 }
 
