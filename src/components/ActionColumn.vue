@@ -36,9 +36,10 @@ async function apply() {
     <v-sheet rounded :color="confirm ? 'red' : 'primary'" class="d-flex pa-3">
       <div class="me-auto align-self-center pr-2" v-html="props.text"></div>
       <v-btn
-        class="align-self-center"
+        class="align-self-center text-uppercase"
         :loading="loading"
         :disabled="loading"
+        variant="flat"
         color="white"
         @click="apply"
         >{{ confirm ? 'Sicher?' : props.button }}</v-btn

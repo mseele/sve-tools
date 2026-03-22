@@ -111,11 +111,10 @@ async function onDelete() {
               <v-btn
                 icon
                 variant="text"
-                color="primary"
                 :disabled="selection == null || selection.status != LifecycleStatus.Draft"
                 v-bind="props"
               >
-                <v-icon>{{ mdiDelete }}</v-icon>
+                <v-icon color="primary">{{ mdiDelete }}</v-icon>
               </v-btn>
             </template>
             <v-card>

@@ -42,8 +42,8 @@ function onApply() {
 <template>
   <v-dialog v-model="show" persistent max-width="500">
     <template v-slot:activator="{ props }">
-      <v-btn icon variant="text" color="primary" v-bind="props">
-        <v-icon>{{ mdiPlus }}</v-icon>
+      <v-btn icon variant="text" v-bind="props">
+        <v-icon color="primary">{{ mdiPlus }}</v-icon>
       </v-btn>
     </template>
     <v-card>

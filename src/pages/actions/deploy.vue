@@ -39,7 +39,7 @@ async function redeployRelease(onFinish: () => void) {
 
 <template>
   <ActionsLayout :title="title" :help="['Webseite nach Event-Änderung neu bauen und ausrollen']">
-    <v-row class="my-5 mx-1" justify="center">
+    <v-row class="my-5 mx-1 justify-center">
       <ActionColumn
         text="<b>next.sv-eutingen.de</b> neu bauen und ausrollen"
         @action="redeployNext"

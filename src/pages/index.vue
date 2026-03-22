@@ -45,8 +45,8 @@ function redirect() {
 <template>
   <v-layout full-height>
     <v-main style="min-height: 100vh">
-      <v-container class="fill-height" fluid>
-        <v-row align="center" justify="center">
+      <v-container class="fill-height d-flex align-center flex-wrap" fluid>
+        <v-row class="align-center justify-center">
           <v-col cols="12" sm="8" md="4">
             <div ref="buttonRef" class="d-flex justify-center"></div>
           </v-col>

@@ -33,6 +33,7 @@ createApp(App)
     createVuetify({
       components,
       directives,
+
       icons: {
         defaultSet: 'mdi',
         aliases,
@@ -41,6 +42,7 @@ createApp(App)
         }
       },
       theme: {
+        defaultTheme: 'light',
         themes: {
           light: {
             dark: false,

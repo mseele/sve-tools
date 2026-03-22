@@ -4,10 +4,9 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [2.4.0](https://github.com/mseele/sve-tools/compare/v2.3.1...v2.4.0) (2026-03-22)
 
-
 ### Features
 
-* add newsletter subscribers tool ([cf145c8](https://github.com/mseele/sve-tools/commit/cf145c8f3fd326ede972e39b3024241a30cea2fa))
+- add newsletter subscribers tool ([cf145c8](https://github.com/mseele/sve-tools/commit/cf145c8f3fd326ede972e39b3024241a30cea2fa))
 
 ### [2.3.1](https://github.com/mseele/sve-tools/compare/v2.3.0...v2.3.1) (2026-01-12)
 

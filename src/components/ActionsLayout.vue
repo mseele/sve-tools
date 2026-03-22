@@ -65,7 +65,7 @@ function handleLogout() {
     </v-app-bar>
 
     <v-navigation-drawer v-model="drawer" :permanent="mdAndUp">
-      <v-list nav dense>
+      <v-list nav density="compact">
         <v-list-item
           v-for="(action, index) of actions"
           :key="index"

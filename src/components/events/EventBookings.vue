@@ -197,28 +197,16 @@ async function downloadBookings(event: Event) {
               <div v-else class="subtitle-2 text-grey">Preis pro Einheit fehlt</div>
               <v-tooltip left>
                 <template v-slot:activator="{ props }">
-                  <v-btn
-                    icon
-                    variant="text"
-                    color="red darken-2"
-                    @click="downloadParticipantList(event)"
-                    v-bind="props"
-                  >
-                    <v-icon>{{ mdiFilePdfBox }}</v-icon>
+                  <v-btn icon variant="text" @click="downloadParticipantList(event)" v-bind="props">
+                    <v-icon color="error">{{ mdiFilePdfBox }}</v-icon>
                   </v-btn>
                 </template>
                 <span>Teilnehmerliste herunterladen</span>
               </v-tooltip>
               <v-tooltip left>
                 <template v-slot:activator="{ props }">
-                  <v-btn
-                    icon
-                    variant="text"
-                    color="green darken-2"
-                    @click="downloadBookings(event)"
-                    v-bind="props"
-                  >
-                    <v-icon>{{ mdiMicrosoftExcel }}</v-icon>
+                  <v-btn icon variant="text" @click="downloadBookings(event)" v-bind="props">
+                    <v-icon color="success">{{ mdiMicrosoftExcel }}</v-icon>
                   </v-btn>
                 </template>
                 <span>Buchungsliste herunterladen</span>

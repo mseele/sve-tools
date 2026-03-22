@@ -46,13 +46,15 @@ async function send() {
       color="primary"
     ></v-progress-circular>
     <v-spacer />
-    <v-btn depressed :disabled="props.disabled" @click="reset()">Zurücksetzen</v-btn>
+    <v-btn variant="flat" class="text-uppercase" :disabled="props.disabled" @click="reset()"
+      >Zurücksetzen</v-btn
+    >
     <v-btn
       v-if="props.sendVisible"
-      depressed
-      :color="confirmSend ? 'red' : 'primary'"
+      variant="elevated"
+      class="text-uppercase text-white ml-2"
+      :color="confirmSend ? 'error' : 'primary'"
       :disabled="disabled"
-      class="ml-2"
       @click="send()"
     >
       {{ confirmSend ? 'Sicher?' : props.sendText }}

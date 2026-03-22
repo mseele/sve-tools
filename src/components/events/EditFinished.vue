@@ -46,7 +46,7 @@ async function closeEvent(onFinish: () => void) {
 </script>
 
 <template>
-  <v-row class="my-5" justify="center">
+  <v-row class="my-5 justify-center">
     <ActionColumn text="Teilnahmebestätigungen senden" @action="sendConfirmation" />
     <ActionColumn text="Event abschließen" @action="closeEvent" />
   </v-row>

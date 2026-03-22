@@ -224,7 +224,7 @@ const rules = {
 
 <template>
   <v-form v-model="valid">
-    <v-row dense>
+    <v-row density="compact">
       <v-col cols="12">
         <v-text-field
           label="Name"
@@ -257,8 +257,8 @@ const rules = {
           <template v-slot:item="{ props, item }">
             <v-list-item v-bind="props" title="">
               <div class="d-flex align-center my-2">
-                <img :src="item.raw.url" class="event-img" />
-                <div class="ml-2">{{ item.raw.name }}</div>
+                <img :src="item.url" class="event-img" />
+                <div class="ml-2">{{ item.name }}</div>
               </div>
             </v-list-item>
           </template>
@@ -484,11 +484,12 @@ const rules = {
             color="light-blue"
           ></v-progress-circular>
           <v-spacer />
-          <v-btn depressed class="mr-2" :disabled="loading" @click="onReset()">
+          <v-btn variant="flat" class="text-uppercase mr-2" :disabled="loading" @click="onReset()">
             Zurücksetzen
           </v-btn>
           <v-btn
-            depressed
+            variant="elevated"
+            class="text-uppercase text-white"
             :color="confirmSave ? 'red' : 'primary'"
             :disabled="!valid || loading"
             @click="onSave()"

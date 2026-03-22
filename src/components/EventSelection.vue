@@ -149,7 +149,7 @@ function selectEvent(e: Event) {
     >
       <template v-slot:item="{ props, item }">
         <v-list-item v-bind="props" title="">
-          <EventListItem :status="item.raw.status" :text="eventName(item.raw)" />
+          <EventListItem :status="item.status" :text="eventName(item)" />
         </v-list-item>
       </template>
     </v-autocomplete>
