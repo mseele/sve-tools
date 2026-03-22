@@ -4,7 +4,8 @@ import type {
   LifecycleStatus,
   UnpaidBooking,
   Event,
-  EventCustomField
+  EventCustomField,
+  NewsTopic
 } from '@/types'
 import { useNotifyStore } from '@/stores/notify'
 
@@ -189,4 +190,10 @@ async function downloadFile(url: string, filename: string) {
   a.click()
   document.body.removeChild(a)
   window.URL.revokeObjectURL(downloadUrl)
+}
+
+export async function getNewsletterSubscribers(topics: NewsTopic[]): Promise<string[]> {
+  return fetchJson<string[]>(`${backend_prefix}/admin/news/subscribers?topic=${topics.join(',')}`, {
+    headers: { ...getAuthHeaders() }
+  })
 }

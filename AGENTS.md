@@ -106,15 +106,15 @@ import { ref, computed } from 'vue'
 export const useAuthStore = defineStore('auth', () => {
   // State
   const token = ref<string | null>(null)
-  
+
   // Getters
   const isAuthenticated = computed(() => !!token.value)
-  
+
   // Actions
   function logout() {
     token.value = null
   }
-  
+
   return { token, isAuthenticated, logout }
 })
 ```

@@ -52,6 +52,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       never
     >
+    '/actions/newsletter': RouteRecordInfo<
+      '/actions/newsletter',
+      '/actions/newsletter',
+      Record<never, never>,
+      Record<never, never>,
+      never
+    >
     '/actions/payments': RouteRecordInfo<
       '/actions/payments',
       '/actions/payments',
@@ -97,6 +104,10 @@ declare module 'vue-router/auto-routes' {
     }
     'src/pages/actions/events.vue': {
       routes: 'default_action'
+      views: never
+    }
+    'src/pages/actions/newsletter.vue': {
+      routes: '/actions/newsletter'
       views: never
     }
     'src/pages/actions/payments.vue': {

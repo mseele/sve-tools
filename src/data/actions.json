@@ -16,6 +16,10 @@
     "link": "/actions/prebooking"
   },
   {
+    "name": "Manage Newsletter",
+    "link": "/actions/newsletter"
+  },
+  {
     "name": "Verify Payments",
     "link": "/actions/payments"
   },

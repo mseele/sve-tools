@@ -32,6 +32,12 @@ export enum EventType {
   Events = 'Events'
 }
 
+export enum NewsTopic {
+  General = 'General',
+  Events = 'Events',
+  Fitness = 'Fitness'
+}
+
 export enum LifecycleStatus {
   Draft = 'Draft',
   Review = 'Review',
