@@ -4,10 +4,9 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### [2.3.1](https://github.com/mseele/sve-tools/compare/v2.3.0...v2.3.1) (2026-01-12)
 
-
 ### Bug Fixes
 
-* correct export file name ([20956f0](https://github.com/mseele/sve-tools/commit/20956f0828d36183a8d11b464fb1cf3b15c2a022))
+- correct export file name ([20956f0](https://github.com/mseele/sve-tools/commit/20956f0828d36183a8d11b464fb1cf3b15c2a022))
 
 ## [2.3.0](https://github.com/mseele/sve-tools/compare/v2.2.1...v2.3.0) (2026-01-11)
 
