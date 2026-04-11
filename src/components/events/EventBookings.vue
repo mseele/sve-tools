@@ -12,7 +12,6 @@ import {
   mdiCash,
   mdiCheck,
   mdiClose,
-  mdiComment,
   mdiDelete,
   mdiFilePdfBox,
   mdiMicrosoftExcel
@@ -36,7 +35,6 @@ const headers = [
   { title: 'Email', key: 'email' },
   { title: 'Mgl.', key: 'member' },
   { title: 'Bezahlt', key: 'payed' },
-  { title: 'Komm.', key: 'comment' },
   { title: '', key: 'actions', sortable: false }
 ]
 const cancelBookingDialog = ref(false)
@@ -237,7 +235,7 @@ async function downloadBookings(event: Event) {
         </template>
         <template v-slot:no-data>Bisher noch keine Buchungen</template>
         <template v-slot:item="{ item }">
-          <tr>
+          <tr :class="{ 'comment-row': item.comment }">
             <td>
               <v-tooltip bottom>
                 <template v-slot:activator="{ props }">
@@ -272,16 +270,6 @@ async function downloadBookings(event: Event) {
               </v-tooltip>
             </td>
             <td>
-              <v-tooltip bottom>
-                <template v-slot:activator="{ props }">
-                  <v-icon size="xs" v-if="item.comment != undefined" v-bind="props">{{
-                    mdiComment
-                  }}</v-icon>
-                </template>
-                <span>{{ item.comment }}</span>
-              </v-tooltip>
-            </td>
-            <td>
               <div class="d-flex align-center justify-end">
                 <template v-if="!item.payed">
                   <v-tooltip bottom>
@@ -304,8 +292,19 @@ async function downloadBookings(event: Event) {
               </div>
             </td>
           </tr>
+          <tr v-if="item.comment">
+            <td colspan="6" class="text-caption text-pre-wrap">
+              {{ item.comment }}
+            </td>
+          </tr>
         </template>
       </v-data-table-virtual>
     </v-col>
   </v-row>
 </template>
+
+<style scoped>
+tr.comment-row > td {
+  border-bottom: none !important;
+}
+</style>
