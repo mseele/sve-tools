@@ -21,8 +21,8 @@ onMounted(() => {
         auth.setCredential(response.credential)
         redirect()
       },
-      auto_select: false,
-      cancel_on_tap_outside: true
+      auto_select: true,
+      cancel_on_tap_outside: false
     })
 
     if (buttonRef.value) {
