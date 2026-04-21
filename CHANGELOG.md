@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.5.0](https://github.com/mseele/sve-tools/compare/v2.4.2...v2.5.0) (2026-04-21)
+
+
+### Features
+
+* add email templates for fitness and events ([68f0e67](https://github.com/mseele/sve-tools/commit/68f0e6799137623562d8a8ada63df8a3d3241569))
+
 ### [2.4.2](https://github.com/mseele/sve-tools/compare/v2.4.1...v2.4.2) (2026-04-19)
 
 ### Bug Fixes
