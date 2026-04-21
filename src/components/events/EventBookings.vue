@@ -8,14 +8,7 @@ import {
 import { useNotifyStore } from '@/stores/notify'
 import { LifecycleStatus, type Event, type EventSubscriber } from '@/types'
 import { formatPrice } from '@/utils'
-import {
-  mdiCash,
-  mdiCheck,
-  mdiClose,
-  mdiDelete,
-  mdiFilePdfBox,
-  mdiMicrosoftExcel
-} from '@mdi/js'
+import { mdiCash, mdiCheck, mdiClose, mdiDelete, mdiFilePdfBox, mdiMicrosoftExcel } from '@mdi/js'
 import { computed, ref } from 'vue'
 
 const props = defineProps<{

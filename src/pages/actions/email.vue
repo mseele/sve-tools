@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { sendEmails } from '@/api'
+import { batchEmailTemplates, type EmailTemplate } from '@/data/emailTemplates'
 import EventSelection from '@/components/EventSelection.vue'
 import { useNotifyStore } from '@/stores/notify'
 import { EventType, LifecycleStatus, type Event, type EventEmail } from '@/types'
-import { defaultEmailBody, defaultEmailSubject, readFile } from '@/utils'
+import { readFile } from '@/utils'
 import { useHead } from '@unhead/vue'
 import { computed, ref, watch } from 'vue'
 
@@ -15,8 +16,9 @@ const notify = useNotifyStore()
 const eventType = ref(EventType.Fitness)
 const attachments = ref<File[]>([])
 const event = ref<Event>()
-const subject = ref(defaultEmailSubject(eventType.value))
-const content = ref(defaultEmailBody(eventType.value))
+const selectedTemplate = ref<EmailTemplate>(batchEmailTemplates[eventType.value][0])
+const subject = ref(selectedTemplate.value.subject)
+const content = ref(selectedTemplate.value.body)
 const bookingList = ref(false)
 const waitingList = ref(false)
 const disabled = ref(false)
@@ -25,14 +27,20 @@ const eventSelection = ref<InstanceType<typeof EventSelection> | null>(null)
 const editable = computed(() => event.value !== undefined)
 
 watch(eventType, (value) => {
-  subject.value = defaultEmailSubject(value)
-  content.value = defaultEmailBody(value)
+  selectedTemplate.value = batchEmailTemplates[value][0]
+  subject.value = selectedTemplate.value.subject
+  content.value = selectedTemplate.value.body
 })
 
 function onEventSelection(data: { event: Event; bookingList?: boolean; waitingList?: boolean }) {
   event.value = data.event
   bookingList.value = data.bookingList || false
   waitingList.value = data.waitingList || false
+}
+
+function onTemplateSelect(template: EmailTemplate) {
+  subject.value = template.subject
+  content.value = template.body
 }
 
 function reset() {
@@ -120,6 +128,18 @@ async function send() {
             :showBookingGroups="true"
             @change="onEventSelection"
           />
+          <v-select
+            v-model="selectedTemplate"
+            :items="batchEmailTemplates[eventType]"
+            item-title="label"
+            item-value="id"
+            return-object
+            variant="outlined"
+            label="Vorlage"
+            :disabled="disabled"
+            class="mb-4"
+            @update:model-value="onTemplateSelect"
+          ></v-select>
           <v-text-field
             v-model="subject"
             variant="outlined"
