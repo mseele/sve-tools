@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.6.0](https://github.com/mseele/sve-tools/compare/v2.5.0...v2.6.0) (2026-04-30)
+
+
+### Features
+
+* add mutter_kind_light image for event assets ([8440ed2](https://github.com/mseele/sve-tools/commit/8440ed26ec892b73e14b61fff20dde5fbdd43407))
+
 ## [2.5.0](https://github.com/mseele/sve-tools/compare/v2.4.2...v2.5.0) (2026-04-21)
 
 
