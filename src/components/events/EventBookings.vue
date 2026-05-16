@@ -3,12 +3,21 @@ import {
   cancelBooking,
   exportEventBookings,
   exportEventParticipantList,
+  exportSepaXml,
   markEventBookingAsPayed
 } from '@/api'
 import { useNotifyStore } from '@/stores/notify'
-import { LifecycleStatus, type Event, type EventSubscriber } from '@/types'
+import { LifecycleStatus, PaymentMethod, type Event, type EventSubscriber } from '@/types'
 import { formatPrice } from '@/utils'
-import { mdiCash, mdiCheck, mdiClose, mdiDelete, mdiFilePdfBox, mdiMicrosoftExcel } from '@mdi/js'
+import {
+  mdiBankTransfer,
+  mdiCash,
+  mdiCheck,
+  mdiClose,
+  mdiDelete,
+  mdiFilePdfBox,
+  mdiMicrosoftExcel
+} from '@mdi/js'
 import { computed, ref } from 'vue'
 
 const props = defineProps<{
@@ -22,14 +31,21 @@ const emit = defineEmits<{
 
 const notify = useNotifyStore()
 
-const headers = [
-  { title: '', key: 'enrolled' },
-  { title: 'Name', key: 'first_name' },
-  { title: 'Email', key: 'email' },
-  { title: 'Mgl.', key: 'member' },
-  { title: 'Bezahlt', key: 'payed' },
-  { title: '', key: 'actions', sortable: false }
-]
+function getHeaders(event: Event) {
+  const base: { title: string; key: string; sortable?: boolean }[] = [
+    { title: '', key: 'enrolled' },
+    { title: 'Name', key: 'first_name' },
+    { title: 'Email', key: 'email' },
+    { title: 'Mgl.', key: 'member' }
+  ]
+  if (event.payment_method === PaymentMethod.SepaDirectDebit) {
+    base.push({ title: 'SEPA exportiert', key: 'sepa_exported_at' })
+  } else {
+    base.push({ title: 'Zahlung bestätigt', key: 'payment_confirmed_at' })
+  }
+  base.push({ title: '', key: 'actions', sortable: false })
+  return base
+}
 const cancelBookingDialog = ref(false)
 const cancelBookingId = ref<string>()
 const cancelBookingLoading = ref(false)
@@ -153,6 +169,17 @@ async function downloadBookings(event: Event) {
     }
   }
 }
+
+async function exportSepa(event: Event) {
+  try {
+    await exportSepaXml(event)
+  } catch (error) {
+    if (error !== null) {
+      console.error(error)
+      notify.showError('SEPA-XML Export fehlgeschlagen. Details siehe Console')
+    }
+  }
+}
 </script>
 
 <template>
@@ -163,7 +190,7 @@ async function downloadBookings(event: Event) {
     <v-col cols="12" v-for="(event, index) of filteredEvents" :key="index">
       <v-data-table-virtual
         density="compact"
-        :headers="headers"
+        :headers="getHeaders(event)"
         :items="event.subscribers"
         item-key="id"
         class="elevation-1"
@@ -201,6 +228,20 @@ async function downloadBookings(event: Event) {
                   </v-btn>
                 </template>
                 <span>Buchungsliste herunterladen</span>
+              </v-tooltip>
+              <v-tooltip left>
+                <template v-slot:activator="{ props }">
+                  <v-btn
+                    v-if="event.payment_method === PaymentMethod.SepaDirectDebit"
+                    icon
+                    variant="text"
+                    @click="exportSepa(event)"
+                    v-bind="props"
+                  >
+                    <v-icon color="blue-darken-2">{{ mdiBankTransfer }}</v-icon>
+                  </v-btn>
+                </template>
+                <span>SEPA-XML exportieren</span>
               </v-tooltip>
             </div>
           </div>
@@ -249,22 +290,34 @@ async function downloadBookings(event: Event) {
             <td>
               <v-icon v-if="item.member">{{ mdiCheck }}</v-icon>
             </td>
-            <td>
-              <v-tooltip bottom>
-                <template v-slot:activator="{ props }">
-                  <div class="d-flex align-center text-no-wrap" v-bind="props">
-                    <v-icon :color="item.payed ? 'green' : 'red'">{{
-                      item.payed ? mdiCheck : mdiClose
-                    }}</v-icon>
-                    <div>{{ item.payment_id }}</div>
-                  </div>
-                </template>
-                <span>{{ price(event, item.member) }}</span>
-              </v-tooltip>
-            </td>
+            <template v-if="event.payment_method === PaymentMethod.SepaDirectDebit">
+              <td>
+                <v-icon v-if="item.sepa_exported_at" color="green">{{ mdiCheck }}</v-icon>
+              </td>
+            </template>
+            <template v-else>
+              <td>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ props }">
+                    <div class="d-flex align-center text-no-wrap" v-bind="props">
+                      <v-icon :color="item.payment_confirmed_at ? 'green' : 'red'">{{
+                        item.payment_confirmed_at ? mdiCheck : mdiClose
+                      }}</v-icon>
+                      <div>{{ item.payment_id }}</div>
+                    </div>
+                  </template>
+                  <span>{{ price(event, item.member) }}</span>
+                </v-tooltip>
+              </td>
+            </template>
             <td>
               <div class="d-flex align-center justify-end">
-                <template v-if="!item.payed">
+                <template
+                  v-if="
+                    !item.payment_confirmed_at &&
+                    event.payment_method !== PaymentMethod.SepaDirectDebit
+                  "
+                >
                   <v-tooltip bottom>
                     <template v-slot:activator="{ props }">
                       <v-icon size="xs" class="mr-2" @click="markPayed(item)" v-bind="props">{{
@@ -286,7 +339,7 @@ async function downloadBookings(event: Event) {
             </td>
           </tr>
           <tr v-if="item.comment">
-            <td colspan="6" class="text-caption text-pre-wrap">
+            <td :colspan="getHeaders(event).length" class="text-caption text-pre-wrap">
               {{ item.comment }}
             </td>
           </tr>

@@ -173,6 +173,40 @@ export async function exportEventParticipantList(event: Event) {
   )
 }
 
+export async function exportSepaXml(event: Event) {
+  const token = localStorage.getItem('token')
+  const res = await fetch(`${backend_prefix}/admin/events/${event.id}/sepa_xml`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {}
+  })
+  if (handleAuthError(res)) throw null
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(text)
+  }
+
+  const today = new Date().toISOString().split('T')[0]
+  const eventName = event.name.replace(/\s+/g, '_').toLowerCase()
+  let filename = `sepa-${eventName}-${today}.xml`
+  const disposition = res.headers.get('content-disposition')
+  if (disposition) {
+    const match = disposition.match(/filename="?([^"]+)"?/)
+    if (match) {
+      filename = match[1]
+    }
+  }
+
+  const blob = await res.blob()
+  const downloadUrl = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = downloadUrl
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  window.URL.revokeObjectURL(downloadUrl)
+}
+
 async function downloadFile(url: string, filename: string) {
   const token = localStorage.getItem('token')
   const res = await fetch(url, {

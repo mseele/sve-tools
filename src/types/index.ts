@@ -24,7 +24,13 @@ export interface Event {
   alt_email_address?: string
   external_operator: boolean
   custom_fields: EventCustomField[]
+  payment_method: PaymentMethod
   subscribers?: EventSubscriber[]
+}
+
+export enum PaymentMethod {
+  BankTransfer = 'BankTransfer',
+  SepaDirectDebit = 'SepaDirectDebit'
 }
 
 export enum EventType {
@@ -103,7 +109,9 @@ export interface EventSubscriber {
   enrolled: boolean
   member: boolean
   payment_id: string
-  payed: boolean
+  payment_confirmed_at?: string
+  sepa_exported_at?: string
+  iban?: string
   comment?: string
   custom_values: string[]
 }

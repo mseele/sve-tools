@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { updateEvent } from '@/api'
 import { useNotifyStore } from '@/stores/notify'
-import { LifecycleStatus, type Event, type EventCustomField } from '@/types'
+import { LifecycleStatus, PaymentMethod, type Event, type EventCustomField } from '@/types'
 import { mdiPlus } from '@mdi/js'
 import { addDays, format, isBefore, isValid, parseISO } from 'date-fns'
 import { isEqual, transform } from 'lodash-es'
@@ -80,6 +80,13 @@ function itemsStatus() {
       break
   }
   return all.filter((v) => allowed.indexOf(v.value) != -1)
+}
+
+function itemsPaymentMethod() {
+  return [
+    { value: PaymentMethod.BankTransfer, title: 'Überweisung' },
+    { value: PaymentMethod.SepaDirectDebit, title: 'SEPA-Lastschrift' }
+  ]
 }
 
 function itemsCustomFields() {
@@ -359,6 +366,15 @@ const rules = {
           v-model="selection.location"
           :rules="rules.required"
         ></v-text-field>
+      </v-col>
+      <v-col cols="12">
+        <v-select
+          :items="itemsPaymentMethod()"
+          label="Zahlungsmethode"
+          variant="outlined"
+          density="compact"
+          v-model="selection.payment_method"
+        ></v-select>
       </v-col>
       <v-col cols="12" sm="4">
         <v-text-field
