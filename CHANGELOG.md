@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.7.0](https://github.com/mseele/sve-tools/compare/v2.6.0...v2.7.0) (2026-06-20)
+
+
+### Features
+
+* add SEPA Lastschrift direct debit support ([3580244](https://github.com/mseele/sve-tools/commit/3580244ff45070944b3ce2acfafcdee318c4f135))
+
 ## [2.6.0](https://github.com/mseele/sve-tools/compare/v2.5.0...v2.6.0) (2026-04-30)
 
 ### Features
