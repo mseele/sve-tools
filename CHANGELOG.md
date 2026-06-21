@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.9.0](https://github.com/mseele/sve-tools/compare/v2.8.0...v2.9.0) (2026-06-21)
+
+
+### Features
+
+* implement WYSWYG editor for description field ([f0a9b4b](https://github.com/mseele/sve-tools/commit/f0a9b4b851c934f48258d3798535119c1299cffa))
+
 ## [2.8.0](https://github.com/mseele/sve-tools/compare/v2.7.0...v2.8.0) (2026-06-20)
 
 
