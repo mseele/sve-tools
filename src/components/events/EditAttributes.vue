@@ -291,14 +291,11 @@ const rules = {
         ></v-textarea>
       </v-col>
       <v-col cols="12">
-        <v-textarea
+        <DescriptionEditor
           label="Beschreibung"
-          variant="outlined"
-          density="compact"
-          rows="7"
           v-model="selection.description"
           :rules="rules.required"
-        ></v-textarea>
+        />
       </v-col>
       <v-col cols="12">
         <v-tabs class="mb-2" v-model="dateSelection">

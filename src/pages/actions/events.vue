@@ -91,7 +91,7 @@ async function onDelete() {
     :title="title"
     :help="[
       'Hier können Events & Fitnesskurse bearbeitet werden',
-      'In der Beschreibung kann mit HTML-Tags z.B. für eine Liste oder eine fettgedruckte Schrift gerarbeitet werden'
+      'In der Beschreibung kann Text fettgedruckt und als Liste formatiert werden'
     ]"
   >
     <v-row>

@@ -15,6 +15,7 @@ declare module 'vue' {
     ActionsLayout: typeof import('./src/components/ActionsLayout.vue')['default']
     ButtonArea: typeof import('./src/components/ButtonArea.vue')['default']
     CreateNew: typeof import('./src/components/events/CreateNew.vue')['default']
+    DescriptionEditor: typeof import('./src/components/events/DescriptionEditor.vue')['default']
     EditAttributes: typeof import('./src/components/events/EditAttributes.vue')['default']
     EditFinished: typeof import('./src/components/events/EditFinished.vue')['default']
     EventBookings: typeof import('./src/components/events/EventBookings.vue')['default']
