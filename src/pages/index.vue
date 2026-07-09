@@ -1,11 +1,15 @@
 <script setup lang="ts">
+import { exchangeGoogleToken } from '@/api'
+import { useNotifyStore } from '@/stores/notify'
 import { useAuthStore } from '@/stores/auth'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const auth = useAuthStore()
+const notify = useNotifyStore()
 const buttonRef = ref<HTMLElement>()
+const loading = ref(false)
 
 onMounted(() => {
   auth.initFromStorage()
@@ -17,9 +21,17 @@ onMounted(() => {
   if (typeof window !== 'undefined' && window.google?.accounts?.id) {
     window.google.accounts.id.initialize({
       client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-      callback: (response: { credential: string }) => {
-        auth.setCredential(response.credential)
-        redirect()
+      callback: async (response: { credential: string }) => {
+        loading.value = true
+        try {
+          const sessionToken = await exchangeGoogleToken(response.credential)
+          auth.setCredential(sessionToken)
+          redirect()
+        } catch {
+          notify.showError('Login fehlgeschlagen. Bitte erneut versuchen.')
+        } finally {
+          loading.value = false
+        }
       },
       auto_select: true,
       cancel_on_tap_outside: false
@@ -47,8 +59,11 @@ function redirect() {
     <v-main style="min-height: 100vh">
       <v-container class="fill-height d-flex align-center flex-wrap" fluid>
         <v-row class="align-center justify-center">
-          <v-col cols="12" sm="8" md="4">
-            <div ref="buttonRef" class="d-flex justify-center"></div>
+          <v-col cols="12" sm="8" md="4" class="d-flex justify-center">
+            <div v-if="loading" class="d-flex align-center">
+              <v-progress-circular indeterminate size="48" />
+            </div>
+            <div v-else ref="buttonRef" class="d-flex justify-center"></div>
           </v-col>
         </v-row>
       </v-container>
