@@ -37,6 +37,17 @@ async function fetchJson<T>(input: RequestInfo, init?: RequestInit): Promise<T> 
   return response.json()
 }
 
+export async function exchangeGoogleToken(googleToken: string): Promise<string> {
+  const res = await fetch(`${backend_prefix}/auth/session`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ google_token: googleToken })
+  })
+  if (!res.ok) throw new Error(await res.text())
+  const data = (await res.json()) as { token: string }
+  return data.token
+}
+
 export async function loadEvents(status?: LifecycleStatus[], subscribers?: boolean) {
   let url = `${backend_prefix}/admin/events`
   if (status != undefined && status.length > 0) {
