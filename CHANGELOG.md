@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.10.0](https://github.com/mseele/sve-tools/compare/v2.9.0...v2.10.0) (2026-07-09)
+
+
+### Features
+
+* exchange Google token for session JWT at login ([aec0b88](https://github.com/mseele/sve-tools/commit/aec0b889de847004d6f4a4ea3bf740b1bf2c125d)), closes [#69](https://github.com/mseele/sve-tools/issues/69)
+
 ## [2.9.0](https://github.com/mseele/sve-tools/compare/v2.8.0...v2.9.0) (2026-06-21)
 
 
