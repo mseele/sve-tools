@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.10.1](https://aws-eu-central-1.entire.io/gh/mseele/sve-tools/compare/v2.10.0...v2.10.1) (2026-07-17)
+
+
+### Bug Fixes
+
+* allow api.netlify.com in CSP connect-src to restore redeploy ([37a8d20](https://aws-eu-central-1.entire.io/gh/mseele/sve-tools/commit/37a8d20b5c53ef62ecae942b28ff9d35fd108e7b))
+
 ## [2.10.0](https://github.com/mseele/sve-tools/compare/v2.9.0...v2.10.0) (2026-07-09)
 
 
