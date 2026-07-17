@@ -1,0 +1,14 @@
+re-deploy website does no longer work: api-C_u_FMOe.js:1 Connecting to 'https://api.netlify.com/build_hooks/6127d32…' violates the following Content Security Policy directive: "connect-src 'self' https://backend.sv-eutingen.de https://accounts.google.com". The action has been blocked.
+
+api-C_u_FMOe.js:1 Fetch API cannot load https://api.netlify.com/build_hooks/6127d32…. Refused to connect because it violates the document's Content Security Policy.
+deploy-DHdRvQw2.js:1 TypeError: Failed to fetch. Refused to connect because it violates the document's Content Security Policy.
+    at b (api-C_u_FMOe.js:1:3495)
+    at p (deploy-DHdRvQw2.js:1:370)
+    at vn (auth-BVWDU6PW.js:1:20293)
+    at yn (auth-BVWDU6PW.js:1:20361)
+    at Ai (auth-BVWDU6PW.js:1:40695)
+    at g (ActionColumn-5IsxjXUN.js:1:331)
+    at framework-BcWYoUVI.js:1:14973
+    at vn (auth-BVWDU6PW.js:1:20293)
+    at yn (auth-BVWDU6PW.js:1:20361)
+    at yn (auth-BVWDU6PW.js:1:20467)
