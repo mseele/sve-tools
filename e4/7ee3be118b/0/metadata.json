@@ -1,0 +1,50 @@
+{
+  "cli_version": "0.8.42",
+  "checkpoint_id": "e47ee3be118b",
+  "session_id": "ses_08701c21dffeu4stE2EzC7Q90o",
+  "strategy": "manual-commit",
+  "created_at": "2026-07-19T07:02:03.922286Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "src/components/events/EditAttributes.vue"
+  ],
+  "agent": "OpenCode",
+  "model": "minimax-m3",
+  "turn_id": "fc1ca2075db1",
+  "compact_transcript_start": 0,
+  "token_usage": {
+    "input_tokens": 35057,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 130057,
+    "output_tokens": 1380,
+    "api_call_count": 11
+  },
+  "session_metrics": {
+    "turn_count": 1
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-07-19T07:02:03.914416Z",
+    "agent_lines": 1,
+    "agent_removed": 1,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 1,
+    "total_lines_changed": 2,
+    "agent_percentage": 100,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 267,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        ".opencode/plugins/entire.ts": 267
+      }
+    }
+  ]
+}
