@@ -300,7 +300,7 @@ const rules = {
       <v-col cols="12">
         <v-tabs class="mb-2" v-model="dateSelection">
           <v-tab value="dates">Termine ({{ selection.dates.length }})</v-tab>
-          <v-tab vvalue="free_date">Individuelles Datum (Freitext)</v-tab>
+          <v-tab value="free_date">Individuelles Datum (Freitext)</v-tab>
         </v-tabs>
         <v-window v-model="dateSelection">
           <v-window-item class="mt-2" value="dates">
