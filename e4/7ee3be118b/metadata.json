@@ -3,7 +3,7 @@
   "checkpoint_id": "e47ee3be118b",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 1,
+  "checkpoints_count": 2,
   "files_touched": [
     "src/components/events/EditAttributes.vue"
   ],
@@ -14,6 +14,13 @@
       "compact_transcript": "/e4/7ee3be118b/0/transcript.jsonl",
       "content_hash": "/e4/7ee3be118b/0/content_hash.txt",
       "prompt": "/e4/7ee3be118b/0/prompt.txt"
+    },
+    {
+      "metadata": "/e4/7ee3be118b/1/metadata.json",
+      "transcript": "/e4/7ee3be118b/1/full.jsonl",
+      "compact_transcript": "/e4/7ee3be118b/1/transcript.jsonl",
+      "content_hash": "/e4/7ee3be118b/1/content_hash.txt",
+      "prompt": ""
     }
   ],
   "token_usage": {
@@ -21,6 +28,6 @@
     "cache_creation_tokens": 0,
     "cache_read_tokens": 130057,
     "output_tokens": 1380,
-    "api_call_count": 11
+    "api_call_count": 12
   }
 }

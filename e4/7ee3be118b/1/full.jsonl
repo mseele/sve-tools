@@ -1,0 +1,95 @@
+{
+  "info": {
+    "id": "ses_087107044ffel73pwQzFzxOp7J",
+    "slug": "curious-lagoon",
+    "projectID": "0b00484ea37c3a9b0ecf702b365754180838ef56",
+    "directory": "/Users/mseele/dev/sve/sve-tools",
+    "path": "",
+    "title": "New session - 2026-07-19T05:53:13.659Z",
+    "agent": "plan",
+    "model": {
+      "id": "minimax-m3",
+      "providerID": "opencode-go"
+    },
+    "version": "1.18.3",
+    "summary": {
+      "additions": 0,
+      "deletions": 0,
+      "files": 0
+    },
+    "cost": 0,
+    "tokens": {
+      "input": 0,
+      "output": 0,
+      "reasoning": 0,
+      "cache": {
+        "read": 0,
+        "write": 0
+      }
+    },
+    "time": {
+      "created": 1784440393659,
+      "updated": 1784440393914
+    }
+  },
+  "messages": [
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1784440393672
+        },
+        "agent": "plan",
+        "model": {
+          "providerID": "opencode-go",
+          "modelID": "minimax-m3"
+        },
+        "summary": {
+          "diffs": []
+        },
+        "id": "msg_f78ef8fc8001mNQ5kWbscRUrb6",
+        "sessionID": "ses_087107044ffel73pwQzFzxOp7J"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "we have a ui regression. when \"individuelles Datum (freitextfeld)\" is slected, no input field it shown",
+          "id": "prt_f78ef8fc9001X4DQ66WZShyVVT",
+          "sessionID": "ses_087107044ffel73pwQzFzxOp7J",
+          "messageID": "msg_f78ef8fc8001mNQ5kWbscRUrb6"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_f78ef8fc8001mNQ5kWbscRUrb6",
+        "role": "assistant",
+        "mode": "plan",
+        "agent": "plan",
+        "path": {
+          "cwd": "/Users/mseele/dev/sve/sve-tools",
+          "root": "/Users/mseele/dev/sve/sve-tools"
+        },
+        "cost": 0,
+        "tokens": {
+          "input": 0,
+          "output": 0,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "modelID": "minimax-m3",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1784440393817,
+          "completed": 1784440398459
+        },
+        "id": "msg_f78ef9059002pxlb102ockolgt",
+        "sessionID": "ses_087107044ffel73pwQzFzxOp7J"
+      },
+      "parts": []
+    }
+  ]
+}
