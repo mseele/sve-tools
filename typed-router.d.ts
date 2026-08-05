@@ -14,11 +14,15 @@ import type {
   ParamValueZeroOrMore,
   ParamValueZeroOrOne,
 } from 'vue-router'
+import type {
+  _ExtractParamParserType,
+} from 'vue-router/experimental'
 
 declare module 'vue-router' {
   interface TypesConfig {
-    ParamParsers:
-      | never
+    _ParamParsers: {}
+    RouteNamedMap: import('vue-router/auto-routes').RouteNamedMap
+    _RouteFileInfoMap: import('vue-router/auto-routes')._RouteFileInfoMap
   }
 }
 
@@ -101,11 +105,15 @@ declare module 'vue-router/auto-routes' {
         | '/'
       views:
         | never
+      pathParamNames:
+        | never
     }
     'src/pages/actions/bookings.vue': {
       routes:
         | '/actions/bookings'
       views:
+        | never
+      pathParamNames:
         | never
     }
     'src/pages/actions/deploy.vue': {
@@ -113,11 +121,15 @@ declare module 'vue-router/auto-routes' {
         | '/actions/deploy'
       views:
         | never
+      pathParamNames:
+        | never
     }
     'src/pages/actions/email.vue': {
       routes:
         | '/actions/email'
       views:
+        | never
+      pathParamNames:
         | never
     }
     'src/pages/actions/events.vue': {
@@ -125,11 +137,15 @@ declare module 'vue-router/auto-routes' {
         | 'default_action'
       views:
         | never
+      pathParamNames:
+        | never
     }
     'src/pages/actions/newsletter.vue': {
       routes:
         | '/actions/newsletter'
       views:
+        | never
+      pathParamNames:
         | never
     }
     'src/pages/actions/payments.vue': {
@@ -137,11 +153,15 @@ declare module 'vue-router/auto-routes' {
         | '/actions/payments'
       views:
         | never
+      pathParamNames:
+        | never
     }
     'src/pages/actions/prebooking.vue': {
       routes:
         | '/actions/prebooking'
       views:
+        | never
+      pathParamNames:
         | never
     }
   }
