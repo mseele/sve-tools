@@ -50,6 +50,13 @@ src/
 
 JWT in `localStorage`. Router redirects to `/` when unauthenticated.
 
+## Git
+
+- Always use conventional commits: `type(scope): summary`, type one of `feat fix chore refactor perf test docs style build ci`. Summary: imperative, ≤ 72 chars, no period.
+- Body states what changed and why in short plain sentences. No filler or bloat.
+- Commit closes an issue/ticket → end the body with `closes #<issue>`.
+- One logical change per commit. Lint/format before committing, push the branch afterwards.
+
 ## Agent skills
 
 ### Issue tracker
