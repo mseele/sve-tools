@@ -33,7 +33,10 @@ function tiptapToStored(html: string): string {
 
 function storedToTiptapInline(text: string): string {
   if (!text || !text.trim()) return ''
-  let result = text.trim().replace(/^(<br\s*\/?>)+/, '').replace(/(<br\s*\/?>)+$/, '')
+  let result = text
+    .trim()
+    .replace(/^(<br\s*\/?>)+/, '')
+    .replace(/(<br\s*\/?>)+$/, '')
   if (!result) return ''
   result = result.replace(/<br\s*\/?>/g, '</p><p>')
   return '<p>' + result + '</p>'

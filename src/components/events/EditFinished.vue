@@ -20,7 +20,7 @@ const subscribers = ref<EventSubscriber[]>([])
 const participants = computed(() => subscribers.value.filter((s) => s.enrolled))
 const participantCount = computed(() => participants.value.length)
 const allPaid = computed(
-  () => participants.value.length > 0 && participants.value.every((s) => s.payment_confirmed_at),
+  () => participants.value.length > 0 && participants.value.every((s) => s.payment_confirmed_at)
 )
 const lastTermin = computed(() => {
   if (props.event.custom_date) {
@@ -90,23 +90,23 @@ async function closeEvent(onFinish: () => void) {
       <v-col cols="12" sm="8">
         <v-card variant="outlined">
           <v-card-text>
-        <div class="d-flex flex-wrap ga-6">
-          <div>
-            <div class="text-caption text-medium-emphasis">Teilnehmer</div>
-            <div class="text-h6">{{ participantCount }} / {{ event.max_subscribers }}</div>
-          </div>
-          <div v-if="lastTermin">
-            <div class="text-caption text-medium-emphasis">Letzter Termin</div>
-            <div class="text-h6">{{ lastTermin }}</div>
-          </div>
-          <div>
-            <div class="text-caption text-medium-emphasis">Bezahlung</div>
-            <div class="text-h6" :class="allPaid ? 'text-success' : 'text-error'">
-              {{ allPaid ? 'Alle bezahlt' : 'Offene Zahlungen' }}
+            <div class="d-flex flex-wrap ga-6">
+              <div>
+                <div class="text-caption text-medium-emphasis">Teilnehmer</div>
+                <div class="text-h6">{{ participantCount }} / {{ event.max_subscribers }}</div>
+              </div>
+              <div v-if="lastTermin">
+                <div class="text-caption text-medium-emphasis">Letzter Termin</div>
+                <div class="text-h6">{{ lastTermin }}</div>
+              </div>
+              <div>
+                <div class="text-caption text-medium-emphasis">Bezahlung</div>
+                <div class="text-h6" :class="allPaid ? 'text-success' : 'text-error'">
+                  {{ allPaid ? 'Alle bezahlt' : 'Offene Zahlungen' }}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </v-card-text>
+          </v-card-text>
         </v-card>
       </v-col>
     </v-row>
