@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check lint format \"build-only {@}\" --",
+    "build": "run-p type-check type-check:tsrs lint format \"build-only {@}\" --",
     "build-only": "vite build",
     "type-check": "vue-tsc --noEmit -p tsconfig.app.json --composite false",
+    "type-check:tsrs": "tsrs -p tsconfig.app.json --noEmit --composite false",
     "lint": "oxlint",
     "format": "oxfmt",
     "release": "standard-version"
@@ -39,6 +40,7 @@
     "@types/node": "^26.6.6",
     "oxfmt": "0.75.0",
     "oxlint": "^1.90.0",
-    "standard-version": "^9.5.0"
+    "standard-version": "^9.5.0",
+    "tsrs": "^0.20.1-ts7.1.0-beta"
   }
 }
