@@ -4,7 +4,7 @@ import { useNotifyStore } from '@/stores/notify'
 import { EventType, LifecycleStatus, type Event, type EventSubscriber } from '@/types'
 import { mdiClose, mdiPlus } from '@mdi/js'
 import { format, parseISO } from 'date-fns'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 const props = defineProps<{
   event: Event
@@ -18,7 +18,17 @@ const notify = useNotifyStore()
 
 const subscribers = ref<EventSubscriber[]>([])
 const managerRecipients = ref([...(props.event.manager_recipients ?? [])])
+const managerRecipientsEventId = ref(props.event.id)
 const loading = ref(false)
+
+watch(
+  () => props.event.id,
+  (eventId) => {
+    managerRecipients.value = [...(props.event.manager_recipients ?? [])]
+    managerRecipientsEventId.value = eventId
+  },
+  { flush: 'sync' }
+)
 
 const emailAddressPattern =
   /^[A-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?(?:\.[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?)+$/i
@@ -117,17 +127,25 @@ async function closeEvent(onFinish: () => void) {
 }
 
 async function saveManagerRecipients() {
-  if (!managerRecipientsValid.value || props.event.type !== EventType.Events) {
+  const eventId = props.event.id
+  if (
+    !managerRecipientsValid.value ||
+    props.event.type !== EventType.Events ||
+    managerRecipientsEventId.value !== eventId
+  ) {
     return
   }
 
+  const recipients = [...managerRecipients.value]
   loading.value = true
   try {
-    const savedEvent = await updateEvent(props.event.id, {
-      manager_recipients: managerRecipients.value
+    const savedEvent = await updateEvent(eventId, {
+      manager_recipients: recipients
     })
     notify.showSuccess('Die Empfänger für Event-Manager-Erinnerungen wurden gespeichert.')
-    emit('success', savedEvent)
+    if (props.event.id === eventId) {
+      emit('success', savedEvent)
+    }
   } catch (error) {
     if (error !== null) {
       console.error(error)
