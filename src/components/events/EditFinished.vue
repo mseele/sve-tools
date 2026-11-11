@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { loadEvents, sendParticipationConfirmation, updateEvent } from '@/api'
 import { useNotifyStore } from '@/stores/notify'
-import { LifecycleStatus, type Event, type EventSubscriber } from '@/types'
+import { EventType, LifecycleStatus, type Event, type EventSubscriber } from '@/types'
+import { mdiClose, mdiPlus } from '@mdi/js'
 import { format, parseISO } from 'date-fns'
 import { computed, onMounted, ref } from 'vue'
 
@@ -16,6 +17,35 @@ const emit = defineEmits<{
 const notify = useNotifyStore()
 
 const subscribers = ref<EventSubscriber[]>([])
+const managerRecipients = ref([...(props.event.manager_recipients ?? [])])
+const loading = ref(false)
+
+const emailAddressPattern =
+  /^[A-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?(?:\.[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?)+$/i
+
+function isValidEmailAddress(value: string) {
+  return value.length <= 254 && emailAddressPattern.test(value)
+}
+
+const managerRecipientsValid = computed(() => managerRecipients.value.every(isValidEmailAddress))
+
+const rules = {
+  managerRecipientEmail: [
+    (value: string) => isValidEmailAddress(value) || 'Bitte gib eine gültige E-Mail-Adresse ein'
+  ]
+}
+
+function addManagerRecipient() {
+  managerRecipients.value.push('')
+}
+
+function updateManagerRecipient(index: number, value: string) {
+  managerRecipients.value[index] = value
+}
+
+function removeManagerRecipient(index: number) {
+  managerRecipients.value.splice(index, 1)
+}
 
 const participants = computed(() => subscribers.value.filter((s) => s.enrolled))
 const participantCount = computed(() => participants.value.length)
@@ -38,6 +68,9 @@ onMounted(async () => {
     const found = events.find((e) => e.id === props.event.id)
     if (found?.subscribers) {
       subscribers.value = found.subscribers
+    }
+    if (props.event.type === EventType.Events && found?.manager_recipients !== undefined) {
+      managerRecipients.value = [...found.manager_recipients]
     }
   } catch (error) {
     if (error !== null) {
@@ -82,6 +115,28 @@ async function closeEvent(onFinish: () => void) {
     onFinish()
   }
 }
+
+async function saveManagerRecipients() {
+  if (!managerRecipientsValid.value || props.event.type !== EventType.Events) {
+    return
+  }
+
+  loading.value = true
+  try {
+    const savedEvent = await updateEvent(props.event.id, {
+      manager_recipients: managerRecipients.value
+    })
+    notify.showSuccess('Die Empfänger für Event-Manager-Erinnerungen wurden gespeichert.')
+    emit('success', savedEvent)
+  } catch (error) {
+    if (error !== null) {
+      console.error(error)
+      notify.showError('Speichern der Empfänger ist fehlgeschlagen. Details siehe Console')
+    }
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
@@ -114,5 +169,50 @@ async function closeEvent(onFinish: () => void) {
       <ActionColumn text="Teilnahmebestätigungen senden" @action="sendConfirmation" />
       <ActionColumn text="Event abschließen" @action="closeEvent" />
     </v-row>
+    <v-form v-if="event.type === EventType.Events">
+      <v-row>
+        <v-col cols="12">
+          <div class="text-subtitle-1 mb-1">Empfänger für Event-Manager-Erinnerungen</div>
+          <div class="text-body-2 text-medium-emphasis mb-3">
+            Diese Adressen sind unabhängig von der alternativen Versand-E-Mailadresse.
+          </div>
+          <div v-for="(email, index) in managerRecipients" :key="index" class="d-flex align-start">
+            <v-text-field
+              :model-value="email"
+              :label="`E-Mail-Adresse ${index + 1}`"
+              type="email"
+              variant="outlined"
+              density="compact"
+              :rules="rules.managerRecipientEmail"
+              @update:model-value="updateManagerRecipient(index, $event)"
+            />
+            <v-btn
+              icon
+              variant="text"
+              color="primary"
+              :aria-label="`Empfänger ${index + 1} entfernen`"
+              @click="removeManagerRecipient(index)"
+            >
+              <v-icon>{{ mdiClose }}</v-icon>
+            </v-btn>
+          </div>
+          <v-btn variant="text" color="primary" @click="addManagerRecipient">
+            <v-icon start>{{ mdiPlus }}</v-icon>
+            Adresse hinzufügen
+          </v-btn>
+        </v-col>
+        <v-col cols="12" class="d-flex justify-end">
+          <v-btn
+            variant="elevated"
+            color="primary"
+            :disabled="!managerRecipientsValid || loading"
+            :loading="loading"
+            @click="saveManagerRecipients"
+          >
+            Speichern
+          </v-btn>
+        </v-col>
+      </v-row>
+    </v-form>
   </div>
 </template>
