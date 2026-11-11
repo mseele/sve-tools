@@ -1,8 +1,14 @@
 <script setup lang="ts">
 import { updateEvent } from '@/api'
 import { useNotifyStore } from '@/stores/notify'
-import { LifecycleStatus, PaymentMethod, type Event, type EventCustomField } from '@/types'
-import { mdiPlus } from '@mdi/js'
+import {
+  EventType,
+  LifecycleStatus,
+  PaymentMethod,
+  type Event,
+  type EventCustomField
+} from '@/types'
+import { mdiClose, mdiPlus } from '@mdi/js'
 import { addDays, format, isBefore, isValid, parseISO } from 'date-fns'
 import { isEqual, transform } from 'lodash-es'
 import { computed, ref } from 'vue'
@@ -34,6 +40,10 @@ const emit = defineEmits<{
 const notify = useNotifyStore()
 
 const selection = ref<Event>(JSON.parse(JSON.stringify(props.event)))
+if (selection.value.type === EventType.Events) {
+  selection.value.manager_recipients ??= []
+}
+const managerRecipients = ref(selection.value.manager_recipients ?? [])
 const valid = ref(false)
 const dateSelection = ref<'dates' | 'free_date'>(
   selection.value.custom_date != undefined ? 'free_date' : 'dates'
@@ -43,6 +53,29 @@ const confirmSave = ref(false)
 const loading = ref(false)
 
 const isDateToAddValid = computed(() => isValid(parseISO(dateToAdd.value)))
+const managerRecipientsValid = computed(
+  () =>
+    selection.value.type !== EventType.Events || managerRecipients.value.every(isValidEmailAddress)
+)
+
+const emailAddressPattern =
+  /^[A-Z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[A-Z0-9!#$%&'*+/=?^_`{|}~-]+)*@[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?(?:\.[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?)+$/i
+
+function isValidEmailAddress(value: string) {
+  return value.length <= 254 && emailAddressPattern.test(value)
+}
+
+function addManagerRecipient() {
+  managerRecipients.value.push('')
+}
+
+function updateManagerRecipient(index: number, value: string) {
+  managerRecipients.value[index] = value
+}
+
+function removeManagerRecipient(index: number) {
+  managerRecipients.value.splice(index, 1)
+}
 
 const costPerDate = computed({
   get: () => selection.value.cost_per_date,
@@ -147,12 +180,18 @@ function onReset() {
 }
 
 async function onSave() {
+  if (!managerRecipientsValid.value) {
+    return
+  }
   if (!confirmSave.value) {
     confirmSave.value = true
     return
   }
   loading.value = true
   try {
+    if (selection.value.type === EventType.Events) {
+      selection.value.manager_recipients = managerRecipients.value
+    }
     if (dateSelection.value == 'dates') {
       selection.value.custom_date = undefined
     } else if (dateSelection.value == 'free_date') {
@@ -221,6 +260,9 @@ const rules = {
       }
       return true
     }
+  ],
+  managerRecipientEmail: [
+    (val: string) => isValidEmailAddress(val) || 'Bitte gib eine gültige E-Mail-Adresse ein'
   ],
   customFields: [
     (val: any[]) =>
@@ -450,6 +492,36 @@ const rules = {
           :rules="rules.altEmailAddress"
         ></v-text-field>
       </v-col>
+      <v-col v-if="selection.type === EventType.Events" cols="12">
+        <div class="text-subtitle-1 mb-1">Empfänger für Event-Manager-Erinnerungen</div>
+        <div class="text-body-2 text-medium-emphasis mb-3">
+          Diese Adressen sind unabhängig von der alternativen Versand-E-Mailadresse.
+        </div>
+        <div v-for="(email, index) in managerRecipients" :key="index" class="d-flex align-start">
+          <v-text-field
+            :model-value="email"
+            :label="`E-Mail-Adresse ${index + 1}`"
+            type="email"
+            variant="outlined"
+            density="compact"
+            :rules="rules.managerRecipientEmail"
+            @update:model-value="updateManagerRecipient(index, $event)"
+          />
+          <v-btn
+            icon
+            variant="text"
+            color="primary"
+            :aria-label="`Empfänger ${index + 1} entfernen`"
+            @click="removeManagerRecipient(index)"
+          >
+            <v-icon>{{ mdiClose }}</v-icon>
+          </v-btn>
+        </div>
+        <v-btn variant="text" color="primary" @click="addManagerRecipient">
+          <v-icon start>{{ mdiPlus }}</v-icon>
+          Adresse hinzufügen
+        </v-btn>
+      </v-col>
       <v-col cols="12">
         <v-select
           :items="itemsCustomFields()"
@@ -504,7 +576,7 @@ const rules = {
             variant="elevated"
             class="text-uppercase text-white"
             :color="confirmSave ? 'red' : 'primary'"
-            :disabled="!valid || loading"
+            :disabled="!valid || !managerRecipientsValid || loading"
             @click="onSave()"
           >
             {{ confirmSave ? 'Sicher?' : 'Speichern' }}
