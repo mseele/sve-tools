@@ -3,7 +3,7 @@ import { loadEvents, sendParticipationConfirmation, updateEvent } from '@/api'
 import { useNotifyStore } from '@/stores/notify'
 import { LifecycleStatus, type Event, type EventSubscriber } from '@/types'
 import { format, parseISO } from 'date-fns'
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 const props = defineProps<{
   event: Event
@@ -16,6 +16,18 @@ const emit = defineEmits<{
 const notify = useNotifyStore()
 
 const subscribers = ref<EventSubscriber[]>([])
+const managerRecipients = ref([...(props.event.manager_recipients ?? [])])
+const managerRecipientsEventId = ref(props.event.id)
+const loading = ref(false)
+
+watch(
+  () => props.event.id,
+  (eventId) => {
+    managerRecipients.value = [...(props.event.manager_recipients ?? [])]
+    managerRecipientsEventId.value = eventId
+  },
+  { flush: 'sync' }
+)
 
 const participants = computed(() => subscribers.value.filter((s) => s.enrolled))
 const participantCount = computed(() => participants.value.length)
@@ -38,6 +50,9 @@ onMounted(async () => {
     const found = events.find((e) => e.id === props.event.id)
     if (found?.subscribers) {
       subscribers.value = found.subscribers
+    }
+    if (found?.manager_recipients !== undefined) {
+      managerRecipients.value = [...found.manager_recipients]
     }
   } catch (error) {
     if (error !== null) {
@@ -82,6 +97,32 @@ async function closeEvent(onFinish: () => void) {
     onFinish()
   }
 }
+
+async function saveManagerRecipients() {
+  const eventId = props.event.id
+  if (managerRecipientsEventId.value !== eventId) {
+    return
+  }
+
+  const recipients = [...managerRecipients.value]
+  loading.value = true
+  try {
+    const savedEvent = await updateEvent(eventId, {
+      manager_recipients: recipients
+    })
+    notify.showSuccess('Die Empfänger für Event-Manager-Erinnerungen wurden gespeichert.')
+    if (props.event.id === eventId) {
+      emit('success', savedEvent)
+    }
+  } catch (error) {
+    if (error !== null) {
+      console.error(error)
+      notify.showError('Speichern der Empfänger ist fehlgeschlagen. Details siehe Console')
+    }
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <template>
@@ -114,5 +155,19 @@ async function closeEvent(onFinish: () => void) {
       <ActionColumn text="Teilnahmebestätigungen senden" @action="sendConfirmation" />
       <ActionColumn text="Event abschließen" @action="closeEvent" />
     </v-row>
+    <div class="mt-4">
+      <ManagerRecipients v-model="managerRecipients" />
+      <div class="d-flex justify-end">
+        <v-btn
+          variant="elevated"
+          color="primary"
+          :disabled="loading"
+          :loading="loading"
+          @click="saveManagerRecipients"
+        >
+          Speichern
+        </v-btn>
+      </div>
+    </div>
   </div>
 </template>

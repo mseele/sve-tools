@@ -22,6 +22,7 @@ export interface Event {
   payment_account: string
   alt_booking_button_text?: string
   alt_email_address?: string
+  manager_recipients?: string[]
   external_operator: boolean
   custom_fields: EventCustomField[]
   payment_method: PaymentMethod

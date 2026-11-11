@@ -34,6 +34,7 @@ const emit = defineEmits<{
 const notify = useNotifyStore()
 
 const selection = ref<Event>(JSON.parse(JSON.stringify(props.event)))
+selection.value.manager_recipients ??= []
 const valid = ref(false)
 const dateSelection = ref<'dates' | 'free_date'>(
   selection.value.custom_date != undefined ? 'free_date' : 'dates'
@@ -449,6 +450,9 @@ const rules = {
           v-model="selection.alt_email_address"
           :rules="rules.altEmailAddress"
         ></v-text-field>
+      </v-col>
+      <v-col cols="12">
+        <ManagerRecipients v-model="selection.manager_recipients" />
       </v-col>
       <v-col cols="12">
         <v-select
