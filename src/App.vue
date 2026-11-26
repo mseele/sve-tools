@@ -35,6 +35,28 @@ useHead({
 </template>
 
 <style>
+/* Global base styles: the app previously got its reset, font stack and background
+   from the Vuetify stylesheet that #193 removed. PrimeVue only styles its own
+   components, so these rules restore the baseline the UI was built against. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #fff;
+}
+
+body {
+  font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 /* Pages render bare h3/h4 headings without their own margin styles,
    so keep the heading margin reset that the UI was built against. */
 h1,
