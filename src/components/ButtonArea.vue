@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import Button from 'primevue/button'
+import ProgressSpinner from 'primevue/progressspinner'
 
 const props = withDefaults(
   defineProps<{
@@ -37,27 +39,45 @@ async function send() {
 </script>
 
 <template>
-  <div class="d-flex align-center">
-    <v-progress-circular
+  <div class="button-area">
+    <ProgressSpinner
       v-if="props.disabled"
-      size="32"
-      rotate="-90"
-      indeterminate
-      color="primary"
-    ></v-progress-circular>
-    <v-spacer />
-    <v-btn variant="flat" class="text-uppercase" :disabled="props.disabled" @click="reset()"
-      >Zurücksetzen</v-btn
-    >
-    <v-btn
+      class="spinner"
+      style="width: 32px; height: 32px"
+      strokeWidth="4"
+    />
+    <Button
+      label="Zurücksetzen"
+      class="reset-button uppercase"
+      :disabled="props.disabled"
+      @click="reset()"
+    />
+    <Button
       v-if="props.sendVisible"
-      variant="elevated"
-      class="text-uppercase text-white ml-2"
-      :color="confirmSend ? 'error' : 'primary'"
+      :label="confirmSend ? 'Sicher?' : props.sendText"
+      class="send-button uppercase"
+      :severity="confirmSend ? 'danger' : 'primary'"
       :disabled="disabled"
       @click="send()"
-    >
-      {{ confirmSend ? 'Sicher?' : props.sendText }}
-    </v-btn>
+    />
   </div>
 </template>
+
+<style scoped>
+.button-area {
+  display: flex;
+  align-items: center;
+}
+
+.reset-button {
+  margin-left: auto;
+}
+
+.send-button {
+  margin-left: 8px;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+</style>

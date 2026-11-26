@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { EventType } from '@/types'
 import { computed } from 'vue'
+import Tab from 'primevue/tab'
+import TabList from 'primevue/tablist'
+import Tabs from 'primevue/tabs'
 
 const props = withDefaults(
   defineProps<{
@@ -8,7 +11,6 @@ const props = withDefaults(
     disabled?: boolean
   }>(),
   {
-    value: EventType.Fitness,
     disabled: false
   }
 )
@@ -17,22 +19,29 @@ const emit = defineEmits<{
   'update:modelValue': [value: EventType]
 }>()
 
-const selectedType = computed({
-  get: () => props.modelValue!,
-  set: (value) => emit('update:modelValue', value)
-})
+const selectedType = computed(() => props.modelValue!)
+
+function select(value: string | number) {
+  emit('update:modelValue', value as EventType)
+}
 </script>
 
 <template>
-  <v-tabs
-    v-model="selectedType"
-    color="primary"
-    align-tabs="center"
-    density="comfortable"
-    class="mb-4"
-  >
-    <v-tab v-for="item in Object.keys(EventType)" :key="item" :value="item" :disabled="disabled">
-      {{ item }}
-    </v-tab>
-  </v-tabs>
+  <Tabs :value="selectedType" class="event-type-selection" @update:value="select">
+    <TabList>
+      <Tab v-for="item in Object.keys(EventType)" :key="item" :value="item" :disabled="disabled">
+        {{ item }}
+      </Tab>
+    </TabList>
+  </Tabs>
 </template>
+
+<style scoped>
+.event-type-selection {
+  margin-bottom: 16px;
+}
+
+.event-type-selection :deep(.p-tablist-tab-list) {
+  justify-content: center;
+}
+</style>
