@@ -15,7 +15,7 @@ const props = defineProps<{
 const auth = useAuthStore()
 const router = useRouter()
 
-// 960px matches Vuetify's md breakpoint; the nav is permanent above it.
+// 960px is the md breakpoint; the nav is permanent above it.
 const desktopQuery = window.matchMedia('(min-width: 960px)')
 const isDesktop = ref(desktopQuery.matches)
 

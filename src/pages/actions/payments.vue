@@ -41,7 +41,7 @@ async function loadUnpaidBookings() {
 }
 
 // PrimeVue FileUpload has no v-model, so the selected CSV file is kept in page
-// state via the @select event. Long names are truncated like Vuetify did.
+// state via the @select event. Long names are truncated as before.
 function onCsvSelect(event: FileUploadSelectEvent) {
   const selected = Array.isArray(event.files) ? event.files : [event.files]
   csv.value = selected[0]

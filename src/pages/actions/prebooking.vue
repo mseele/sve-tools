@@ -220,7 +220,7 @@ async function send() {
 </template>
 
 <style scoped>
-/* 24px keeps the gap Vuetify's mb-6 created between pickers and compose area */
+/* 24px keeps the gap between pickers and compose area */
 .to-selection {
   margin-bottom: 24px;
 }

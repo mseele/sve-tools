@@ -57,8 +57,8 @@ const dateSelection = ref<'dates' | 'free_date'>(
 const confirmSave = ref(false)
 const loading = ref(false)
 
-// InputNumber models an emptied field as null while the previous Vuetify
-// v-model.number bindings left undefined in the event object, which the rule
+// InputNumber models an emptied field as null while the previous number
+// model bindings left undefined in the event object, which the rule
 // functions treat as invalid. Normalize null back on write.
 const sortIndex = computed<number | null>({
   get: () => selection.value.sort_index ?? null,
@@ -286,8 +286,8 @@ const rules = {
   ]
 }
 
-// PrimeVue has no form-level rules, so the Vuetify rule functions above are
-// evaluated manually to reproduce the previous v-form validity exactly.
+// PrimeVue has no form-level rules, so the rule functions above are
+// evaluated manually to reproduce the previous form validity exactly.
 function errorOf(
   ruleList: readonly ((value: any) => boolean | string)[],
   value: any
@@ -654,7 +654,7 @@ const valid = computed(() => Object.values(errors.value).every((error) => error 
   grid-column: 1 / -1;
 }
 
-/* 600px matches Vuetify's sm breakpoint for the old col sm= props. */
+/* 600px is the sm breakpoint for the old column split layout. */
 @media (min-width: 600px) {
   .col-sm-2 {
     grid-column: span 2;

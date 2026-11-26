@@ -63,7 +63,7 @@ function subscriberClasses(subscriber: EventSubscriber) {
   return subscriber.enrolled ? '' : 'waitlisted'
 }
 
-// PrimeVue DataTable cannot inject a second <tr> like Vuetify's item slot, so
+// PrimeVue DataTable cannot inject a second <tr> per row, so
 // comments render through the expansion template. Rows with a comment are
 // pre-expanded, which keeps them always visible below the subscriber row.
 function expandedCommentRows(event: Event) {

@@ -180,7 +180,7 @@ async function saveManagerRecipients() {
   padding: 16px;
 }
 
-/* 600px matches Vuetify's sm breakpoint; cols=12 sm=8 becomes 2/3 width. */
+/* 600px is the sm breakpoint; full width becomes 2/3 width above it. */
 @media (min-width: 600px) {
   .summary-card {
     width: 66.6667%;

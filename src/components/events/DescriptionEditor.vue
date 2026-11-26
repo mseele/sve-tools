@@ -21,7 +21,7 @@ const emit = defineEmits<{
 const isFocused = ref(false)
 const lastEmitted = ref(props.modelValue || '')
 
-// PrimeVue has no rule evaluation, so the Vuetify v-input rules wrapper is
+// PrimeVue has no rule evaluation, so the old rules wrapper is
 // reproduced manually: the first failing rule message drives the error style.
 const error = computed(() => {
   for (const rule of props.rules ?? []) {

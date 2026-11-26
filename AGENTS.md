@@ -1,6 +1,6 @@
 # SVE Tools
 
-Vue 3 + TypeScript + Vite admin dashboard for events and bookings. Pinia, Vuetify, file-based Vue Router.
+Vue 3 + TypeScript + Vite admin dashboard for events and bookings. Pinia, PrimeVue, file-based Vue Router.
 
 ## Commands
 
