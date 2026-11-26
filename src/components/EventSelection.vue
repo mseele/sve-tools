@@ -4,7 +4,9 @@ import { useNotifyStore } from '@/stores/notify'
 import { EventType, LifecycleStatus, type Event } from '@/types'
 import { statusIndex } from '@/utils'
 import { format, parseISO } from 'date-fns'
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, useId, watch } from 'vue'
+import AutoComplete, { type AutoCompleteCompleteEvent } from 'primevue/autocomplete'
+import Checkbox from 'primevue/checkbox'
 
 const props = withDefaults(
   defineProps<{
@@ -30,6 +32,7 @@ const emit = defineEmits<{
 defineExpose({ reset, addEvent, selectEvent, loadEvents })
 
 const notify = useNotifyStore()
+const uid = useId()
 
 onMounted(loadEvents)
 
@@ -37,6 +40,7 @@ const allEvents = ref<Event[]>([])
 const event = ref<Event>()
 const bookingList = ref(true)
 const waitingList = ref(false)
+const suggestions = ref<Event[]>([])
 
 const events = computed(() => {
   return allEvents.value
@@ -51,14 +55,29 @@ const events = computed(() => {
 })
 
 watch(events, () => (event.value = undefined))
-watch(event, emitChanges)
+watch(event, onEventChange)
 watch(bookingList, emitChanges)
 watch(waitingList, emitChanges)
 
-// any is needed to make vuetify happy
-function eventName(event: any) {
+// PrimeVue AutoComplete binds the raw typed query to the model until a
+// suggestion is picked and clears the model on blur when nothing matches
+// (forceSelection). Parents expect either a real event or an empty selection,
+// so the transient string state is ignored and a cleared value is normalized
+// to undefined.
+function onEventChange(value: Event | string | null | undefined) {
+  if (typeof value === 'string') {
+    return
+  }
+  if (value === null) {
+    event.value = undefined
+    return
+  }
+  emitChanges()
+}
+
+function eventName(event: Event) {
   let visibility
-  switch ((event as Event).status) {
+  switch (event.status) {
     case LifecycleStatus.Draft:
       visibility = 'Entwurf - Unsichtbar'
       break
@@ -95,7 +114,17 @@ function formatDate(value: string) {
   return format(new Date(date.getTime() + timezoneOffset), 'dd-MM-yyyy HH:mm')
 }
 
+function onComplete({ query }: AutoCompleteCompleteEvent) {
+  const search = query.trim().toLowerCase()
+  suggestions.value = events.value.filter((item) => {
+    return eventName(item).toLowerCase().includes(search)
+  })
+}
+
 function emitChanges() {
+  if (typeof event.value === 'string') {
+    return
+  }
   const data: { event: Event; bookingList?: boolean; waitingList?: boolean } = {
     event: event.value!
   }
@@ -136,38 +165,63 @@ function selectEvent(e: Event) {
 </script>
 
 <template>
-  <div style="width: 100%">
-    <v-autocomplete
+  <div class="event-selection">
+    <AutoComplete
       v-model="event"
-      :items="events"
-      :item-value="(v: any) => v"
-      :item-title="eventName"
-      variant="outlined"
-      hide-details
-      :label="label"
+      class="event-picker"
+      :suggestions="suggestions"
+      :optionLabel="eventName"
+      :placeholder="label"
       :disabled="disabled"
+      :forceSelection="true"
+      :completeOnFocus="true"
+      dropdown
+      fluid
+      @complete="onComplete"
     >
-      <template v-slot:item="{ props, item }">
-        <v-list-item v-bind="props" title="">
-          <EventListItem :status="item.status" :text="eventName(item)" />
-        </v-list-item>
+      <template #option="{ option }">
+        <EventListItem :status="option.status" :text="eventName(option)" />
       </template>
-    </v-autocomplete>
-    <v-row v-if="showBookingGroups">
-      <v-col cols="6">
-        <v-checkbox
-          label="Email an Buchungen"
+    </AutoComplete>
+    <div v-if="showBookingGroups" class="booking-groups">
+      <div class="booking-group">
+        <Checkbox
           v-model="bookingList"
+          binary
+          :inputId="`${uid}-booking-list`"
           :disabled="event == null"
-        ></v-checkbox>
-      </v-col>
-      <v-col cols="6">
-        <v-checkbox
-          label="Email an Warteliste"
+        />
+        <label :for="`${uid}-booking-list`">Email an Buchungen</label>
+      </div>
+      <div class="booking-group">
+        <Checkbox
           v-model="waitingList"
+          binary
+          :inputId="`${uid}-waiting-list`"
           :disabled="event == null"
-        ></v-checkbox>
-      </v-col>
-    </v-row>
+        />
+        <label :for="`${uid}-waiting-list`">Email an Warteliste</label>
+      </div>
+    </div>
   </div>
 </template>
+
+<style scoped>
+.event-selection {
+  width: 100%;
+}
+
+.booking-groups {
+  display: flex;
+}
+
+.booking-group {
+  flex: 0 0 50%;
+  display: flex;
+  align-items: center;
+}
+
+.booking-group label {
+  margin-left: 8px;
+}
+</style>
