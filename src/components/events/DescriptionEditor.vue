@@ -2,7 +2,8 @@
 import { EditorContent, useEditor } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import { mdiFormatBold, mdiFormatListBulleted } from '@mdi/js'
-import { ref, watch } from 'vue'
+import Button from 'primevue/button'
+import { computed, ref, watch } from 'vue'
 
 const props = withDefaults(
   defineProps<{
@@ -19,6 +20,18 @@ const emit = defineEmits<{
 
 const isFocused = ref(false)
 const lastEmitted = ref(props.modelValue || '')
+
+// PrimeVue has no rule evaluation, so the Vuetify v-input rules wrapper is
+// reproduced manually: the first failing rule message drives the error style.
+const error = computed(() => {
+  for (const rule of props.rules ?? []) {
+    const result = rule(props.modelValue)
+    if (result !== true) {
+      return result
+    }
+  }
+  return undefined
+})
 
 function tiptapToStored(html: string): string {
   let result = html
@@ -75,10 +88,7 @@ const editor = useEditor({
       orderedList: false,
       horizontalRule: false,
       link: false,
-      underline: false,
-      bulletList: {
-        HTMLAttributes: { class: 'pl-6 list-disc' }
-      }
+      underline: false
     })
   ],
   onUpdate: ({ editor: ed }) => {
@@ -106,14 +116,7 @@ watch(
 </script>
 
 <template>
-  <v-input
-    :model-value="modelValue"
-    :rules="rules"
-    :focused="isFocused"
-    hide-details="auto"
-    density="compact"
-    class="description-editor"
-  >
+  <div class="description-editor" :class="{ 'description-editor--error': error !== undefined }">
     <div
       class="description-editor__field"
       :class="{ 'description-editor__field--focused': isFocused }"
@@ -126,36 +129,33 @@ watch(
         {{ label }}
       </label>
       <div v-if="editor" class="description-editor__toolbar">
-        <v-btn
-          icon
-          size="small"
-          variant="text"
-          :color="editor.isActive('bold') ? 'primary' : undefined"
+        <Button
+          text
+          rounded
+          aria-label="Fett"
+          :severity="editor.isActive('bold') ? 'primary' : 'secondary'"
           @click="editor.chain().focus().toggleBold().run()"
         >
-          <v-icon>{{ mdiFormatBold }}</v-icon>
-        </v-btn>
-        <v-btn
-          icon
-          size="small"
-          variant="text"
-          :color="editor.isActive('bulletList') ? 'primary' : undefined"
+          <MdiIcon :path="mdiFormatBold" :size="20" />
+        </Button>
+        <Button
+          text
+          rounded
+          aria-label="Liste"
+          :severity="editor.isActive('bulletList') ? 'primary' : 'secondary'"
           @click="editor.chain().focus().toggleBulletList().run()"
         >
-          <v-icon>{{ mdiFormatListBulleted }}</v-icon>
-        </v-btn>
+          <MdiIcon :path="mdiFormatListBulleted" :size="20" />
+        </Button>
       </div>
       <EditorContent v-if="editor" :editor="editor" class="description-editor__content" />
     </div>
-  </v-input>
+    <div v-if="error" class="description-editor__error">{{ error }}</div>
+  </div>
 </template>
 
 <style>
 .description-editor {
-  width: 100%;
-}
-
-.description-editor .v-input__control {
   width: 100%;
 }
 
@@ -170,8 +170,8 @@ watch(
   border-color: rgba(0, 0, 0, 0.87);
 }
 
-.description-editor.v-input--error .description-editor__field {
-  border-color: rgb(var(--v-theme-error));
+.description-editor--error .description-editor__field {
+  border-color: var(--p-red-500, #f44336);
 }
 
 .description-editor__label {
@@ -187,8 +187,14 @@ watch(
   color: rgba(0, 0, 0, 0.87);
 }
 
-.description-editor.v-input--error .description-editor__label {
-  color: rgb(var(--v-theme-error));
+.description-editor--error .description-editor__label {
+  color: var(--p-red-500, #f44336);
+}
+
+.description-editor__error {
+  color: var(--p-red-500, #f44336);
+  font-size: 0.75rem;
+  padding: 2px 12px 0;
 }
 
 .description-editor__toolbar {

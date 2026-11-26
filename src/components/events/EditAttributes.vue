@@ -2,10 +2,25 @@
 import { updateEvent } from '@/api'
 import { useNotifyStore } from '@/stores/notify'
 import { LifecycleStatus, PaymentMethod, type Event, type EventCustomField } from '@/types'
-import { mdiPlus } from '@mdi/js'
-import { addDays, format, isBefore, isValid, parseISO } from 'date-fns'
+import { format, parseISO } from 'date-fns'
 import { isEqual, transform } from 'lodash-es'
-import { computed, ref } from 'vue'
+import Button from 'primevue/button'
+import Checkbox from 'primevue/checkbox'
+import Chip from 'primevue/chip'
+import DatePicker from 'primevue/datepicker'
+import IftaLabel from 'primevue/iftalabel'
+import InputNumber from 'primevue/inputnumber'
+import InputText from 'primevue/inputtext'
+import MultiSelect from 'primevue/multiselect'
+import ProgressSpinner from 'primevue/progressspinner'
+import Select from 'primevue/select'
+import Tab from 'primevue/tab'
+import TabList from 'primevue/tablist'
+import TabPanel from 'primevue/tabpanel'
+import TabPanels from 'primevue/tabpanels'
+import Tabs from 'primevue/tabs'
+import Textarea from 'primevue/textarea'
+import { computed, ref, useId } from 'vue'
 
 interface Image {
   name: string
@@ -32,23 +47,79 @@ const emit = defineEmits<{
 }>()
 
 const notify = useNotifyStore()
+const uid = useId()
 
 const selection = ref<Event>(JSON.parse(JSON.stringify(props.event)))
 selection.value.manager_recipients ??= []
-const valid = ref(false)
 const dateSelection = ref<'dates' | 'free_date'>(
   selection.value.custom_date != undefined ? 'free_date' : 'dates'
 )
-const dateToAdd = ref<string>('')
 const confirmSave = ref(false)
 const loading = ref(false)
 
-const isDateToAddValid = computed(() => isValid(parseISO(dateToAdd.value)))
+// InputNumber models an emptied field as null while the previous Vuetify
+// v-model.number bindings left undefined in the event object, which the rule
+// functions treat as invalid. Normalize null back on write.
+const sortIndex = computed<number | null>({
+  get: () => selection.value.sort_index ?? null,
+  set: (value) => (selection.value.sort_index = value ?? (undefined as unknown as number))
+})
 
-const costPerDate = computed({
-  get: () => selection.value.cost_per_date,
+const priceMember = computed<number | null>({
+  get: () => {
+    const value = Number(selection.value.price_member)
+    return Number.isNaN(value) ? null : value
+  },
+  set: (value) => (selection.value.price_member = (value ?? undefined) as unknown as string)
+})
+
+const priceNonMember = computed<number | null>({
+  get: () => {
+    const value = Number(selection.value.price_non_member)
+    return Number.isNaN(value) ? null : value
+  },
+  set: (value) => (selection.value.price_non_member = (value ?? undefined) as unknown as string)
+})
+
+const costPerDate = computed<number | null>({
+  get: () => selection.value.cost_per_date ?? null,
   set: (value) => (selection.value.cost_per_date = typeof value === 'number' ? value : undefined)
 })
+
+const maxSubscribers = computed<number | null>({
+  get: () => selection.value.max_subscribers ?? null,
+  set: (value) => (selection.value.max_subscribers = value ?? (undefined as unknown as number))
+})
+
+const maxWaitingList = computed<number | null>({
+  get: () => selection.value.max_waiting_list ?? null,
+  set: (value) => (selection.value.max_waiting_list = value ?? (undefined as unknown as number))
+})
+
+const durationInMinutes = computed<number | null>({
+  get: () => selection.value.duration_in_minutes ?? null,
+  set: (value) => (selection.value.duration_in_minutes = value ?? (undefined as unknown as number))
+})
+
+// The stored dates are local wall-clock strings with a literal Z suffix; the
+// DatePicker works with real Date objects, so convert at the boundary exactly
+// like the display formatting below does.
+const dateModel = computed<Date[]>({
+  get: () => selection.value.dates.map(toModelDate),
+  set: (value) => {
+    selection.value.dates = value.map((date) => format(date, "yyyy-MM-dd'T'HH:mm':00Z'")).sort()
+  }
+})
+
+function toModelDate(value: string) {
+  const date = parseISO(value)
+  const timezoneOffset = date.getTimezoneOffset() * 60000
+  return new Date(date.getTime() + timezoneOffset)
+}
+
+function removeDate(index: number) {
+  selection.value.dates.splice(index, 1)
+}
 
 function itemsStatus() {
   const all = [
@@ -126,20 +197,6 @@ function formatDate(value: string) {
   const date = parseISO(value)
   const timezoneOffset = date.getTimezoneOffset() * 60000
   return format(new Date(date.getTime() + timezoneOffset), 'dd-MM-yyyy HH:mm')
-}
-
-function addDate() {
-  const newDate = parseISO(dateToAdd.value)
-  let index = 0
-  for (const current of selection.value.dates) {
-    if (isBefore(newDate, parseISO(current))) {
-      break
-    }
-    index++
-  }
-  const dateString = format(newDate, "yyyy-MM-dd'T'HH:mm':00Z'")
-  selection.value.dates.splice(index, 0, dateString)
-  dateToAdd.value = format(addDays(newDate, 7), "yyyy-MM-dd'T'HH:mm")
 }
 
 function onReset() {
@@ -228,305 +285,463 @@ const rules = {
       (Array.isArray(val) && val.length <= 4) || 'Bitte wähle maximal 4 Zusatzfelder aus'
   ]
 }
+
+// PrimeVue has no form-level rules, so the Vuetify rule functions above are
+// evaluated manually to reproduce the previous v-form validity exactly.
+function errorOf(
+  ruleList: readonly ((value: any) => boolean | string)[],
+  value: any
+): string | undefined {
+  for (const rule of ruleList) {
+    const result = rule(value)
+    if (result !== true) {
+      return typeof result === 'string' ? result : 'Ungültiger Wert'
+    }
+  }
+  return undefined
+}
+
+const errors = computed(() => ({
+  name: errorOf(rules.required, selection.value.name),
+  sortIndex: errorOf(rules.requiredPositiveNumber, selection.value.sort_index),
+  shortDescription: errorOf(rules.required, selection.value.short_description),
+  description: errorOf(rules.required, selection.value.description),
+  location: errorOf(rules.required, selection.value.location),
+  priceMember: errorOf(rules.requiredPositiveNumber, selection.value.price_member),
+  priceNonMember: errorOf(rules.requiredPositiveNumber, selection.value.price_non_member),
+  costPerDate: errorOf(rules.positiveNumber, selection.value.cost_per_date),
+  maxSubscribers: errorOf(rules.maxSubscribers, selection.value.max_subscribers),
+  maxWaitingList: errorOf(rules.requiredPositiveNumber, selection.value.max_waiting_list),
+  duration: errorOf(rules.requiredPositiveNumber, selection.value.duration_in_minutes),
+  altEmailAddress: errorOf(rules.altEmailAddress, selection.value.alt_email_address),
+  customFields: errorOf(rules.customFields, customFields.value),
+  bookingTemplate: errorOf(rules.required, selection.value.booking_template)
+}))
+
+const valid = computed(() => Object.values(errors.value).every((error) => error === undefined))
 </script>
 
 <template>
-  <v-form v-model="valid">
-    <v-row density="compact">
-      <v-col cols="12">
-        <v-text-field
-          label="Name"
-          variant="outlined"
-          density="compact"
+  <div class="form-grid">
+    <div>
+      <IftaLabel>
+        <InputText
+          :id="`${uid}-name`"
           v-model="selection.name"
-          :rules="rules.required"
+          fluid
+          :invalid="errors.name !== undefined"
         />
-      </v-col>
-      <v-col cols="12" sm="2">
-        <v-text-field
-          label="Sortier-Index"
-          variant="outlined"
-          density="compact"
-          type="number"
-          v-model.number="selection.sort_index"
-          :rules="rules.requiredPositiveNumber"
+        <label :for="`${uid}-name`">Name</label>
+      </IftaLabel>
+      <div v-if="errors.name" class="field-error">{{ errors.name }}</div>
+    </div>
+    <div class="col-sm-2">
+      <IftaLabel>
+        <InputNumber
+          :inputId="`${uid}-sort-index`"
+          v-model="sortIndex"
+          fluid
+          :useGrouping="false"
+          :invalid="errors.sortIndex !== undefined"
         />
-      </v-col>
-      <v-col cols="12" sm="5">
-        <v-select
-          :items="images"
-          :item-value="(v: any) => v"
-          item-title="name"
-          label="Bild"
-          variant="outlined"
-          density="compact"
+        <label :for="`${uid}-sort-index`">Sortier-Index</label>
+      </IftaLabel>
+      <div v-if="errors.sortIndex" class="field-error">{{ errors.sortIndex }}</div>
+    </div>
+    <div class="col-sm-5">
+      <IftaLabel>
+        <Select
+          :inputId="`${uid}-image`"
           v-model="eventImage"
+          :options="images"
+          optionLabel="name"
+          placeholder="Bild"
+          fluid
         >
-          <template v-slot:item="{ props, item }">
-            <v-list-item v-bind="props" title="">
-              <div class="d-flex align-center my-2">
-                <img :src="item.url" class="event-img" />
-                <div class="ml-2">{{ item.name }}</div>
-              </div>
-            </v-list-item>
-          </template>
-        </v-select>
-      </v-col>
-      <v-col cols="12" sm="5">
-        <v-select
-          :items="itemsStatus()"
-          label="Status"
-          variant="outlined"
-          density="compact"
-          v-model="selection.status"
-        ></v-select>
-      </v-col>
-      <v-col cols="12">
-        <v-textarea
-          label="Kurze Beschreibung"
-          variant="outlined"
-          density="compact"
-          rows="3"
-          v-model="selection.short_description"
-          :rules="rules.required"
-        ></v-textarea>
-      </v-col>
-      <v-col cols="12">
-        <DescriptionEditor
-          label="Beschreibung"
-          v-model="selection.description"
-          :rules="rules.required"
-        />
-      </v-col>
-      <v-col cols="12">
-        <v-tabs class="mb-2" v-model="dateSelection">
-          <v-tab value="dates">Termine ({{ selection.dates.length }})</v-tab>
-          <v-tab value="free_date">Individuelles Datum (Freitext)</v-tab>
-        </v-tabs>
-        <v-window v-model="dateSelection">
-          <v-window-item class="mt-2" value="dates">
-            <div class="d-flex align-center mb-4">
-              <v-text-field
-                variant="outlined"
-                density="compact"
-                hide-details
-                label="Datum hinzufügen"
-                type="datetime-local"
-                v-model="dateToAdd"
-              ></v-text-field>
-              <v-btn
-                variant="text"
-                size="small"
-                icon
-                color="primary"
-                :disabled="!isDateToAddValid"
-                @click="addDate"
-              >
-                <v-icon>{{ mdiPlus }}</v-icon>
-              </v-btn>
+          <template #option="{ option }">
+            <div class="image-option">
+              <img :src="option.url" class="event-img" />
+              <span>{{ option.name }}</span>
             </div>
-            <v-card class="pa-1 mb-6 colored-border" variant="outlined">
+          </template>
+        </Select>
+        <label :for="`${uid}-image`">Bild</label>
+      </IftaLabel>
+    </div>
+    <div class="col-sm-5">
+      <IftaLabel>
+        <Select
+          :inputId="`${uid}-status`"
+          v-model="selection.status"
+          :options="itemsStatus()"
+          optionLabel="title"
+          optionValue="value"
+          fluid
+        />
+        <label :for="`${uid}-status`">Status</label>
+      </IftaLabel>
+    </div>
+    <div>
+      <IftaLabel>
+        <Textarea
+          :id="`${uid}-short-description`"
+          v-model="selection.short_description"
+          rows="3"
+          fluid
+          :invalid="errors.shortDescription !== undefined"
+        />
+        <label :for="`${uid}-short-description`">Kurze Beschreibung</label>
+      </IftaLabel>
+      <div v-if="errors.shortDescription" class="field-error">{{ errors.shortDescription }}</div>
+    </div>
+    <div>
+      <DescriptionEditor
+        label="Beschreibung"
+        v-model="selection.description"
+        :rules="rules.required"
+      />
+    </div>
+    <div>
+      <Tabs v-model:value="dateSelection" class="date-tabs">
+        <TabList>
+          <Tab value="dates">Termine ({{ selection.dates.length }})</Tab>
+          <Tab value="free_date">Individuelles Datum (Freitext)</Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel value="dates" class="date-tab-panel">
+            <DatePicker
+              v-model="dateModel"
+              selectionMode="multiple"
+              showTime
+              hourFormat="24"
+              dateFormat="dd.mm.yy"
+              placeholder="Datum hinzufügen"
+              fluid
+            />
+            <div class="chips-box">
               <div
                 v-if="selection.dates === undefined || selection.dates.length === 0"
-                style="height: 40px"
+                class="chips-empty"
               >
                 &nbsp;
               </div>
-              <v-chip
+              <Chip
                 v-for="(date, index) in selection.dates"
-                class="ma-2"
-                size="small"
-                label
-                closable
-                color="primary"
-                @click:close="selection.dates.splice(index, 1)"
                 :key="date"
-              >
-                {{ formatDate(date) }}
-              </v-chip>
-            </v-card>
-          </v-window-item>
-          <v-window-item class="mt-2" value="free_date">
-            <v-text-field
-              variant="outlined"
-              density="compact"
-              rows="1"
+                class="date-chip"
+                :label="formatDate(date)"
+                removable
+                @remove="removeDate(index)"
+              />
+            </div>
+          </TabPanel>
+          <TabPanel value="free_date" class="date-tab-panel">
+            <InputText
+              :id="`${uid}-custom-date`"
               v-model="selection.custom_date"
-            ></v-text-field>
-          </v-window-item>
-        </v-window>
-      </v-col>
-      <v-col cols="12">
-        <v-text-field
-          label="Ort"
-          variant="outlined"
-          density="compact"
+              placeholder="Individuelles Datum"
+              fluid
+            />
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </div>
+    <div>
+      <IftaLabel>
+        <InputText
+          :id="`${uid}-location`"
           v-model="selection.location"
-          :rules="rules.required"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12">
-        <v-select
-          :items="itemsPaymentMethod()"
-          label="Zahlungsmethode"
-          variant="outlined"
-          density="compact"
+          fluid
+          :invalid="errors.location !== undefined"
+        />
+        <label :for="`${uid}-location`">Ort</label>
+      </IftaLabel>
+      <div v-if="errors.location" class="field-error">{{ errors.location }}</div>
+    </div>
+    <div>
+      <IftaLabel>
+        <Select
+          :inputId="`${uid}-payment-method`"
           v-model="selection.payment_method"
-        ></v-select>
-      </v-col>
-      <v-col cols="12" sm="4">
-        <v-text-field
-          label="Preis Mitglied €"
-          variant="outlined"
-          density="compact"
-          type="number"
-          v-model.number="selection.price_member"
-          :rules="rules.requiredPositiveNumber"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12" sm="4">
-        <v-text-field
-          label="Preis Nicht-Mitglied €"
-          variant="outlined"
-          density="compact"
-          type="number"
-          v-model.number="selection.price_non_member"
-          :rules="rules.requiredPositiveNumber"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12" sm="4">
-        <v-text-field
-          label="Kosten pro Einheit €"
-          variant="outlined"
-          density="compact"
-          type="number"
-          v-model.number="costPerDate"
-          :rules="rules.positiveNumber"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12" sm="4">
-        <v-text-field
-          label="Maximale Teilnehmer"
-          variant="outlined"
-          density="compact"
-          type="number"
-          v-model.number="selection.max_subscribers"
-          :rules="rules.maxSubscribers"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12" sm="4">
-        <v-text-field
-          label="Maximale Warteliste"
-          variant="outlined"
-          density="compact"
-          type="number"
-          v-model.number="selection.max_waiting_list"
-          :rules="rules.requiredPositiveNumber"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12" sm="4">
-        <v-text-field
-          label="Dauer in Minuten"
-          variant="outlined"
-          density="compact"
-          type="number"
-          v-model.number="selection.duration_in_minutes"
-          :rules="rules.requiredPositiveNumber"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12" sm="6">
-        <v-text-field
-          label="Alternativer Button Text"
-          variant="outlined"
-          density="compact"
+          :options="itemsPaymentMethod()"
+          optionLabel="title"
+          optionValue="value"
+          fluid
+        />
+        <label :for="`${uid}-payment-method`">Zahlungsmethode</label>
+      </IftaLabel>
+    </div>
+    <div class="col-sm-4">
+      <IftaLabel>
+        <InputNumber
+          :inputId="`${uid}-price-member`"
+          v-model="priceMember"
+          fluid
+          :useGrouping="false"
+          :invalid="errors.priceMember !== undefined"
+        />
+        <label :for="`${uid}-price-member`">Preis Mitglied €</label>
+      </IftaLabel>
+      <div v-if="errors.priceMember" class="field-error">{{ errors.priceMember }}</div>
+    </div>
+    <div class="col-sm-4">
+      <IftaLabel>
+        <InputNumber
+          :inputId="`${uid}-price-non-member`"
+          v-model="priceNonMember"
+          fluid
+          :useGrouping="false"
+          :invalid="errors.priceNonMember !== undefined"
+        />
+        <label :for="`${uid}-price-non-member`">Preis Nicht-Mitglied €</label>
+      </IftaLabel>
+      <div v-if="errors.priceNonMember" class="field-error">{{ errors.priceNonMember }}</div>
+    </div>
+    <div class="col-sm-4">
+      <IftaLabel>
+        <InputNumber
+          :inputId="`${uid}-cost-per-date`"
+          v-model="costPerDate"
+          fluid
+          :useGrouping="false"
+          :invalid="errors.costPerDate !== undefined"
+        />
+        <label :for="`${uid}-cost-per-date`">Kosten pro Einheit €</label>
+      </IftaLabel>
+      <div v-if="errors.costPerDate" class="field-error">{{ errors.costPerDate }}</div>
+    </div>
+    <div class="col-sm-4">
+      <IftaLabel>
+        <InputNumber
+          :inputId="`${uid}-max-subscribers`"
+          v-model="maxSubscribers"
+          fluid
+          :useGrouping="false"
+          :invalid="errors.maxSubscribers !== undefined"
+        />
+        <label :for="`${uid}-max-subscribers`">Maximale Teilnehmer</label>
+      </IftaLabel>
+      <div v-if="errors.maxSubscribers" class="field-error">{{ errors.maxSubscribers }}</div>
+    </div>
+    <div class="col-sm-4">
+      <IftaLabel>
+        <InputNumber
+          :inputId="`${uid}-max-waiting-list`"
+          v-model="maxWaitingList"
+          fluid
+          :useGrouping="false"
+          :invalid="errors.maxWaitingList !== undefined"
+        />
+        <label :for="`${uid}-max-waiting-list`">Maximale Warteliste</label>
+      </IftaLabel>
+      <div v-if="errors.maxWaitingList" class="field-error">{{ errors.maxWaitingList }}</div>
+    </div>
+    <div class="col-sm-4">
+      <IftaLabel>
+        <InputNumber
+          :inputId="`${uid}-duration`"
+          v-model="durationInMinutes"
+          fluid
+          :useGrouping="false"
+          :invalid="errors.duration !== undefined"
+        />
+        <label :for="`${uid}-duration`">Dauer in Minuten</label>
+      </IftaLabel>
+      <div v-if="errors.duration" class="field-error">{{ errors.duration }}</div>
+    </div>
+    <div class="col-sm-6">
+      <IftaLabel>
+        <InputText
+          :id="`${uid}-alt-button-text`"
           v-model="selection.alt_booking_button_text"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12" sm="6">
-        <v-text-field
-          label="Alternative Versand-Emailadresse"
-          variant="outlined"
-          density="compact"
+          fluid
+        />
+        <label :for="`${uid}-alt-button-text`">Alternativer Button Text</label>
+      </IftaLabel>
+    </div>
+    <div class="col-sm-6">
+      <IftaLabel>
+        <InputText
+          :id="`${uid}-alt-email`"
           v-model="selection.alt_email_address"
-          :rules="rules.altEmailAddress"
-        ></v-text-field>
-      </v-col>
-      <v-col cols="12">
-        <ManagerRecipients v-model="selection.manager_recipients" />
-      </v-col>
-      <v-col cols="12">
-        <v-select
-          :items="itemsCustomFields()"
-          label="Zusatzfelder"
-          variant="outlined"
-          density="compact"
-          multiple
+          fluid
+          :invalid="errors.altEmailAddress !== undefined"
+        />
+        <label :for="`${uid}-alt-email`">Alternative Versand-Emailadresse</label>
+      </IftaLabel>
+      <div v-if="errors.altEmailAddress" class="field-error">{{ errors.altEmailAddress }}</div>
+    </div>
+    <div>
+      <ManagerRecipients v-model="selection.manager_recipients" />
+    </div>
+    <div>
+      <IftaLabel>
+        <MultiSelect
+          :inputId="`${uid}-custom-fields`"
           v-model="customFields"
-          :rules="rules.customFields"
-        ></v-select>
-      </v-col>
-      <v-col cols="12">
-        <v-checkbox
-          label="Durchführung durch den Förderverein"
-          density="compact"
-          v-model="selection.external_operator"
-        ></v-checkbox>
-      </v-col>
-      <v-col cols="12">
-        <v-textarea
-          label="Kontodaten"
-          variant="outlined"
-          density="compact"
-          rows="3"
+          :options="itemsCustomFields()"
+          optionLabel="title"
+          optionValue="value"
+          :maxSelectedLabels="4"
+          placeholder="Zusatzfelder"
+          fluid
+          :invalid="errors.customFields !== undefined"
+        />
+        <label :for="`${uid}-custom-fields`">Zusatzfelder</label>
+      </IftaLabel>
+      <div v-if="errors.customFields" class="field-error">{{ errors.customFields }}</div>
+    </div>
+    <div class="checkbox-row">
+      <Checkbox
+        v-model="selection.external_operator"
+        binary
+        :inputId="`${uid}-external-operator`"
+      />
+      <label :for="`${uid}-external-operator`">Durchführung durch den Förderverein</label>
+    </div>
+    <div>
+      <IftaLabel>
+        <Textarea
+          :id="`${uid}-payment-account`"
           v-model="selection.payment_account"
-        ></v-textarea>
-      </v-col>
-      <v-col cols="12">
-        <v-textarea
-          label="Buchungsemail"
-          variant="outlined"
-          density="compact"
-          rows="10"
+          rows="3"
+          fluid
+        />
+        <label :for="`${uid}-payment-account`">Kontodaten</label>
+      </IftaLabel>
+    </div>
+    <div>
+      <IftaLabel>
+        <Textarea
+          :id="`${uid}-booking-template`"
           v-model="selection.booking_template"
-          :rules="rules.required"
-        ></v-textarea>
-      </v-col>
-      <v-col cols="12">
-        <div class="d-flex align-center">
-          <v-progress-circular
-            v-if="loading"
-            size="32"
-            rotate="-90"
-            indeterminate
-            color="light-blue"
-          ></v-progress-circular>
-          <v-spacer />
-          <v-btn variant="flat" class="text-uppercase mr-2" :disabled="loading" @click="onReset()">
-            Zurücksetzen
-          </v-btn>
-          <v-btn
-            variant="elevated"
-            class="text-uppercase text-white"
-            :color="confirmSave ? 'red' : 'primary'"
-            :disabled="!valid || loading"
-            @click="onSave()"
-          >
-            {{ confirmSave ? 'Sicher?' : 'Speichern' }}
-          </v-btn>
-        </div>
-      </v-col>
-    </v-row>
-  </v-form>
+          rows="10"
+          fluid
+          :invalid="errors.bookingTemplate !== undefined"
+        />
+        <label :for="`${uid}-booking-template`">Buchungsemail</label>
+      </IftaLabel>
+      <div v-if="errors.bookingTemplate" class="field-error">{{ errors.bookingTemplate }}</div>
+    </div>
+    <div class="actions">
+      <ProgressSpinner v-if="loading" style="width: 32px; height: 32px" strokeWidth="4" />
+      <Button
+        label="Zurücksetzen"
+        class="reset-button uppercase"
+        :disabled="loading"
+        @click="onReset()"
+      />
+      <Button
+        :label="confirmSave ? 'Sicher?' : 'Speichern'"
+        class="save-button uppercase"
+        :severity="confirmSave ? 'danger' : 'primary'"
+        :disabled="!valid || loading"
+        @click="onSave()"
+      />
+    </div>
+  </div>
 </template>
 
-<style>
-.colored-border {
-  border-color: rgba(0, 0, 0, 0.42) !important;
+<style scoped>
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: 16px;
+  row-gap: 12px;
+}
+
+.form-grid > * {
+  grid-column: 1 / -1;
+}
+
+/* 600px matches Vuetify's sm breakpoint for the old col sm= props. */
+@media (min-width: 600px) {
+  .col-sm-2 {
+    grid-column: span 2;
+  }
+
+  .col-sm-4 {
+    grid-column: span 4;
+  }
+
+  .col-sm-5 {
+    grid-column: span 5;
+  }
+
+  .col-sm-6 {
+    grid-column: span 6;
+  }
+}
+
+.field-error {
+  color: var(--p-red-500, #f44336);
+  font-size: 0.75rem;
+  padding: 2px 12px 0;
+}
+
+.date-tabs {
+  margin-bottom: 8px;
+}
+
+.date-tab-panel {
+  padding-top: 8px;
+}
+
+.chips-box {
+  border: 1px solid rgba(0, 0, 0, 0.42);
+  border-radius: 4px;
+  padding: 4px;
+  margin-top: 16px;
+  margin-bottom: 24px;
+}
+
+.chips-empty {
+  height: 40px;
+}
+
+.date-chip {
+  margin: 8px;
+}
+
+.image-option {
+  display: flex;
+  align-items: center;
+  margin: 8px 0;
+}
+
+.image-option span {
+  margin-left: 8px;
 }
 
 .event-img {
   width: 120px;
   height: 70px;
   object-fit: cover;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+}
+
+.checkbox-row label {
+  margin-left: 8px;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+}
+
+.actions .reset-button {
+  margin-left: auto;
+}
+
+.actions .save-button {
+  margin-left: 8px;
+}
+
+.uppercase {
+  text-transform: uppercase;
 }
 </style>

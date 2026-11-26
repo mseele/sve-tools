@@ -9,6 +9,8 @@ import { useNotifyStore } from '@/stores/notify'
 import { EventType, LifecycleStatus, type Event, type EventCustomField } from '@/types'
 import { mdiDelete } from '@mdi/js'
 import { useHead } from '@unhead/vue'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
 import { nextTick, onMounted, ref, watch } from 'vue'
 
 const title = 'Manage Events'
@@ -94,10 +96,10 @@ async function onDelete() {
       'In der Beschreibung kann Text fettgedruckt und als Liste formatiert werden'
     ]"
   >
-    <v-row>
-      <v-col cols="12">
-        <EventTypeSelection v-model="eventType" />
-        <div class="d-flex align-center">
+    <div>
+      <EventTypeSelection v-model="eventType" />
+      <div class="picker-row">
+        <div class="event-selection-wrapper">
           <EventSelection
             ref="eventSelection"
             :eventType="eventType"
@@ -105,47 +107,49 @@ async function onDelete() {
             label="Event auswählen"
             @change="onEventSelection"
           />
-          <CreateNew :eventType="eventType" :eventStatus="eventStatus" @new="onNew" />
-          <v-dialog v-model="deleteDialog" persistent max-width="400">
-            <template v-slot:activator="{ props }">
-              <v-btn
-                icon
-                variant="text"
-                :disabled="selection == null || selection.status != LifecycleStatus.Draft"
-                v-bind="props"
-              >
-                <v-icon color="primary">{{ mdiDelete }}</v-icon>
-              </v-btn>
-            </template>
-            <v-card>
-              <v-card-title class="text-h5">Event löschen</v-card-title>
-              <v-card-text
-                >Willst du das Event
-                <span class="font-weight-bold">{{
-                  selection != null ? selection.name : selection
-                }}</span>
-                wirklich löschen?</v-card-text
-              >
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="primary" variant="text" @click="deleteDialog = false">
-                  Abbrechen
-                </v-btn>
-                <v-btn color="error" variant="text" :loading="deleteLoading" @click="onDelete()">
-                  Löschen
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
         </div>
-      </v-col>
-    </v-row>
+        <CreateNew :eventType="eventType" :eventStatus="eventStatus" @new="onNew" />
+        <Button
+          text
+          rounded
+          aria-label="Event löschen"
+          :disabled="selection == null || selection.status != LifecycleStatus.Draft"
+          @click="deleteDialog = true"
+        >
+          <MdiIcon :path="mdiDelete" :size="20" />
+        </Button>
+      </div>
+    </div>
+    <Dialog
+      v-model:visible="deleteDialog"
+      modal
+      header="Event löschen"
+      :closable="false"
+      :closeOnEscape="false"
+      :style="{ width: '400px' }"
+    >
+      <p class="delete-text">
+        Willst du das Event
+        <span class="bold">{{ selection != null ? selection.name : selection }}</span>
+        wirklich löschen?
+      </p>
+      <template #footer>
+        <Button label="Abbrechen" text @click="deleteDialog = false" />
+        <Button
+          label="Löschen"
+          text
+          severity="danger"
+          :loading="deleteLoading"
+          @click="onDelete()"
+        />
+      </template>
+    </Dialog>
     <template v-if="selection != undefined">
       <EditFinished
         v-if="selection.status === LifecycleStatus.Finished"
         :event="selection"
         @success="onUpdate"
-        class="mt-8"
+        class="edit-area"
       />
       <EditAttributes
         v-else
@@ -153,8 +157,32 @@ async function onDelete() {
         :custom-fields="customFields"
         @success="onUpdate"
         :key="selection.id"
-        class="mt-8"
+        class="edit-area"
       />
     </template>
   </ActionsLayout>
 </template>
+
+<style scoped>
+.picker-row {
+  display: flex;
+  align-items: center;
+}
+
+.event-selection-wrapper {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.delete-text {
+  margin: 0;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.edit-area {
+  margin-top: 32px;
+}
+</style>

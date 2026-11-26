@@ -3,6 +3,7 @@ import { loadEvents, sendParticipationConfirmation, updateEvent } from '@/api'
 import { useNotifyStore } from '@/stores/notify'
 import { LifecycleStatus, type Event, type EventSubscriber } from '@/types'
 import { format, parseISO } from 'date-fns'
+import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
 
 const props = defineProps<{
@@ -127,47 +128,113 @@ async function saveManagerRecipients() {
 
 <template>
   <div>
-    <v-row class="mb-6 justify-center">
-      <v-col cols="12" sm="8">
-        <v-card variant="outlined">
-          <v-card-text>
-            <div class="d-flex flex-wrap ga-6">
-              <div>
-                <div class="text-caption text-medium-emphasis">Teilnehmer</div>
-                <div class="text-h6">{{ participantCount }} / {{ event.max_subscribers }}</div>
-              </div>
-              <div v-if="lastTermin">
-                <div class="text-caption text-medium-emphasis">Letzter Termin</div>
-                <div class="text-h6">{{ lastTermin }}</div>
-              </div>
-              <div>
-                <div class="text-caption text-medium-emphasis">Bezahlung</div>
-                <div class="text-h6" :class="allPaid ? 'text-success' : 'text-error'">
-                  {{ allPaid ? 'Alle bezahlt' : 'Offene Zahlungen' }}
-                </div>
-              </div>
+    <div class="summary-row">
+      <div class="summary-card">
+        <div class="summary-items">
+          <div>
+            <div class="summary-caption">Teilnehmer</div>
+            <div class="summary-value">{{ participantCount }} / {{ event.max_subscribers }}</div>
+          </div>
+          <div v-if="lastTermin">
+            <div class="summary-caption">Letzter Termin</div>
+            <div class="summary-value">{{ lastTermin }}</div>
+          </div>
+          <div>
+            <div class="summary-caption">Bezahlung</div>
+            <div class="summary-value" :class="allPaid ? 'paid' : 'unpaid'">
+              {{ allPaid ? 'Alle bezahlt' : 'Offene Zahlungen' }}
             </div>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
-    <v-row class="my-5 justify-center">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="action-columns">
       <ActionColumn text="Teilnahmebestätigungen senden" @action="sendConfirmation" />
       <ActionColumn text="Event abschließen" @action="closeEvent" />
-    </v-row>
-    <div class="mt-4">
+    </div>
+    <div class="manager-recipients">
       <ManagerRecipients v-model="managerRecipients" />
-      <div class="d-flex justify-end">
-        <v-btn
-          variant="elevated"
-          color="primary"
-          :disabled="loading"
+      <div class="save-row">
+        <Button
+          label="Speichern"
           :loading="loading"
+          :disabled="loading"
           @click="saveManagerRecipients"
-        >
-          Speichern
-        </v-btn>
+        />
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.summary-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.summary-card {
+  width: 100%;
+  border: 1px solid rgba(0, 0, 0, 0.42);
+  border-radius: 4px;
+  padding: 16px;
+}
+
+/* 600px matches Vuetify's sm breakpoint; cols=12 sm=8 becomes 2/3 width. */
+@media (min-width: 600px) {
+  .summary-card {
+    width: 66.6667%;
+  }
+}
+
+.summary-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.summary-caption {
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.summary-value {
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.summary-value.paid {
+  color: var(--p-green-500, #4caf50);
+}
+
+.summary-value.unpaid {
+  color: var(--p-red-500, #f44336);
+}
+
+.action-columns {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+
+.action-columns > * {
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  .action-columns > * {
+    width: 66.6667%;
+  }
+}
+
+.manager-recipients {
+  margin-top: 16px;
+}
+
+.save-row {
+  display: flex;
+  justify-content: flex-end;
+}
+</style>
