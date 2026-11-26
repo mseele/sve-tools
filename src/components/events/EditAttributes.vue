@@ -2,6 +2,7 @@
 import { updateEvent } from '@/api'
 import { useNotifyStore } from '@/stores/notify'
 import { LifecycleStatus, PaymentMethod, type Event, type EventCustomField } from '@/types'
+import { firstRuleError } from '@/utils'
 import { format, parseISO } from 'date-fns'
 import { isEqual, transform } from 'lodash-es'
 import Button from 'primevue/button'
@@ -28,6 +29,23 @@ interface Image {
   url: string
 }
 
+// The number inputs model an emptied field as null and edit the string-typed
+// prices numerically, while the event object uses undefined for absent values
+// and carries the prices as strings. The editable draft widens those fields
+// so the null normalization stays type-safe; the draft is assignable to the
+// Partial<Event> that updateEvent() accepts, which is the boundary where it
+// flows back into the event.
+interface EventDraftFields {
+  sort_index?: number
+  price_member?: string
+  price_non_member?: string
+  max_subscribers?: number
+  max_waiting_list?: number
+  duration_in_minutes?: number
+}
+
+type EventDraft = Omit<Event, keyof EventDraftFields> & EventDraftFields
+
 const images: Image[] = []
 for (const url of Object.values(
   import.meta.glob('@/assets/events/*.jpg', { eager: true, query: '?url', import: 'default' })
@@ -49,7 +67,7 @@ const emit = defineEmits<{
 const notify = useNotifyStore()
 const uid = useId()
 
-const selection = ref<Event>(JSON.parse(JSON.stringify(props.event)))
+const selection = ref<EventDraft>(JSON.parse(JSON.stringify(props.event)))
 selection.value.manager_recipients ??= []
 const dateSelection = ref<'dates' | 'free_date'>(
   selection.value.custom_date != undefined ? 'free_date' : 'dates'
@@ -57,20 +75,23 @@ const dateSelection = ref<'dates' | 'free_date'>(
 const confirmSave = ref(false)
 const loading = ref(false)
 
-// InputNumber models an emptied field as null while the previous number
-// model bindings left undefined in the event object, which the rule
-// functions treat as invalid. Normalize null back on write.
+// InputNumber models an emptied field as null while the event object uses
+// undefined for absent numbers, which the rule functions treat as invalid.
+// Normalize null back on write.
 const sortIndex = computed<number | null>({
   get: () => selection.value.sort_index ?? null,
-  set: (value) => (selection.value.sort_index = value ?? (undefined as unknown as number))
+  set: (value) => (selection.value.sort_index = value ?? undefined)
 })
 
+// The event carries the prices as strings; the number input edits them
+// numerically, so convert at the boundary. A cleared input becomes an
+// absent value exactly like the number fields above.
 const priceMember = computed<number | null>({
   get: () => {
     const value = Number(selection.value.price_member)
     return Number.isNaN(value) ? null : value
   },
-  set: (value) => (selection.value.price_member = (value ?? undefined) as unknown as string)
+  set: (value) => (selection.value.price_member = value === null ? undefined : String(value))
 })
 
 const priceNonMember = computed<number | null>({
@@ -78,7 +99,7 @@ const priceNonMember = computed<number | null>({
     const value = Number(selection.value.price_non_member)
     return Number.isNaN(value) ? null : value
   },
-  set: (value) => (selection.value.price_non_member = (value ?? undefined) as unknown as string)
+  set: (value) => (selection.value.price_non_member = value === null ? undefined : String(value))
 })
 
 const costPerDate = computed<number | null>({
@@ -88,17 +109,17 @@ const costPerDate = computed<number | null>({
 
 const maxSubscribers = computed<number | null>({
   get: () => selection.value.max_subscribers ?? null,
-  set: (value) => (selection.value.max_subscribers = value ?? (undefined as unknown as number))
+  set: (value) => (selection.value.max_subscribers = value ?? undefined)
 })
 
 const maxWaitingList = computed<number | null>({
   get: () => selection.value.max_waiting_list ?? null,
-  set: (value) => (selection.value.max_waiting_list = value ?? (undefined as unknown as number))
+  set: (value) => (selection.value.max_waiting_list = value ?? undefined)
 })
 
 const durationInMinutes = computed<number | null>({
   get: () => selection.value.duration_in_minutes ?? null,
-  set: (value) => (selection.value.duration_in_minutes = value ?? (undefined as unknown as number))
+  set: (value) => (selection.value.duration_in_minutes = value ?? undefined)
 })
 
 // The stored dates are local wall-clock strings with a literal Z suffix; the
@@ -168,7 +189,7 @@ function itemsCustomFields() {
   }))
 }
 
-const customFields: any = computed({
+const customFields = computed<EventCustomField[]>({
   get: () =>
     props.customFields.filter((field) =>
       selection.value.custom_fields.map((v) => v.id).includes(field.id)
@@ -182,9 +203,9 @@ const customFields: any = computed({
   }
 })
 
-const eventImage: any = computed({
+const eventImage = computed<Image | undefined>({
   get: () => images.find((v) => v.name == selection.value.image),
-  set: (value?: Image) => {
+  set: (value) => {
     const eventImage = images.find((v) => v.name === value?.name)
     if (eventImage !== undefined) {
       selection.value.image = eventImage.name
@@ -248,74 +269,66 @@ function diff<T extends object>(object: T, base: T) {
 }
 
 const rules = {
-  required: [(val: string) => (val || '').length > 0 || 'Ein Wert wird benötigt'],
+  required: [
+    (val: unknown) => (typeof val === 'string' && val.length > 0) || 'Ein Wert wird benötigt'
+  ],
   requiredPositiveNumber: [
-    (val: any) =>
+    (val: unknown) =>
       val === 0 || (val != '' && Number(val) >= 0) || 'Eine positive Nummer wird benötigt'
   ],
   positiveNumber: [
-    (val: number) => val === undefined || val >= 0 || 'Eine positive Nummer wird benötigt'
+    (val: unknown) =>
+      val === undefined ||
+      (typeof val === 'number' && val >= 0) ||
+      'Eine positive Nummer wird benötigt'
   ],
   maxSubscribers: [
-    (val: number) => {
-      if (val == -1 || val > 0) {
+    (val: unknown) => {
+      if (val == -1 || (typeof val === 'number' && val > 0)) {
         return true
       }
       return '-1 oder eine positive Nummer wird benötigt'
     }
   ],
   newEvent: [
-    (val: any) => {
-      if ((val || '').length == 0) {
+    (val: unknown) => {
+      if (typeof val !== 'string' || val.length == 0) {
         return 'Bitte wähle ein Event aus'
       }
       return true
     }
   ],
   altEmailAddress: [
-    (val: any) => {
-      if ((val || '').length > 0 && val !== 'jugendturnier@sv-eutingen.de') {
+    (val: unknown) => {
+      if (typeof val === 'string' && val.length > 0 && val !== 'jugendturnier@sv-eutingen.de') {
         return "Als alternative Email Adresse ist aktuell nur 'jugendturnier@sv-eutingen.de' möglich"
       }
       return true
     }
   ],
   customFields: [
-    (val: any[]) =>
+    (val: unknown) =>
       (Array.isArray(val) && val.length <= 4) || 'Bitte wähle maximal 4 Zusatzfelder aus'
   ]
 }
 
 // PrimeVue has no form-level rules, so the rule functions above are
 // evaluated manually to reproduce the previous form validity exactly.
-function errorOf(
-  ruleList: readonly ((value: any) => boolean | string)[],
-  value: any
-): string | undefined {
-  for (const rule of ruleList) {
-    const result = rule(value)
-    if (result !== true) {
-      return typeof result === 'string' ? result : 'Ungültiger Wert'
-    }
-  }
-  return undefined
-}
-
 const errors = computed(() => ({
-  name: errorOf(rules.required, selection.value.name),
-  sortIndex: errorOf(rules.requiredPositiveNumber, selection.value.sort_index),
-  shortDescription: errorOf(rules.required, selection.value.short_description),
-  description: errorOf(rules.required, selection.value.description),
-  location: errorOf(rules.required, selection.value.location),
-  priceMember: errorOf(rules.requiredPositiveNumber, selection.value.price_member),
-  priceNonMember: errorOf(rules.requiredPositiveNumber, selection.value.price_non_member),
-  costPerDate: errorOf(rules.positiveNumber, selection.value.cost_per_date),
-  maxSubscribers: errorOf(rules.maxSubscribers, selection.value.max_subscribers),
-  maxWaitingList: errorOf(rules.requiredPositiveNumber, selection.value.max_waiting_list),
-  duration: errorOf(rules.requiredPositiveNumber, selection.value.duration_in_minutes),
-  altEmailAddress: errorOf(rules.altEmailAddress, selection.value.alt_email_address),
-  customFields: errorOf(rules.customFields, customFields.value),
-  bookingTemplate: errorOf(rules.required, selection.value.booking_template)
+  name: firstRuleError(rules.required, selection.value.name),
+  sortIndex: firstRuleError(rules.requiredPositiveNumber, selection.value.sort_index),
+  shortDescription: firstRuleError(rules.required, selection.value.short_description),
+  description: firstRuleError(rules.required, selection.value.description),
+  location: firstRuleError(rules.required, selection.value.location),
+  priceMember: firstRuleError(rules.requiredPositiveNumber, selection.value.price_member),
+  priceNonMember: firstRuleError(rules.requiredPositiveNumber, selection.value.price_non_member),
+  costPerDate: firstRuleError(rules.positiveNumber, selection.value.cost_per_date),
+  maxSubscribers: firstRuleError(rules.maxSubscribers, selection.value.max_subscribers),
+  maxWaitingList: firstRuleError(rules.requiredPositiveNumber, selection.value.max_waiting_list),
+  duration: firstRuleError(rules.requiredPositiveNumber, selection.value.duration_in_minutes),
+  altEmailAddress: firstRuleError(rules.altEmailAddress, selection.value.alt_email_address),
+  customFields: firstRuleError(rules.customFields, customFields.value),
+  bookingTemplate: firstRuleError(rules.required, selection.value.booking_template)
 }))
 
 const valid = computed(() => Object.values(errors.value).every((error) => error === undefined))

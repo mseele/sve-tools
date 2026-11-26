@@ -19,7 +19,13 @@ export function bindToast() {
 }
 
 function add(message: NotifyToastMessage) {
-  toast?.add(message)
+  if (toast === undefined) {
+    // Dev-time signal: without the bound toast service the notification
+    // would silently vanish.
+    console.warn('notify: toast service is not bound, call bindToast() during app setup')
+    return
+  }
+  toast.add(message)
 }
 
 function showSuccess(message: string) {

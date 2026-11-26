@@ -88,7 +88,7 @@ function freeBookings(event: Event, enrolled: boolean) {
   )
 }
 
-function finacialResult(event: Event) {
+function financialResult(event: Event) {
   if (event.cost_per_date != undefined) {
     let date_count = 0
     if (event.custom_date != undefined) {
@@ -209,12 +209,12 @@ async function exportSepa(event: Event) {
             </div>
             <div class="table-header-right">
               <div
-                v-if="finacialResult(event) != undefined"
-                :class="finacialResult(event)! < 0 ? 'finacial negative' : 'finacial positive'"
+                v-if="financialResult(event) != undefined"
+                :class="financialResult(event)! < 0 ? 'financial negative' : 'financial positive'"
               >
-                {{ formatPrice(finacialResult(event)!.toString()) }}
+                {{ formatPrice(financialResult(event)!.toString()) }}
               </div>
-              <div v-else class="finacial missing">Preis pro Einheit fehlt</div>
+              <div v-else class="financial missing">Preis pro Einheit fehlt</div>
               <Button
                 v-tooltip.left="'Teilnehmerliste herunterladen'"
                 text
@@ -250,12 +250,7 @@ async function exportSepa(event: Event) {
         <Column>
           <template #body="{ data }">
             <div v-tooltip.bottom="data.enrolled ? 'Gebucht' : 'Warteliste'" class="enrolled">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16pt" height="21.333">
-                <path
-                  d="M15.625 10a5.625 5.625 0 11-11.25 0 5.625 5.625 0 0111.25 0z"
-                  :fill="data.enrolled ? 'green' : 'red'"
-                />
-              </svg>
+              <StatusDot :color="data.enrolled ? 'green' : 'red'" />
             </div>
           </template>
         </Column>
@@ -400,19 +395,19 @@ async function exportSepa(event: Event) {
   gap: 4px;
 }
 
-.finacial {
+.financial {
   font-size: 0.875rem;
 }
 
-.finacial.negative {
+.financial.negative {
   color: #dc2626;
 }
 
-.finacial.positive {
+.financial.positive {
   color: #65a30d;
 }
 
-.finacial.missing {
+.financial.missing {
   color: #9e9e9e;
 }
 

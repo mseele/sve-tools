@@ -4,12 +4,13 @@ import StarterKit from '@tiptap/starter-kit'
 import { mdiFormatBold, mdiFormatListBulleted } from '@mdi/js'
 import Button from 'primevue/button'
 import { computed, ref, watch } from 'vue'
+import { firstRuleError, type Rule } from '@/utils'
 
 const props = withDefaults(
   defineProps<{
     modelValue: string
     label?: string
-    rules?: readonly ((v: any) => boolean | string)[]
+    rules?: readonly Rule[]
   }>(),
   { label: '' }
 )
@@ -23,15 +24,7 @@ const lastEmitted = ref(props.modelValue || '')
 
 // PrimeVue has no rule evaluation, so the old rules wrapper is
 // reproduced manually: the first failing rule message drives the error style.
-const error = computed(() => {
-  for (const rule of props.rules ?? []) {
-    const result = rule(props.modelValue)
-    if (result !== true) {
-      return result
-    }
-  }
-  return undefined
-})
+const error = computed(() => firstRuleError(props.rules ?? [], props.modelValue))
 
 function tiptapToStored(html: string): string {
   let result = html

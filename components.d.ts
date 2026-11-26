@@ -26,6 +26,7 @@ declare module 'vue' {
     MdiIcon: typeof import('./src/components/MdiIcon.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    StatusDot: typeof import('./src/components/StatusDot.vue')['default']
     UnpaidBookings: typeof import('./src/components/events/UnpaidBookings.vue')['default']
   }
 }

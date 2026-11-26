@@ -68,3 +68,23 @@ export function statusIndex(status: LifecycleStatus) {
 export function formatPrice(price: string) {
   return price.replace('.', ',') + '  €'
 }
+
+// A form validation rule: it receives the current field value and either
+// accepts it (true) or rejects it with an error message.
+export interface Rule {
+  (value: unknown): boolean | string
+}
+
+// Returns the message of the first failing rule, or undefined when every
+// rule accepts the value. A rule that rejects without a message yields a
+// generic one. PrimeVue has no form-level rule evaluation, so the old
+// per-field rules are checked manually through this helper.
+export function firstRuleError(rules: readonly Rule[], value: unknown): string | undefined {
+  for (const rule of rules) {
+    const result = rule(value)
+    if (result !== true) {
+      return typeof result === 'string' ? result : 'Ungültiger Wert'
+    }
+  }
+  return undefined
+}

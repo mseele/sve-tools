@@ -3,7 +3,9 @@ import { getUnpaidBookings, verifyPayments } from '@/api'
 import { useNotifyStore } from '@/stores/notify'
 import { EventType, type UnpaidBooking } from '@/types'
 import { readFile } from '@/utils'
+import { mdiClose } from '@mdi/js'
 import { useHead } from '@unhead/vue'
+import Button from 'primevue/button'
 import Chip from 'primevue/chip'
 import Divider from 'primevue/divider'
 import FileUpload, { type FileUploadSelectEvent } from 'primevue/fileupload'
@@ -61,6 +63,12 @@ function reset() {
   csvResult.value = undefined
   disabled.value = false
   loadUnpaidBookings()
+}
+
+// Vuetify's clearable set the bound string to ''; reproduce that affordance
+// with the clear button next to the input.
+function clearStartDate() {
+  startDate.value = ''
 }
 
 async function send() {
@@ -141,13 +149,27 @@ async function send() {
         </template>
       </FileUpload>
       <IftaLabel class="field">
-        <InputText
-          inputId="csv-start-date"
-          v-model="startDate"
-          type="date"
-          fluid
-          :disabled="disabled"
-        />
+        <div class="start-date-row">
+          <InputText
+            inputId="csv-start-date"
+            v-model="startDate"
+            type="date"
+            fluid
+            :disabled="disabled"
+          />
+          <Button
+            v-if="startDate"
+            text
+            rounded
+            severity="secondary"
+            class="clear-start-date"
+            aria-label="Startdatum leeren"
+            :disabled="disabled"
+            @click="clearStartDate"
+          >
+            <MdiIcon :path="mdiClose" :size="20" />
+          </Button>
+        </div>
         <label for="csv-start-date">CSV Start Date</label>
       </IftaLabel>
     </template>
@@ -184,5 +206,15 @@ async function send() {
 
 .csv-upload {
   margin-bottom: 16px;
+}
+
+.start-date-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.start-date-row :deep(.p-inputtext) {
+  flex: 1;
 }
 </style>
