@@ -2,6 +2,7 @@
 import { exchangeGoogleToken } from '@/api'
 import { useNotifyStore } from '@/stores/notify'
 import { useAuthStore } from '@/stores/auth'
+import ProgressSpinner from 'primevue/progressspinner'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -55,18 +56,22 @@ function redirect() {
 </script>
 
 <template>
-  <v-layout full-height>
-    <v-main style="min-height: 100vh">
-      <v-container class="fill-height d-flex align-center flex-wrap" fluid>
-        <v-row class="align-center justify-center">
-          <v-col cols="12" sm="8" md="4" class="d-flex justify-center">
-            <div v-if="loading" class="d-flex align-center">
-              <v-progress-circular indeterminate size="48" />
-            </div>
-            <div v-else ref="buttonRef" class="d-flex justify-center"></div>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-main>
-  </v-layout>
+  <div class="login">
+    <ProgressSpinner
+      v-if="loading"
+      class="login-spinner"
+      style="width: 48px; height: 48px"
+      strokeWidth="4"
+    />
+    <div v-else ref="buttonRef"></div>
+  </div>
 </template>
+
+<style scoped>
+.login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
