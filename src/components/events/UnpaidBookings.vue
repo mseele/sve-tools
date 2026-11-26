@@ -5,6 +5,9 @@ import { EventType, type UnpaidBooking } from '@/types'
 import { formatPrice } from '@/utils'
 import { mdiCash, mdiCashClock, mdiCheckCircle, mdiCloseCircle } from '@mdi/js'
 import { format, parseISO } from 'date-fns'
+import Button from 'primevue/button'
+import Column from 'primevue/column'
+import DataTable from 'primevue/datatable'
 import { computed, ref } from 'vue'
 
 const props = defineProps<{
@@ -22,15 +25,15 @@ const bookingsDue = computed(() => {
   return props.bookings?.filter((b) => b.due_in_days < 0) || []
 })
 
-const headers = [
-  { title: '', key: 'due_in_days' },
-  { title: 'Event', key: 'event_name' },
-  { title: 'Name', key: 'first_name' },
-  { title: 'Buchungsdatum', key: 'booking_date' },
-  { title: 'Payment ID', key: 'payment_id' },
-  { title: 'Preis', key: 'price' },
-  { title: '', key: 'actions', sortable: false }
-]
+const reminderTooltip = computed(() => {
+  return (
+    'Zahlungserinnerung an ' +
+    bookingsDue.value.length +
+    ' überfällige ' +
+    (bookingsDue.value.length == 1 ? 'Buchung' : 'Buchungen') +
+    ' senden'
+  )
+})
 
 function dueInDaysTooltip(item: UnpaidBooking) {
   const prefix = item.payment_reminder_sent == undefined ? 'Zahlung' : 'Zahlungserinnerung'
@@ -97,87 +100,126 @@ function formatDate(value: string) {
 
 <template>
   <div>
-    <div v-if="bookings == undefined" class="mt-4">Unbezahlte Buchungen werden geladen...</div>
+    <div v-if="bookings == undefined" class="loading">Unbezahlte Buchungen werden geladen...</div>
     <template v-else>
       <template v-if="bookings.length > 0">
-        <h4 class="d-flex align-center justify-space-between">
-          <div class="d-flex align-center">
-            <v-icon color="error">{{ mdiCloseCircle }}</v-icon>
-            <div class="mx-1">
+        <h4 class="unpaid-header">
+          <div class="unpaid-title">
+            <MdiIcon :path="mdiCloseCircle" class="icon-error" />
+            <div class="unpaid-count">
               {{ bookings.length }} Unbezahlte
               {{ bookings.length == 1 ? 'Buchung' : 'Buchungen' }}
             </div>
           </div>
           <div v-if="bookingsDue.length > 0">
-            <v-tooltip left>
-              <template v-slot:activator="{ props }">
-                <v-btn
-                  icon
-                  variant="text"
-                  color="primary"
-                  v-bind="props"
-                  :loading="paymentReminderLoading"
-                  @click="sendingPaymentReminders()"
-                >
-                  <v-icon>{{ mdiCashClock }}</v-icon>
-                </v-btn>
-              </template>
-              <span>
-                Zahlungserinnerung an {{ bookingsDue.length }} überfällige
-                {{ bookingsDue.length == 1 ? ' Buchung' : ' Buchungen' }} senden
-              </span>
-            </v-tooltip>
+            <Button
+              v-tooltip.left="reminderTooltip"
+              text
+              rounded
+              aria-label="Zahlungserinnerungen senden"
+              :loading="paymentReminderLoading"
+              @click="sendingPaymentReminders()"
+            >
+              <MdiIcon v-if="!paymentReminderLoading" :path="mdiCashClock" />
+            </Button>
           </div>
         </h4>
-        <v-data-table-virtual
-          density="compact"
-          :headers="headers"
-          :items="bookings"
-          item-key="id"
-          class="elevation-1 my-4"
-        >
-          <template v-slot:item="{ item }">
-            <tr>
-              <td>
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ props }">
-                    <div class="d-flex align-center" v-bind="props">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16pt" height="21.333">
-                        <path
-                          d="M15.625 10a5.625 5.625 0 11-11.25 0 5.625 5.625 0 0111.25 0z"
-                          :fill="dueInDaysColor(item)"
-                        />
-                      </svg>
-                    </div>
-                  </template>
-                  <span>{{ dueInDaysTooltip(item) }}</span>
-                </v-tooltip>
-              </td>
-              <td>{{ item.event_name }}</td>
-              <td>{{ `${item.first_name} ${item.last_name}` }}</td>
-              <td>{{ formatDate(item.booking_date) }}</td>
-              <td>{{ item.payment_id }}</td>
-              <td>{{ formatPrice(item.price) }}</td>
-              <td>
-                <div class="d-flex align-center justify-end">
-                  <v-tooltip left>
-                    <template v-slot:activator="{ props }">
-                      <v-icon small class="mr-2" @click="markPayed(item)" v-bind="props">{{
-                        mdiCash
-                      }}</v-icon>
-                    </template>
-                    <span>Als Bezahlt markieren</span>
-                  </v-tooltip>
-                </div>
-              </td>
-            </tr>
-          </template>
-        </v-data-table-virtual>
+        <DataTable :value="bookings || []" dataKey="booking_id" size="small" class="unpaid-table">
+          <Column>
+            <template #body="{ data }">
+              <div v-tooltip.bottom="dueInDaysTooltip(data)" class="due-dot">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16pt" height="21.333">
+                  <path
+                    d="M15.625 10a5.625 5.625 0 11-11.25 0 5.625 5.625 0 0111.25 0z"
+                    :fill="dueInDaysColor(data)"
+                  />
+                </svg>
+              </div>
+            </template>
+          </Column>
+          <Column field="event_name" header="Event" sortable />
+          <Column field="first_name" header="Name" sortable>
+            <template #body="{ data }">{{ `${data.first_name} ${data.last_name}` }}</template>
+          </Column>
+          <Column field="booking_date" header="Buchungsdatum" sortable>
+            <template #body="{ data }">{{ formatDate(data.booking_date) }}</template>
+          </Column>
+          <Column field="payment_id" header="Payment ID" sortable />
+          <Column field="price" header="Preis" sortable>
+            <template #body="{ data }">{{ formatPrice(data.price) }}</template>
+          </Column>
+          <Column>
+            <template #body="{ data }">
+              <div class="actions">
+                <Button
+                  v-tooltip.left="'Als Bezahlt markieren'"
+                  text
+                  rounded
+                  size="small"
+                  aria-label="Als Bezahlt markieren"
+                  @click="markPayed(data)"
+                >
+                  <MdiIcon :path="mdiCash" :size="16" />
+                </Button>
+              </div>
+            </template>
+          </Column>
+        </DataTable>
       </template>
-      <h4 v-else class="d-flex align-center mt-4">
-        <v-icon color="success">{{ mdiCheckCircle }}</v-icon>
-        <div class="ml-1">Keine unbezahlten Buchungen</div>
+      <h4 v-else class="paid-header">
+        <MdiIcon :path="mdiCheckCircle" class="icon-success" />
+        <div class="paid-text">Keine unbezahlten Buchungen</div>
       </h4>
     </template>
   </div>
 </template>
+
+<style scoped>
+.loading {
+  margin-top: 16px;
+}
+
+.unpaid-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.unpaid-title {
+  display: flex;
+  align-items: center;
+}
+
+.unpaid-count {
+  margin: 0 4px;
+}
+
+.unpaid-table {
+  margin: 16px 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+
+.paid-header {
+  display: flex;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.paid-text {
+  margin-left: 4px;
+}
+
+.icon-error {
+  color: #dc2626;
+}
+
+.icon-success {
+  color: #65a30d;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+</style>

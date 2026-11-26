@@ -4,6 +4,7 @@ import { createHead } from '@unhead/vue/client'
 import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config'
 import ToastService from 'primevue/toastservice'
+import Tooltip from 'primevue/tooltip'
 import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import { routes } from 'vue-router/auto-routes'
@@ -77,4 +78,5 @@ createApp(App)
       }
     })
   )
+  .directive('tooltip', Tooltip)
   .mount('#app')
