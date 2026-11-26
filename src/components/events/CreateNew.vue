@@ -3,6 +3,8 @@ import { EventType, LifecycleStatus, type Event } from '@/types'
 import { mdiPlus } from '@mdi/js'
 import { cloneDeep } from 'lodash-es'
 import { computed, ref } from 'vue'
+import Button from 'primevue/button'
+import Dialog from 'primevue/dialog'
 
 const props = defineProps<{
   eventType: EventType
@@ -40,25 +42,43 @@ function onApply() {
 </script>
 
 <template>
-  <v-dialog v-model="show" persistent max-width="500">
-    <template v-slot:activator="{ props }">
-      <v-btn icon variant="text" v-bind="props">
-        <v-icon color="primary">{{ mdiPlus }}</v-icon>
-      </v-btn>
-    </template>
-    <v-card>
-      <v-card-title class="text-h5">Neues Event</v-card-title>
-      <v-card-text class="pb-0">
-        Wähle ein Vorlage-Event aus:<br />
-        <div class="mt-2 mb-4">
-          <EventSelection :eventType="props.eventType" @change="onEventSelection" />
-        </div>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="primary" variant="text" @click="onCancel()">Abbrechen</v-btn>
-        <v-btn color="primary" variant="text" @click="onApply()" :disabled="!valid">Starten</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  <div class="create-new">
+    <Button class="activator" text rounded aria-label="Neues Event" @click="show = true">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+        <path :d="mdiPlus" fill="currentColor" />
+      </svg>
+    </Button>
+    <Dialog
+      v-model:visible="show"
+      modal
+      header="Neues Event"
+      :closable="false"
+      :closeOnEscape="false"
+      :style="{ width: '500px' }"
+    >
+      <div class="intro">Wähle ein Vorlage-Event aus:</div>
+      <div class="picker">
+        <EventSelection :eventType="props.eventType" @change="onEventSelection" />
+      </div>
+      <template #footer>
+        <Button label="Abbrechen" text @click="onCancel()" />
+        <Button label="Starten" text :disabled="!valid" @click="onApply()" />
+      </template>
+    </Dialog>
+  </div>
 </template>
+
+<style scoped>
+/* keeps the activator button as the effective flex item of parent rows */
+.create-new {
+  display: contents;
+}
+
+.intro {
+  margin-bottom: 8px;
+}
+
+.picker {
+  margin-bottom: 16px;
+}
+</style>

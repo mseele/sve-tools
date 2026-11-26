@@ -39,7 +39,7 @@ async function redeployRelease(onFinish: () => void) {
 
 <template>
   <ActionsLayout :title="title" :help="['Webseite nach Event-Änderung neu bauen und ausrollen']">
-    <v-row class="my-5 mx-1 justify-center">
+    <div class="deploy-actions">
       <ActionColumn
         text="<b>next.sv-eutingen.de</b> neu bauen und ausrollen"
         @action="redeployNext"
@@ -48,6 +48,27 @@ async function redeployRelease(onFinish: () => void) {
         text="<b>www.sv-eutingen.de</b> neu bauen und ausrollen"
         @action="redeployRelease"
       />
-    </v-row>
+    </div>
   </ActionsLayout>
 </template>
+
+<style scoped>
+.deploy-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 32px 4px;
+}
+
+.deploy-actions > * {
+  width: 100%;
+}
+
+/* 600px matches Vuetify's sm breakpoint; cols=12 sm=8 becomes 2/3 width. */
+@media (min-width: 600px) {
+  .deploy-actions > * {
+    width: 66.6667%;
+  }
+}
+</style>
