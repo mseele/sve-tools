@@ -23,6 +23,7 @@ declare module 'vue' {
     EventSelection: typeof import('./src/components/EventSelection.vue')['default']
     EventTypeSelection: typeof import('./src/components/EventTypeSelection.vue')['default']
     ManagerRecipients: typeof import('./src/components/events/ManagerRecipients.vue')['default']
+    MdiIcon: typeof import('./src/components/MdiIcon.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     UnpaidBookings: typeof import('./src/components/events/UnpaidBookings.vue')['default']

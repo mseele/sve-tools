@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import Button from 'primevue/button'
 
 const props = withDefaults(
   defineProps<{
@@ -32,18 +33,42 @@ async function apply() {
 </script>
 
 <template>
-  <v-col cols="12" sm="8">
-    <v-sheet rounded :color="confirm ? 'red' : 'primary'" class="d-flex pa-3">
-      <div class="me-auto align-self-center pr-2" v-html="props.text"></div>
-      <v-btn
-        class="align-self-center text-uppercase"
-        :loading="loading"
-        :disabled="loading"
-        variant="flat"
-        color="white"
-        @click="apply"
-        >{{ confirm ? 'Sicher?' : props.button }}</v-btn
-      >
-    </v-sheet>
-  </v-col>
+  <div class="action-sheet" :class="confirm ? 'confirm' : 'primary'">
+    <div class="action-text" v-html="props.text"></div>
+    <Button
+      class="uppercase"
+      :label="confirm ? 'Sicher?' : props.button"
+      severity="contrast"
+      :loading="loading"
+      :disabled="loading"
+      @click="apply"
+    />
+  </div>
 </template>
+
+<style scoped>
+.action-sheet {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: 4px;
+  color: #fff;
+}
+
+.action-sheet.primary {
+  background: var(--p-primary-color, #c62828);
+}
+
+.action-sheet.confirm {
+  background: var(--p-red-500, #f44336);
+}
+
+.action-text {
+  margin-inline-end: auto;
+  padding-right: 8px;
+}
+
+.uppercase {
+  text-transform: uppercase;
+}
+</style>

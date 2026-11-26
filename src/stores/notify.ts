@@ -1,39 +1,42 @@
 import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
+import type { ToastMessageOptions } from 'primevue/toast'
+import type { ToastServiceMethods } from 'primevue/toastservice'
+import { useToast } from 'primevue/usetoast'
+
+export interface NotifyAction {
+  actionLabel?: string
+  onAction?: () => void
+}
+
+interface NotifyToastMessage extends ToastMessageOptions, NotifyAction {}
+
+let toast: ToastServiceMethods | undefined
+
+// Captures useToast() once during App.vue setup so notifications work from
+// anywhere, including non-component modules like api/index.ts.
+export function bindToast() {
+  toast = useToast()
+}
+
+function add(message: NotifyToastMessage) {
+  toast?.add(message)
+}
+
+function showSuccess(message: string) {
+  add({ group: 'notify', severity: 'success', summary: message, life: 4000 })
+}
+
+function showError(message: string, options: NotifyAction = {}) {
+  add({
+    group: 'notify',
+    severity: 'error',
+    summary: message,
+    life: 4000,
+    actionLabel: options.actionLabel,
+    onAction: options.onAction
+  })
+}
 
 export const useNotifyStore = defineStore('notify', () => {
-  const _message = ref<string | undefined>()
-  const _type = ref<'success' | 'error'>('success')
-  const _actionLabel = ref<string | undefined>()
-  const _onAction = ref<(() => void) | undefined>()
-
-  function showSuccess(message: string) {
-    _type.value = 'success'
-    _message.value = message
-    _actionLabel.value = undefined
-    _onAction.value = undefined
-  }
-
-  function showError(
-    message: string,
-    options: { actionLabel?: string; onAction?: () => void } = {}
-  ) {
-    _type.value = 'error'
-    _message.value = message
-    _actionLabel.value = options.actionLabel
-    _onAction.value = options.onAction
-  }
-
-  function hideMessage() {
-    _message.value = undefined
-    _actionLabel.value = undefined
-    _onAction.value = undefined
-  }
-
-  const message = computed(() => _message.value)
-  const type = computed(() => _type.value)
-  const actionLabel = computed(() => _actionLabel.value)
-  const onAction = computed(() => _onAction.value)
-
-  return { showSuccess, showError, hideMessage, message, type, actionLabel, onAction }
+  return { showSuccess, showError }
 })
