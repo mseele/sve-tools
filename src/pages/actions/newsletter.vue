@@ -3,6 +3,10 @@ import { getNewsletterSubscribers } from '@/api'
 import { useNotifyStore } from '@/stores/notify'
 import { NewsTopic } from '@/types'
 import { useHead } from '@unhead/vue'
+import IftaLabel from 'primevue/iftalabel'
+import MultiSelect from 'primevue/multiselect'
+import ProgressBar from 'primevue/progressbar'
+import Textarea from 'primevue/textarea'
 import { computed, ref, watch } from 'vue'
 
 const title = 'Manage Newsletter'
@@ -58,37 +62,57 @@ watch(selectedTopics, async (topics) => {
       'Email-Adressen kopieren und ins Email-Tool einfügen'
     ]"
   >
-    <v-row>
-      <v-col cols="12">
-        <v-autocomplete
-          v-model="selectedTopics"
-          :items="allTopics"
-          :item-title="(t: NewsTopic) => topicLabels[t] || t"
-          :item-value="(t: NewsTopic) => t"
-          variant="outlined"
-          label="Themen auswählen"
-          multiple
-          chips
-          closable-chips
-          hide-details
-        />
-        <v-progress-linear v-if="loading" indeterminate color="primary" class="my-4" />
-        <template v-if="emailBlocks.length > 0">
-          <p class="mt-4">{{ emailBlocks.flat().length }} Adressen insgesamt</p>
-          <div v-for="(block, index) in emailBlocks" :key="index" class="mt-4">
-            <v-textarea
-              :model-value="block.join('; ')"
-              :label="`Block ${index + 1} (${block.length} Adressen)`"
-              variant="outlined"
-              readonly
-              auto-grow
-              rows="2"
-              @click="($event.target as HTMLTextAreaElement).select()"
-            />
-          </div>
-        </template>
-        <p v-else-if="subscribers" class="text-medium-emphasis mt-4">Keine Abonnenten</p>
-      </v-col>
-    </v-row>
+    <IftaLabel>
+      <MultiSelect
+        inputId="newsletter-topics"
+        v-model="selectedTopics"
+        :options="allTopics"
+        :optionLabel="(t: NewsTopic) => topicLabels[t] || t"
+        display="chip"
+        fluid
+      />
+      <label for="newsletter-topics">Themen auswählen</label>
+    </IftaLabel>
+    <ProgressBar v-if="loading" mode="indeterminate" class="loading-bar" />
+    <template v-if="emailBlocks.length > 0">
+      <p class="total">{{ emailBlocks.flat().length }} Adressen insgesamt</p>
+      <div v-for="(block, index) in emailBlocks" :key="index" class="email-block">
+        <IftaLabel>
+          <Textarea
+            :inputId="`newsletter-block-${index}`"
+            :modelValue="block.join('; ')"
+            rows="2"
+            autoResize
+            readonly
+            fluid
+            @click="($event.target as HTMLTextAreaElement).select()"
+          />
+          <label :for="`newsletter-block-${index}`">
+            {{ `Block ${index + 1} (${block.length} Adressen)` }}
+          </label>
+        </IftaLabel>
+      </div>
+    </template>
+    <p v-else-if="subscribers" class="empty">Keine Abonnenten</p>
   </ActionsLayout>
 </template>
+
+<style scoped>
+.loading-bar {
+  margin-block: 16px;
+  height: 6px;
+}
+
+.total {
+  margin-top: 16px;
+}
+
+.email-block {
+  margin-top: 16px;
+}
+
+.empty {
+  margin-top: 16px;
+  color: rgba(0, 0, 0, 0.6);
+}
+</style>

@@ -4,6 +4,11 @@ import { useNotifyStore } from '@/stores/notify'
 import { EventType, type UnpaidBooking } from '@/types'
 import { readFile } from '@/utils'
 import { useHead } from '@unhead/vue'
+import Chip from 'primevue/chip'
+import Divider from 'primevue/divider'
+import FileUpload, { type FileUploadSelectEvent } from 'primevue/fileupload'
+import IftaLabel from 'primevue/iftalabel'
+import InputText from 'primevue/inputtext'
 import { onMounted, ref, watch } from 'vue'
 
 const title = 'Verify Payments'
@@ -33,6 +38,21 @@ async function loadUnpaidBookings() {
       notify.showError('Abholen unbezahlter Buchungen fehlgeschlafen. Details siehe Console')
     }
   }
+}
+
+// PrimeVue FileUpload has no v-model, so the selected CSV file is kept in page
+// state via the @select event. Long names are truncated like Vuetify did.
+function onCsvSelect(event: FileUploadSelectEvent) {
+  const selected = Array.isArray(event.files) ? event.files : [event.files]
+  csv.value = selected[0]
+}
+
+function removeCsv() {
+  csv.value = undefined
+}
+
+function csvName(file: File) {
+  return file.name.length > 50 ? file.name.slice(0, 50) + '…' : file.name
 }
 
 function reset() {
@@ -77,56 +97,92 @@ async function send() {
     :title="title"
     :help="['Kontoauszug als CVS Datei angeben', 'Überprüfung starten und Auswertung abwarten']"
   >
-    <v-row>
-      <v-col cols="12">
-        <div v-if="csvResult">
-          <div v-for="(item, index) in csvResult" :key="index" class="mb-4">
-            <h4>{{ item.title }}</h4>
-            <ul v-if="item.values.length > 0">
-              <li v-for="(value, idx) in item.values" :key="idx" class="my-1">
-                {{ value }}
-              </li>
-            </ul>
-          </div>
-          <v-divider class="mb-4" />
-          <UnpaidBookings
-            :eventType="eventType"
-            :bookings="unpaidBookings"
-            @refresh="loadUnpaidBookings"
+    <template v-if="csvResult">
+      <div v-for="(item, index) in csvResult" :key="index" class="result">
+        <h4>{{ item.title }}</h4>
+        <ul v-if="item.values.length > 0">
+          <li v-for="(value, idx) in item.values" :key="idx" class="result-value">
+            {{ value }}
+          </li>
+        </ul>
+      </div>
+      <Divider class="result-divider" />
+      <UnpaidBookings
+        :eventType="eventType"
+        :bookings="unpaidBookings"
+        @refresh="loadUnpaidBookings"
+      />
+    </template>
+    <template v-else>
+      <EventTypeSelection v-model="eventType" :disabled="disabled" />
+      <UnpaidBookings
+        :eventType="eventType"
+        :bookings="unpaidBookings"
+        @refresh="loadUnpaidBookings"
+        class="unpaid-bookings"
+      />
+      <Divider class="upload-divider" />
+      <FileUpload
+        mode="basic"
+        customUpload
+        chooseLabel="CSV Datei auswählen"
+        class="csv-upload"
+        :disabled="disabled"
+        @select="onCsvSelect"
+      >
+        <template #filelabel>
+          <Chip
+            v-if="csv"
+            :label="csvName(csv)"
+            removable
+            class="attachment-chip"
+            @remove="removeCsv"
           />
-        </div>
-        <v-form :disabled="disabled" v-else>
-          <EventTypeSelection v-model="eventType" />
-          <UnpaidBookings
-            :eventType="eventType"
-            :bookings="unpaidBookings"
-            @refresh="loadUnpaidBookings"
-            class="mb-6"
-          />
-          <v-divider class="mb-6" />
-          <v-file-input
-            clearable
-            variant="outlined"
-            v-model="csv"
-            truncate-length="50"
-            label="CSV Datei auswählen"
-          ></v-file-input>
-          <v-text-field
-            label="CSV Start Date"
-            type="date"
-            v-model="startDate"
-            clearable
-            variant="outlined"
-          ></v-text-field>
-        </v-form>
-        <ButtonArea
+        </template>
+      </FileUpload>
+      <IftaLabel class="field">
+        <InputText
+          inputId="csv-start-date"
+          v-model="startDate"
+          type="date"
+          fluid
           :disabled="disabled"
-          send-text="Starten"
-          :send-visible="csvResult == undefined"
-          @send="send"
-          @reset="reset"
         />
-      </v-col>
-    </v-row>
+        <label for="csv-start-date">CSV Start Date</label>
+      </IftaLabel>
+    </template>
+    <ButtonArea
+      :disabled="disabled"
+      send-text="Starten"
+      :send-visible="csvResult == undefined"
+      @send="send"
+      @reset="reset"
+    />
   </ActionsLayout>
 </template>
+
+<style scoped>
+.result {
+  margin-bottom: 16px;
+}
+
+.result-value {
+  margin-block: 4px;
+}
+
+.result-divider {
+  margin-bottom: 16px;
+}
+
+.unpaid-bookings {
+  margin-bottom: 24px;
+}
+
+.upload-divider {
+  margin-bottom: 24px;
+}
+
+.csv-upload {
+  margin-bottom: 16px;
+}
+</style>
