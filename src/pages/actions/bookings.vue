@@ -5,6 +5,7 @@ import { EventType, LifecycleStatus, type Event } from '@/types'
 import { statusIndex } from '@/utils'
 import { mdiRefresh } from '@mdi/js'
 import { useHead } from '@unhead/vue'
+import Button from 'primevue/button'
 import { computed, onMounted, ref, watch } from 'vue'
 
 const title = 'Manage Bookings'
@@ -49,23 +50,31 @@ async function refresh() {
 
 <template>
   <ActionsLayout :title="title" :help="['Anzeige und Bearbeitung aller aktuellen Buchungen']">
-    <v-row>
-      <v-col cols="12" class="d-flex align-center justify-space-between pb-0">
-        <EventTypeSelection v-model="eventType" />
-        <v-btn variant="text" icon color="primary" @click="refresh()">
-          <v-icon>{{ mdiRefresh }}</v-icon>
-        </v-btn>
-      </v-col>
-    </v-row>
+    <div class="header">
+      <EventTypeSelection v-model="eventType" />
+      <Button text rounded aria-label="Aktualisieren" @click="refresh()">
+        <MdiIcon :path="mdiRefresh" />
+      </Button>
+    </div>
     <template v-if="allEvents.length > 0">
       <EventBookings status="Review" :events="events" @refresh="refresh" />
       <EventBookings status="Published" :events="events" @refresh="refresh" />
       <EventBookings status="Running" :events="events" @refresh="refresh" />
-      <v-row v-if="events.length == 0" class="text-center">
-        <v-col cols="12">
-          Keine aktiven {{ eventType == EventType.Fitness ? 'Kurse' : 'Events' }}
-        </v-col>
-      </v-row>
+      <div v-if="events.length == 0" class="empty">
+        Keine aktiven {{ eventType == EventType.Fitness ? 'Kurse' : 'Events' }}
+      </div>
     </template>
   </ActionsLayout>
 </template>
+
+<style scoped>
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.empty {
+  text-align: center;
+}
+</style>

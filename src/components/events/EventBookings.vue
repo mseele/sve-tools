@@ -18,6 +18,10 @@ import {
   mdiFilePdfBox,
   mdiMicrosoftExcel
 } from '@mdi/js'
+import Button from 'primevue/button'
+import Column from 'primevue/column'
+import DataTable from 'primevue/datatable'
+import Dialog from 'primevue/dialog'
 import { computed, ref } from 'vue'
 
 const props = defineProps<{
@@ -31,21 +35,6 @@ const emit = defineEmits<{
 
 const notify = useNotifyStore()
 
-function getHeaders(event: Event) {
-  const base: { title: string; key: string; sortable?: boolean }[] = [
-    { title: '', key: 'enrolled' },
-    { title: 'Name', key: 'first_name' },
-    { title: 'Email', key: 'email' },
-    { title: 'Mgl.', key: 'member' }
-  ]
-  if (event.payment_method === PaymentMethod.SepaDirectDebit) {
-    base.push({ title: 'SEPA exportiert', key: 'sepa_exported_at' })
-  } else {
-    base.push({ title: 'Zahlung bestätigt', key: 'payment_confirmed_at' })
-  }
-  base.push({ title: '', key: 'actions', sortable: false })
-  return base
-}
 const cancelBookingDialog = ref(false)
 const cancelBookingId = ref<string>()
 const cancelBookingLoading = ref(false)
@@ -71,7 +60,20 @@ function titleText() {
 }
 
 function subscriberClasses(subscriber: EventSubscriber) {
-  return subscriber.enrolled ? '' : 'grey--text'
+  return subscriber.enrolled ? '' : 'waitlisted'
+}
+
+// PrimeVue DataTable cannot inject a second <tr> like Vuetify's item slot, so
+// comments render through the expansion template. Rows with a comment are
+// pre-expanded, which keeps them always visible below the subscriber row.
+function expandedCommentRows(event: Event) {
+  const rows: Record<string, boolean> = {}
+  for (const subscriber of event.subscribers || []) {
+    if (subscriber.comment) {
+      rows[subscriber.id] = true
+    }
+  }
+  return rows
 }
 
 function price(event: Event, member: boolean) {
@@ -183,174 +185,285 @@ async function exportSepa(event: Event) {
 </script>
 
 <template>
-  <v-row v-if="filteredEvents.length > 0">
-    <v-col cols="12" class="d-flex text-h6 pb-0">
+  <div v-if="filteredEvents.length > 0" class="event-bookings">
+    <div class="section-title">
       <EventListItem :status="status" :text="titleText()" />
-    </v-col>
-    <v-col cols="12" v-for="(event, index) of filteredEvents" :key="index">
-      <v-data-table-virtual
-        density="compact"
-        :headers="getHeaders(event)"
-        :items="event.subscribers"
-        item-key="id"
-        class="elevation-1"
-        :item-class="subscriberClasses"
+    </div>
+    <div v-for="(event, index) of filteredEvents" :key="index" class="event">
+      <DataTable
+        :value="event.subscribers || []"
+        dataKey="id"
+        size="small"
+        class="event-table"
+        :rowClass="subscriberClasses"
+        :expandedRows="expandedCommentRows(event)"
       >
-        <template v-slot:top>
-          <div class="d-flex align-center justify-space-between">
-            <div class="d-flex align-center">
-              <h3 class="px-2 py-1">{{ event.name }}</h3>
+        <template #header>
+          <div class="table-header">
+            <div class="table-header-left">
+              <h3>{{ event.name }}</h3>
               <div>
                 {{ freeBookings(event, true) }} freie Plätze /
                 {{ freeBookings(event, false) }} freie Wartelistplätze
               </div>
             </div>
-            <div class="d-flex align-center">
+            <div class="table-header-right">
               <div
                 v-if="finacialResult(event) != undefined"
-                :class="['subtitle-2', finacialResult(event)! < 0 ? 'text-red' : 'text-green']"
+                :class="finacialResult(event)! < 0 ? 'finacial negative' : 'finacial positive'"
               >
                 {{ formatPrice(finacialResult(event)!.toString()) }}
               </div>
-              <div v-else class="subtitle-2 text-grey">Preis pro Einheit fehlt</div>
-              <v-tooltip left>
-                <template v-slot:activator="{ props }">
-                  <v-btn icon variant="text" @click="downloadParticipantList(event)" v-bind="props">
-                    <v-icon color="error">{{ mdiFilePdfBox }}</v-icon>
-                  </v-btn>
-                </template>
-                <span>Teilnehmerliste herunterladen</span>
-              </v-tooltip>
-              <v-tooltip left>
-                <template v-slot:activator="{ props }">
-                  <v-btn icon variant="text" @click="downloadBookings(event)" v-bind="props">
-                    <v-icon color="success">{{ mdiMicrosoftExcel }}</v-icon>
-                  </v-btn>
-                </template>
-                <span>Buchungsliste herunterladen</span>
-              </v-tooltip>
-              <v-tooltip left>
-                <template v-slot:activator="{ props }">
-                  <v-btn
-                    v-if="event.payment_method === PaymentMethod.SepaDirectDebit"
-                    icon
-                    variant="text"
-                    @click="exportSepa(event)"
-                    v-bind="props"
-                  >
-                    <v-icon color="blue-darken-2">{{ mdiBankTransfer }}</v-icon>
-                  </v-btn>
-                </template>
-                <span>SEPA-XML exportieren</span>
-              </v-tooltip>
+              <div v-else class="finacial missing">Preis pro Einheit fehlt</div>
+              <Button
+                v-tooltip.left="'Teilnehmerliste herunterladen'"
+                text
+                rounded
+                aria-label="Teilnehmerliste herunterladen"
+                @click="downloadParticipantList(event)"
+              >
+                <MdiIcon :path="mdiFilePdfBox" class="pdf" />
+              </Button>
+              <Button
+                v-tooltip.left="'Buchungsliste herunterladen'"
+                text
+                rounded
+                aria-label="Buchungsliste herunterladen"
+                @click="downloadBookings(event)"
+              >
+                <MdiIcon :path="mdiMicrosoftExcel" class="excel" />
+              </Button>
+              <Button
+                v-if="event.payment_method === PaymentMethod.SepaDirectDebit"
+                v-tooltip.left="'SEPA-XML exportieren'"
+                text
+                rounded
+                aria-label="SEPA-XML exportieren"
+                @click="exportSepa(event)"
+              >
+                <MdiIcon :path="mdiBankTransfer" class="sepa" />
+              </Button>
             </div>
           </div>
-          <v-divider class="mb-1"></v-divider>
-          <v-dialog v-model="cancelBookingDialog" max-width="400px">
-            <v-card>
-              <v-card-title class="text-h5">Buchung stornieren</v-card-title>
-              <v-card-text> Soll die Buchung wirklich storniert werden? </v-card-text>
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn color="red" variant="text" @click="cancelBookingDialog = false"
-                  >Abbrechen</v-btn
-                >
-                <v-btn
-                  color="primary"
-                  variant="text"
-                  @click="confirmCancelBooking"
-                  :loading="cancelBookingLoading"
-                >
-                  Stornieren
-                </v-btn>
-              </v-card-actions>
-            </v-card>
-          </v-dialog>
         </template>
-        <template v-slot:no-data>Bisher noch keine Buchungen</template>
-        <template v-slot:item="{ item }">
-          <tr :class="{ 'comment-row': item.comment }">
-            <td>
-              <v-tooltip bottom>
-                <template v-slot:activator="{ props }">
-                  <div class="d-flex align-center" v-bind="props">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16pt" height="21.333">
-                      <path
-                        d="M15.625 10a5.625 5.625 0 11-11.25 0 5.625 5.625 0 0111.25 0z"
-                        :fill="item.enrolled ? 'green' : 'red'"
-                      />
-                    </svg>
-                  </div>
-                </template>
-                <span>{{ item.enrolled ? 'Gebucht' : 'Warteliste' }}</span>
-              </v-tooltip>
-            </td>
-            <td>{{ `${item.first_name} ${item.last_name}` }}</td>
-            <td>{{ item.email }}</td>
-            <td>
-              <v-icon v-if="item.member">{{ mdiCheck }}</v-icon>
-            </td>
-            <template v-if="event.payment_method === PaymentMethod.SepaDirectDebit">
-              <td>
-                <v-icon v-if="item.sepa_exported_at" color="green">{{ mdiCheck }}</v-icon>
-              </td>
-            </template>
-            <template v-else>
-              <td>
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ props }">
-                    <div class="d-flex align-center text-no-wrap" v-bind="props">
-                      <v-icon :color="item.payment_confirmed_at ? 'green' : 'red'">{{
-                        item.payment_confirmed_at ? mdiCheck : mdiClose
-                      }}</v-icon>
-                      <div>{{ item.payment_id }}</div>
-                    </div>
-                  </template>
-                  <span>{{ price(event, item.member) }}</span>
-                </v-tooltip>
-              </td>
-            </template>
-            <td>
-              <div class="d-flex align-center justify-end">
-                <template
-                  v-if="
-                    !item.payment_confirmed_at &&
-                    event.payment_method !== PaymentMethod.SepaDirectDebit
-                  "
-                >
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ props }">
-                      <v-icon size="xs" class="mr-2" @click="markPayed(item)" v-bind="props">{{
-                        mdiCash
-                      }}</v-icon>
-                    </template>
-                    <span>Als Bezahlt markieren</span>
-                  </v-tooltip>
-                </template>
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ props }">
-                    <v-icon size="xs" @click="displayCancelBookingDialog(item)" v-bind="props">{{
-                      mdiDelete
-                    }}</v-icon>
-                  </template>
-                  <span>Buchung stornieren</span>
-                </v-tooltip>
-              </div>
-            </td>
-          </tr>
-          <tr v-if="item.comment">
-            <td :colspan="getHeaders(event).length" class="text-caption text-pre-wrap">
-              {{ item.comment }}
-            </td>
-          </tr>
+        <template #empty>Bisher noch keine Buchungen</template>
+        <Column>
+          <template #body="{ data }">
+            <div v-tooltip.bottom="data.enrolled ? 'Gebucht' : 'Warteliste'" class="enrolled">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16pt" height="21.333">
+                <path
+                  d="M15.625 10a5.625 5.625 0 11-11.25 0 5.625 5.625 0 0111.25 0z"
+                  :fill="data.enrolled ? 'green' : 'red'"
+                />
+              </svg>
+            </div>
+          </template>
+        </Column>
+        <Column field="first_name" header="Name" sortable>
+          <template #body="{ data }">{{ `${data.first_name} ${data.last_name}` }}</template>
+        </Column>
+        <Column field="email" header="Email" sortable />
+        <Column field="member" header="Mgl." sortable>
+          <template #body="{ data }">
+            <MdiIcon v-if="data.member" :path="mdiCheck" />
+          </template>
+        </Column>
+        <Column
+          v-if="event.payment_method === PaymentMethod.SepaDirectDebit"
+          field="sepa_exported_at"
+          header="SEPA exportiert"
+          sortable
+        >
+          <template #body="{ data }">
+            <MdiIcon v-if="data.sepa_exported_at" :path="mdiCheck" class="icon-ok" />
+          </template>
+        </Column>
+        <Column v-else field="payment_confirmed_at" header="Zahlung bestätigt" sortable>
+          <template #body="{ data }">
+            <div v-tooltip.bottom="price(event, data.member)" class="payment">
+              <MdiIcon
+                :path="data.payment_confirmed_at ? mdiCheck : mdiClose"
+                :class="data.payment_confirmed_at ? 'icon-ok' : 'icon-failed'"
+              />
+              <span>{{ data.payment_id }}</span>
+            </div>
+          </template>
+        </Column>
+        <Column>
+          <template #body="{ data }">
+            <div class="actions">
+              <Button
+                v-if="
+                  !data.payment_confirmed_at &&
+                  event.payment_method !== PaymentMethod.SepaDirectDebit
+                "
+                v-tooltip.bottom="'Als Bezahlt markieren'"
+                text
+                rounded
+                size="small"
+                aria-label="Als Bezahlt markieren"
+                @click="markPayed(data)"
+              >
+                <MdiIcon :path="mdiCash" :size="16" />
+              </Button>
+              <Button
+                v-tooltip.bottom="'Buchung stornieren'"
+                text
+                rounded
+                size="small"
+                aria-label="Buchung stornieren"
+                @click="displayCancelBookingDialog(data)"
+              >
+                <MdiIcon :path="mdiDelete" :size="16" />
+              </Button>
+            </div>
+          </template>
+        </Column>
+        <template #expansion="{ data }">
+          <div class="comment">{{ data.comment }}</div>
         </template>
-      </v-data-table-virtual>
-    </v-col>
-  </v-row>
+      </DataTable>
+    </div>
+    <Dialog
+      v-model:visible="cancelBookingDialog"
+      modal
+      :dismissableMask="true"
+      header="Buchung stornieren"
+      :style="{ width: '400px' }"
+    >
+      <div>Soll die Buchung wirklich storniert werden?</div>
+      <template #footer>
+        <div class="dialog-footer">
+          <Button
+            label="Abbrechen"
+            text
+            severity="secondary"
+            @click="cancelBookingDialog = false"
+          />
+          <Button
+            label="Stornieren"
+            text
+            severity="primary"
+            :loading="cancelBookingLoading"
+            @click="confirmCancelBooking"
+          />
+        </div>
+      </template>
+    </Dialog>
+  </div>
 </template>
 
 <style scoped>
-tr.comment-row > td {
-  border-bottom: none !important;
+.event-bookings {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.event {
+  margin-top: 16px;
+}
+
+.event-table {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.table-header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.table-header-left h3 {
+  margin: 4px 8px;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.table-header-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.finacial {
+  font-size: 0.875rem;
+}
+
+.finacial.negative {
+  color: #dc2626;
+}
+
+.finacial.positive {
+  color: #65a30d;
+}
+
+.finacial.missing {
+  color: #9e9e9e;
+}
+
+.pdf {
+  color: #dc2626;
+}
+
+.excel {
+  color: #65a30d;
+}
+
+.sepa {
+  color: #1976d2;
+}
+
+.payment {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+.payment span {
+  margin-left: 4px;
+}
+
+.icon-ok {
+  color: #4caf50;
+}
+
+.icon-failed {
+  color: #f44336;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.comment {
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+:deep(tr.waitlisted > td) {
+  color: #9e9e9e;
 }
 </style>
