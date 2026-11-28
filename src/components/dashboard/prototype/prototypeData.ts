@@ -39,6 +39,10 @@ export interface EventMoney {
   open: number
   method: PaymentMethod
   sepaNotExported: number
+  /** Einnahmen − Termine × Preis pro Einheit; undefiniert, solange kein
+      Preis pro Einheit gepflegt ist — dieselbe Rechnung wie
+      EventBookings.vue (finacialResult). */
+  result: number | undefined
 }
 
 /** Erwartete Einnahmen eines Events: enrolled × (Mitglied/Nicht-Mitglied-Preis). */
@@ -60,7 +64,11 @@ export function eventMoney(event: Event): EventMoney {
     sepaNotExported:
       event.payment_method === PM.SepaDirectDebit
         ? enrolled.filter((s) => !s.sepa_exported_at).length
-        : 0
+        : 0,
+    result:
+      event.cost_per_date == undefined
+        ? undefined
+        : expected - (event.custom_date != undefined ? 1 : event.dates.length) * event.cost_per_date
   }
 }
 
@@ -207,6 +215,7 @@ export function demoEvents(now: Date): Event[] {
       payment_method: PM.SepaDirectDebit,
       price_member: '30.00',
       price_non_member: '42.00',
+      cost_per_date: 40,
       max_subscribers: 12,
       dates: [dayFromNow(now, 4), dayFromNow(now, 11), dayFromNow(now, 18)],
       subscribers: [
@@ -225,6 +234,7 @@ export function demoEvents(now: Date): Event[] {
       payment_method: PM.BankTransfer,
       price_member: '35.00',
       price_non_member: '50.00',
+      cost_per_date: 60,
       max_subscribers: 14,
       dates: [dayFromNow(now, 9), dayFromNow(now, 16)],
       subscribers: [
@@ -243,6 +253,7 @@ export function demoEvents(now: Date): Event[] {
       payment_method: PM.BankTransfer,
       price_member: '45.00',
       price_non_member: '60.00',
+      cost_per_date: 160,
       max_subscribers: 20,
       dates: [dayFromNow(now, 31)],
       subscribers: [
@@ -273,6 +284,7 @@ export function demoEvents(now: Date): Event[] {
       payment_method: PM.SepaDirectDebit,
       price_member: '20.00',
       price_non_member: '30.00',
+      cost_per_date: 200,
       max_subscribers: 18,
       max_waiting_list: 4,
       dates: [dayFromNow(now, 0)],

@@ -108,6 +108,7 @@ function dashboardEvents(): Event[] {
       name: 'Rückenfitness',
       status: LifecycleStatus.Published,
       dates: [isoDateInDays(7)],
+      cost_per_date: 20,
       subscribers: [...enrolled, ...waiting]
     }),
     makeEvent({
@@ -348,9 +349,11 @@ describe('dashboard prototype variants', () => {
     await flushPromises()
 
     const text = wrapper.text()
-    expect(text).toContain('veröffentlichte Events')
+    expect(text).toContain('Events')
     expect(text).toContain('110,00')
-    expect(text).toContain('neue Buchungen (7 Tage)')
+    expect(text).toContain('neue Buchungen')
+    expect(text).toContain('Ergebnis')
+    expect(text).toContain('+ 60')
     expect(text).toContain('bestätigt')
     expect(text).toContain('offen')
     expect(text).toContain('überfällige Zahlung')

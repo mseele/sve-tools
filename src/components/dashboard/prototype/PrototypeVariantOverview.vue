@@ -1,16 +1,16 @@
 <script setup lang="ts">
-// PROTOTYPE Variante E v9 — Karten sind der Hauptinhalt.
+// PROTOTYPE Variante E v10 — Karten sind der Hauptinhalt.
 //
 // UX-Grundlage weiterhin Few (Monitoring-Sequenz), NN/g (Farbe nur als
 // Ausnahme-Signal), PatternFly (Ausnahmen nur wenn > 0). Der Kopf-Kasten
-// zeigt veröffentlichte Events, neue Buchungen der letzten 7 Tage
-// (Markt-Muster: „Recent bookings", Eversports/Eventbrite) und die
-// Geldwerte erwartet/bestätigt/offen. Jede Karte folgt einer festen
-// Bänderung: Identität + Zeit (Titelzeile), Auslastung (Balken +
-// X / Y), Geld (drei ausgerichtete Wert-Label-Paare, Überfälliges rot
-// im offen-Label), Fußzeile (Zahlart · SEPA-Export-Rückstand; keine
-// Kurven-Grafik — Charts sind laut Research Detailseiten-Material).
-// Unbegrenzte Events: statischer Schraffur-Balken,
+// zeigt Events, neue Buchungen und die Geldwerte erwartet/bestätigt/
+// offen — Labels bewusst kurz. Jede Karte folgt einer festen Bänderung:
+// Identität + Zeit (Titelzeile), Auslastung (Balken + X / Y), Geld
+// (Wert-Label-Paare erwartet → bestätigt → offen → Ergebnis; das
+// Ergebnis ist Einnahmen − Termine × Preis pro Einheit wie auf der
+// Buchungsseite, neutral mit Vorzeichen, Überfälliges rot im
+// offen-Label), Fußzeile (Zahlart · SEPA-Export-Rückstand; keine
+// Kurven-Grafik). Unbegrenzte Events: statischer Schraffur-Balken,
 // X / ∞ in derselben Form.
 import { computed } from 'vue'
 import type { PrototypeProps } from './prototypeData'
@@ -124,12 +124,20 @@ const newBookings = computed(() => {
 })
 
 const stats = computed<StatusValue[]>(() => [
-  { value: String(cards.value.length), label: 'veröffentlichte Events' },
-  { value: String(newBookings.value), label: 'neue Buchungen (7 Tage)' },
+  { value: String(cards.value.length), label: 'Events' },
+  { value: String(newBookings.value), label: 'neue Buchungen' },
   { value: euro(money.value.expected), label: 'erwartet' },
   { value: euro(money.value.confirmed), label: 'bestätigt' },
   { value: euro(money.value.open), label: 'offen' }
 ])
+
+// Ergebnis mit Vorzeichen wie von der Buchungsseite vertraut
+// (Einnahmen − Termine × Preis pro Einheit), aber neutral gefärbt —
+// Rot bleibt auf dem Dashboard Alarmen vorbehalten.
+function resultText(result: number | undefined): string {
+  if (result == undefined || result === 0) return euro(0)
+  return result > 0 ? `+ ${euro(result)}` : `- ${euro(-result)}`
+}
 
 // Überfällige Zahlungen nur als Zählzeile — bei 10, 20 Stück wäre eine
 // Einzelliste zu lang. Details stehen im Zahlungen-Tab.
@@ -178,7 +186,7 @@ const running = computed<RunningRow[]>(() =>
 <template>
   <div>
     <p v-if="props.demo" class="text-caption text-medium-emphasis mb-2">
-      Demo-Daten (Stand v9) — der echte Endpunkt liefert gerade nichts.
+      Demo-Daten (Stand v10) — der echte Endpunkt liefert gerade nichts.
     </p>
 
     <!-- Kopf-Kasten: Statuswerte mit Separatoren, darunter — nur wenn
@@ -297,8 +305,8 @@ const running = computed<RunningRow[]>(() =>
 
               <!-- Geld: dieselben ausgerichteten Wert-Label-Paare wie im
                    Kopf-Kasten, gleiche Reihenfolge erwartet → bestätigt →
-                   offen. Überfällige Zahlungen sind das einzige Rot,
-                   direkt im Label unter offen. -->
+                   offen → Ergebnis. Überfällige Zahlungen sind das
+                   einzige Rot, direkt im Label unter offen. -->
               <div class="d-flex flex-wrap align-center">
                 <div>
                   <div class="text-body-1 font-weight-medium">{{ euro(card.money.expected) }}</div>
@@ -322,6 +330,15 @@ const running = computed<RunningRow[]>(() =>
                     </template>
                   </div>
                 </div>
+                <template v-if="card.money.result != undefined">
+                  <v-divider vertical class="mx-3 my-1 align-self-stretch" />
+                  <div>
+                    <div class="text-body-1 font-weight-medium">
+                      {{ resultText(card.money.result) }}
+                    </div>
+                    <div class="text-caption text-medium-emphasis">Ergebnis</div>
+                  </div>
+                </template>
               </div>
 
               <!-- Fußzeile: Zahlart (+ SEPA-Export-Rückstand) — fester
