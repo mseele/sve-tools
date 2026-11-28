@@ -1,19 +1,14 @@
 <script setup lang="ts">
-// PROTOTYPE Variante E — Klare Übersicht.
+// PROTOTYPE Variante E v2 — Karten sind der Hauptinhalt.
 //
-// UX-Recherche, eingearbeitet in drei Regeln:
-//   1. Monitoring-Sequenz nach Stephen Few («Rich Data, Poor Data»):
-//      konsolidierter Überblick zuerst, markierte Details danach,
-//      Drill-down über Links.
-//   2. NN/g («Dashboards», Preattentive Processing): Mengen über Länge
-//      und Position (Balken), Farbe nur als Ausnahme-Signal, nie für
-//      Größenordnungen.
-//   3. PatternFly (Aggregate Status Card: Ausnahmen nur wenn > 0) und
-//      NHS Turas / REN Layout-Guides: KPI-Zeile einheitlich gebaut,
-//      Zusammenfassung vor Detail, Karten nur für gleichartige
-//      Vergleichsobjekte, wiederholte Label entfernen.
-// Zonen: Status (Plus/Minus) → Aufmerksamkeit (nur wenn nötig) →
-// laufende Events → eine einheitliche Karte pro beworbenem Event.
+// UX-Grundlage weiterhin Few (Monitoring-Sequenz), NN/g (Mengen über
+// Länge/Position, Farbe nur als Ausnahme-Signal), PatternFly (Ausnahmen
+// nur wenn > 0), Turas/REN (Zusammenfassung vor Detail). Neu gewichtet
+// nach Feedback: Der große KPI-Block mit Balken drückte die Karten unter
+// den sichtbaren Bereich. Jetzt beantwortet eine schmale Statuszeile
+// Plus/Minus, darunter stehen rote Problemzeilen (nur echte Probleme:
+// überfällige Zahlungen, abgelaufene laufende Events), dann folgen die
+// Karten als Hauptinhalt, laufende Events schließen ab.
 import { computed } from 'vue'
 import type { PrototypeProps } from './prototypeData'
 import {
@@ -32,8 +27,10 @@ import {
 import {
   deriveDashboardModel,
   readEventAvailability,
+  type AttentionEntry,
   type EventAvailability
 } from '@/dashboard/model'
+import { formatIsoDay, formatPrice } from '@/utils'
 import { PaymentMethod as PM, type Event } from '@/types'
 
 interface CampaignCard {
@@ -50,6 +47,11 @@ interface RunningRow {
   event: Event
   days: number
   text: string
+}
+
+interface StatusPart {
+  text: string
+  emphasis: 'high' | 'medium' | 'error'
 }
 
 const props = defineProps<PrototypeProps>()
@@ -118,22 +120,72 @@ const money = computed(() =>
       acc.confirmed += card.money.confirmed
       if (card.money.method === PM.SepaDirectDebit) acc.sepaOpen += card.money.open
       else acc.transferOpen += card.money.open
+      acc.sepaNotExported += card.money.sepaNotExported
       return acc
     },
-    { expected: 0, confirmed: 0, sepaOpen: 0, transferOpen: 0 }
+    { expected: 0, confirmed: 0, sepaOpen: 0, transferOpen: 0, sepaNotExported: 0 }
   )
 )
 
-const confirmedPercent = computed(() =>
-  money.value.expected > 0 ? (money.value.confirmed / money.value.expected) * 100 : 100
+const openTotal = computed(() => money.value.sepaOpen + money.value.transferOpen)
+
+/** «SEPA 602 €, 3 n. exportiert · Überweisung 270 €» — nur offene Teile. */
+const openSplit = computed(() => {
+  const parts: string[] = []
+  if (money.value.sepaOpen > 0) {
+    let sepa = `SEPA ${euro(money.value.sepaOpen)}`
+    if (money.value.sepaNotExported > 0) sepa += `, ${money.value.sepaNotExported} n. exportiert`
+    parts.push(sepa)
+  }
+  if (money.value.transferOpen > 0) parts.push(`Überweisung ${euro(money.value.transferOpen)}`)
+  return parts.join(' · ')
+})
+
+const statusParts = computed<StatusPart[]>(() => {
+  const grey = (text: string): StatusPart => ({ text, emphasis: 'medium' })
+  const parts: StatusPart[] = [
+    grey(`${cards.value.length} beworbene Events`),
+    { text: `erwartet ${euro(money.value.expected)}`, emphasis: 'high' },
+    { text: `bestätigt ${euro(money.value.confirmed)}`, emphasis: 'high' },
+    openTotal.value > 0
+      ? { text: `offen ${euro(openTotal.value)}`, emphasis: 'high' }
+      : grey('komplett bestätigt')
+  ]
+  if (openTotal.value > 0) {
+    parts.push(grey(openSplit.value))
+    if (overduePromoted.value.count > 0) {
+      parts.push({
+        text: `${overduePromoted.value.count} ${
+          overduePromoted.value.count === 1 ? 'Zahlung' : 'Zahlungen'
+        } überfällig`,
+        emphasis: 'error'
+      })
+    }
+  }
+  return parts
+})
+
+// Echte Probleme für den roten Block: überfällige Zahlungen und
+// abgelaufene laufende Events. Noch nicht fällige offene Zahlungen sind
+// Information auf den Karten, kein Alarm hier.
+const problems = computed(() =>
+  model.value.attention.filter((entry) =>
+    entry.kind === 'unpaid_booking' ? entry.dueInDays < 0 : true
+  )
 )
 
-const kpis = computed(() => [
-  { value: euro(money.value.expected), label: `erwartet · ${cards.value.length} Events` },
-  { value: euro(money.value.confirmed), label: 'bestätigt' },
-  { value: euro(money.value.sepaOpen), label: 'SEPA offen' },
-  { value: euro(money.value.transferOpen), label: 'Überweisung offen' }
-])
+function problemKey(entry: AttentionEntry): string {
+  return entry.kind === 'unpaid_booking' ? entry.bookingId : entry.eventId
+}
+
+function problemText(entry: AttentionEntry): string {
+  if (entry.kind === 'unpaid_booking') {
+    const due = entry.dueInDays === -1 ? '1 Tag überfällig' : `${-entry.dueInDays} Tage überfällig`
+    const base = `${entry.name} — ${entry.eventName}: ${due} (${formatPrice(entry.price)})`
+    return entry.reminderSent ? `${base} · Erinnerung gesendet` : base
+  }
+  return `${entry.eventName}: letzter Termin ${formatIsoDay(entry.lastDate)} — abschließen`
+}
 
 const running = computed<RunningRow[]>(() =>
   props.events
@@ -142,92 +194,52 @@ const running = computed<RunningRow[]>(() =>
       const end = endsOn(event)
       if (!end) return []
       const days = dayDiff(end, props.now)
-      // Abgelaufene laufende Events sind Straggler — Aufmerksamkeitsliste.
+      // Abgelaufene laufende Events sind Straggler — roter Problem-Block.
       if (days < 0) return []
       return [{ event, days, text: countdown(days, 'endet').text }]
     })
     .sort((a, b) => a.days - b.days)
 )
-
-// Die Aufmerksamkeitskarte erscheint nur, wenn es etwas zu sehen gibt —
-// oder solange geladen wird / ein Endpunkt fehlschlägt.
-const showAttention = computed(
-  () =>
-    model.value.attention.length > 0 ||
-    props.eventsStatus === 'loading' ||
-    props.unpaidStatus === 'loading' ||
-    props.eventsStatus === 'error' ||
-    props.unpaidStatus === 'error'
-)
 </script>
 
 <template>
   <div>
-    <p v-if="props.demo" class="text-caption text-medium-emphasis mb-2">
+    <p v-if="props.demo" class="text-caption text-medium-emphasis mb-1">
       Demo-Daten — der echte Endpunkt liefert gerade nichts.
     </p>
 
-    <!-- Zone 1: Status — «stehen wir im Plus oder Minus?» auf einen Blick. -->
-    <div v-if="cards.length > 0" class="mb-2">
-      <div class="text-overline text-medium-emphasis">Status beworbener Events</div>
-      <div class="d-flex flex-wrap ga-6 mt-1">
-        <div v-for="kpi in kpis" :key="kpi.label">
-          <div class="text-h5 font-weight-bold">{{ kpi.value }}</div>
-          <div class="text-caption text-medium-emphasis">{{ kpi.label }}</div>
-        </div>
-      </div>
-      <div v-if="money.expected > 0" class="d-flex align-center ga-3 mt-3">
-        <div
-          class="flex-grow-1 rounded"
-          style="height: 8px; overflow: hidden; background: rgba(0, 0, 0, 0.12)"
-        >
-          <div
-            :style="{ width: `${confirmedPercent}%` }"
-            style="height: 100%; background: rgb(var(--v-theme-primary))"
-          />
-        </div>
-        <span class="text-caption text-medium-emphasis text-no-wrap">
-          bestätigt {{ Math.round(confirmedPercent) }} %
-        </span>
-      </div>
-      <p
-        v-if="overduePromoted.count > 0"
-        class="text-body-2 text-error font-weight-medium mt-2 mb-0"
-      >
-        {{ overduePromoted.count }}
-        {{ overduePromoted.count === 1 ? 'Zahlung' : 'Zahlungen' }} überfällig ({{
-          euro(overduePromoted.total)
-        }}) — Details unten
-      </p>
-    </div>
-    <p v-else class="text-body-2 text-medium-emphasis mb-2">Keine beworbenen Events</p>
-
-    <!-- Zone 2: Aufmerksamkeit — nur wenn es etwas zu erledigen gibt. -->
-    <AttentionList
-      v-if="showAttention"
-      class="mb-2"
-      :entries="model.attention"
-      :unpaid-status="props.demo ? 'ok' : props.unpaidStatus"
-      :events-status="props.demo ? 'ok' : props.eventsStatus"
-    />
-
-    <!-- Zone 3: Laufende Events — eine Zeile, runtergezählt. -->
-    <p v-if="running.length > 0" class="text-body-2 text-medium-emphasis mb-2">
-      <span class="font-weight-medium text-high-emphasis">Laufende Events:</span>
-      <template v-for="(row, i) in running" :key="row.event.id"
+    <!-- Statuszeile: Plus/Minus in einer Zeile, direkt gefolgt von den Karten. -->
+    <p v-if="cards.length > 0" class="text-body-2 mb-1">
+      <template v-for="(part, i) in statusParts" :key="`${i}-${part.text}`"
         ><template v-if="i > 0"> · </template>
-        <router-link to="/actions/bookings" class="text-decoration-none">
-          {{ row.event.name }}
-        </router-link>
-        {{ row.text }}
+        <span
+          :class="
+            part.emphasis === 'high'
+              ? ''
+              : part.emphasis === 'error'
+                ? 'text-error font-weight-medium'
+                : 'text-medium-emphasis'
+          "
+          >{{ part.text }}</span
+        >
       </template>
     </p>
+    <p v-else class="text-body-2 text-medium-emphasis mb-1">Keine beworbenen Events</p>
 
-    <!-- Zone 4: Eine einheitliche Karte pro Event — gleiche Anatomie,
+    <!-- Echte Probleme, rot, nur wenn es sie gibt. -->
+    <router-link
+      v-for="entry in problems"
+      :key="problemKey(entry)"
+      :to="entry.link"
+      class="d-block text-body-2 text-error text-decoration-none mb-1"
+    >
+      {{ problemText(entry) }}
+    </router-link>
+
+    <!-- Hauptinhalt: eine einheitliche Karte pro Event — gleiche Anatomie,
          gleiche Positionen, gleiche Größen. Sortiert nach Startdatum. -->
-    <div v-if="cards.length > 0">
-      <div class="text-overline text-medium-emphasis">Beworbene Events</div>
-      <p class="text-caption text-medium-emphasis mt-1 mb-2">
+    <template v-if="cards.length > 0">
+      <p class="text-caption text-medium-emphasis mb-2">
         Nach Startdatum sortiert · Mini-Kurve: Buchungen der letzten 8 Wochen
       </p>
       <v-row dense>
@@ -309,6 +321,18 @@ const showAttention = computed(
           </v-card>
         </v-col>
       </v-row>
-    </div>
+    </template>
+
+    <!-- Laufende Events als Abschluss. -->
+    <p v-if="running.length > 0" class="text-body-2 text-medium-emphasis mt-4 mb-0">
+      <span class="font-weight-medium text-high-emphasis">Laufende Events:</span>
+      <template v-for="(row, i) in running" :key="row.event.id"
+        ><template v-if="i > 0"> · </template>
+        <router-link to="/actions/bookings" class="text-decoration-none">
+          {{ row.event.name }}
+        </router-link>
+        {{ row.text }}
+      </template>
+    </p>
   </div>
 </template>
