@@ -15,11 +15,11 @@ import {
   EventType as ET,
   PaymentMethod as PM,
   PaymentMethod,
+  NewsTopic,
   type Event,
   type EventSubscriber,
   type FetchStatus,
   type EventType,
-  type NewsTopic,
   type UnpaidBooking
 } from '@/types'
 
@@ -303,6 +303,15 @@ export function demoEvents(now: Date): Event[] {
       subscribers: [...group(now, 9, -80, 6, { ...PAID })]
     })
   ]
+}
+
+export function demoNewsletter(): Record<NewsTopic, string[]> {
+  const mails = (n: number) => Array.from({ length: n }, (_, i) => `newsletter${i + 1}@example.com`)
+  return {
+    [NewsTopic.General]: mails(120),
+    [NewsTopic.Events]: mails(45),
+    [NewsTopic.Fitness]: mails(89)
+  }
 }
 
 export function demoUnpaid(now: Date): Record<EventType, UnpaidBooking[]> {

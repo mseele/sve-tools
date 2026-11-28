@@ -16,6 +16,16 @@ const router = createRouter({
   routes
 })
 router.beforeEach((to) => {
+  // PROTOTYPE (throwaway branch): Demo-Link ohne Login — ?demo=1 zeigt das
+  // Dashboard mit Fixtures statt echter Daten. Mit echtem Token bleibt
+  // alles beim Alten; auf feature/dashboard existiert diese Freigabe nicht.
+  const demo = to.query.demo
+  if (
+    to.path === '/actions/dashboard' &&
+    (demo === '1' || (Array.isArray(demo) && demo[0] === '1'))
+  ) {
+    return true
+  }
   const auth = useAuthStore()
   if (to.path !== '/' && !auth.isAuthenticated) {
     auth.initFromStorage()

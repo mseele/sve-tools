@@ -18,7 +18,11 @@ import { mdiRefresh } from '@mdi/js'
 import { useHead } from '@unhead/vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { demoEvents, demoUnpaid } from '@/components/dashboard/prototype/prototypeData'
+import {
+  demoEvents,
+  demoNewsletter,
+  demoUnpaid
+} from '@/components/dashboard/prototype/prototypeData'
 
 const title = 'Dashboard'
 useHead({ title })
@@ -84,15 +88,24 @@ const loading = computed(
 )
 
 // PROTOTYPE: Demo-Fixtures, wenn im Varianten-Modus echte Daten fehlen.
+const demoRequested = computed(() => {
+  const raw = route.query.demo
+  return raw === '1' || (Array.isArray(raw) && raw[0] === '1')
+})
 const protoActive = computed(() => prototypeEnabled && variant.value !== '')
 const protoDemo = computed(
   () =>
     protoActive.value &&
-    (eventsStatus.value !== 'ok' || unpaidStatus.value !== 'ok' || events.value.length === 0)
+    (demoRequested.value ||
+      eventsStatus.value !== 'ok' ||
+      unpaidStatus.value !== 'ok' ||
+      events.value.length === 0)
 )
-const protoEvents = computed(() => (protoDemo.value ? demoEvents(fetchedAt.value) : events.value))
+const protoEvents = computed(() =>
+  protoDemo.value && !demoRequested.value ? demoEvents(fetchedAt.value) : events.value
+)
 const protoUnpaid = computed(() =>
-  protoDemo.value ? demoUnpaid(fetchedAt.value) : unpaidBookings.value
+  protoDemo.value && !demoRequested.value ? demoUnpaid(fetchedAt.value) : unpaidBookings.value
 )
 
 onMounted(refresh)
@@ -102,6 +115,18 @@ async function refresh() {
   unpaidStatus.value = 'loading'
   newsletterStatus.value = 'loading'
   fetchedAt.value = new Date()
+
+  // PROTOTYPE: ?demo=1 lädt Fixtures statt echter Endpunkte — für den
+  // geteilten Demo-Link ohne Login.
+  if (demoRequested.value) {
+    events.value = demoEvents(fetchedAt.value)
+    unpaidBookings.value = demoUnpaid(fetchedAt.value)
+    newsletterSubscribers.value = demoNewsletter()
+    eventsStatus.value = 'ok'
+    unpaidStatus.value = 'ok'
+    newsletterStatus.value = 'ok'
+    return
+  }
 
   await Promise.all([loadEventsData(), loadUnpaidData(), loadNewsletterData()])
 }
