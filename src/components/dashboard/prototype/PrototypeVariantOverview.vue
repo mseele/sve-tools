@@ -252,7 +252,14 @@ const showAttention = computed(
             <v-card-text class="pt-0">
               <div class="d-flex align-center ga-3 mb-2">
                 <template v-if="card.avail.unlimited">
-                  <span class="text-body-2 text-medium-emphasis">
+                  <v-progress-linear
+                    indeterminate
+                    color="primary"
+                    height="6"
+                    rounded
+                    class="flex-grow-1"
+                  />
+                  <span class="text-body-2 text-no-wrap text-medium-emphasis">
                     Unbegrenzt · {{ card.avail.enrolled }} gebucht
                   </span>
                 </template>
