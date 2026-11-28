@@ -366,6 +366,68 @@ describe('deriveDashboardModel', () => {
     expect(model.fill[0]?.type).toBe(EventType.Fitness)
   })
 
+  it('normalises model dates to days when stored dates carry times', () => {
+    const events = [
+      makeEvent({
+        id: 'e-time',
+        name: 'Mit Uhrzeit',
+        status: LifecycleStatus.Published,
+        custom_date: '2026-12-05T18:00:00',
+        dates: [],
+        subscribers: []
+      }),
+      makeEvent({
+        id: 'e-past-time',
+        name: 'Vergangen Mit Uhrzeit',
+        status: LifecycleStatus.Running,
+        custom_date: '2026-11-01T20:00:00',
+        dates: [],
+        subscribers: []
+      })
+    ]
+
+    const model = deriveDashboardModel(makeInput({ events }))
+
+    const fillEntry = model.fill.find((entry) => entry.eventId === 'e-time')
+    expect(fillEntry?.nextDate).toBe('2026-12-05')
+
+    const straggler = model.attention.find((entry) => entry.kind === 'lifecycle_straggler')
+    expect(
+      straggler !== undefined && straggler.kind === 'lifecycle_straggler'
+        ? straggler.lastDate
+        : undefined
+    ).toBe('2026-11-01')
+  })
+
+  it('pins the phase and fill rate of a zero-capacity event', () => {
+    const withWaitingRoom = makeEvent({
+      id: 'e-zero-room',
+      name: 'Null Kapazität',
+      status: LifecycleStatus.Published,
+      max_subscribers: 0,
+      dates: ['2026-12-05'],
+      subscribers: [makeSubscriber({ id: 's-z1', enrolled: false })]
+    })
+    const withoutWaitingRoom = makeEvent({
+      id: 'e-zero-full',
+      name: 'Null Kapazität Voll',
+      status: LifecycleStatus.Published,
+      max_subscribers: 0,
+      max_waiting_list: 0,
+      dates: ['2026-12-05'],
+      subscribers: []
+    })
+
+    const model = deriveDashboardModel(makeInput({ events: [withWaitingRoom, withoutWaitingRoom] }))
+
+    const withRoom = model.fill.find((entry) => entry.eventId === 'e-zero-room')
+    expect(withRoom?.phase).toBe('WaitingList')
+    expect(withRoom?.availability.fillPercent).toBe(0)
+
+    const withoutRoom = model.fill.find((entry) => entry.eventId === 'e-zero-full')
+    expect(withoutRoom?.phase).toBe('FullyBooked')
+  })
+
   it('orders open payments on the attention list by days until due', () => {
     const unpaidBookings = {
       [EventType.Fitness]: [

@@ -151,12 +151,17 @@ async function loadNewsletterData() {
       :unpaid-status="unpaidStatus"
       :newsletter-status="newsletterStatus"
     />
-    <FillList :fill="model.fill" :status="eventsStatus" class="mt-4" />
-    <AttentionList
-      :entries="model.attention"
-      :unpaid-status="unpaidStatus"
-      :events-status="eventsStatus"
-      class="mt-4"
-    />
+    <v-row dense class="mt-4">
+      <v-col cols="12" lg="6">
+        <FillList :fill="model.fill" :status="eventsStatus" />
+      </v-col>
+      <v-col cols="12" lg="6">
+        <AttentionList
+          :entries="model.attention"
+          :unpaid-status="unpaidStatus"
+          :events-status="eventsStatus"
+        />
+      </v-col>
+    </v-row>
   </ActionsLayout>
 </template>

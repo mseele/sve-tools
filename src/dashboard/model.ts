@@ -44,6 +44,7 @@ export interface EventFillEntry {
   eventId: string
   name: string
   type: EventType
+  /** Next upcoming date as ISO day (YYYY-MM-DD). */
   nextDate: string
   phase: EventPhase
   availability: EventAvailability
@@ -65,6 +66,7 @@ export interface StragglerAttentionEntry {
   kind: 'lifecycle_straggler'
   eventId: string
   eventName: string
+  /** Last passed date as ISO day (YYYY-MM-DD). */
   lastDate: string
   hint: string
   link: string
@@ -181,7 +183,7 @@ function deriveAttention(input: DashboardInput, active: Event[], today: string):
       kind: 'lifecycle_straggler',
       eventId: event.id,
       eventName: event.name,
-      lastDate: last,
+      lastDate: dateDay(last),
       hint: stragglerHint,
       link: eventsLink
     })
@@ -203,7 +205,7 @@ function deriveFill(active: Event[], today: string): EventFillEntry[] {
       eventId: event.id,
       name: event.name,
       type: event.type,
-      nextDate: next,
+      nextDate: dateDay(next),
       phase: phaseOf(event, availability),
       availability,
       link: bookingsLink

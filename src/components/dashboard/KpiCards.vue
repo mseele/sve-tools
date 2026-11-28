@@ -65,11 +65,7 @@ function paymentCount(type: EventType) {
               class="d-flex align-center justify-space-between"
             >
               <span>{{ type }}</span>
-              <v-chip
-                size="small"
-                :color="paymentCount(type) > 0 ? 'error' : 'success'"
-                class="my-1"
-              >
+              <v-chip size="small" :color="paymentCount(type) > 0 ? 'error' : ''" class="my-1">
                 {{ paymentCount(type) }} offen
               </v-chip>
             </div>
