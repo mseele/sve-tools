@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// PROTOTYPE Variante E v5 — Karten sind der Hauptinhalt.
+// PROTOTYPE Variante E v6 — Karten sind der Hauptinhalt.
 //
 // UX-Grundlage weiterhin Few (Monitoring-Sequenz), NN/g (Farbe nur als
 // Ausnahme-Signal), PatternFly (Ausnahmen nur wenn > 0), Turas/REN
@@ -114,7 +114,7 @@ const money = computed(() =>
 )
 
 const stats = computed<StatusValue[]>(() => [
-  { value: String(cards.value.length), label: 'beworbene Events' },
+  { value: String(cards.value.length), label: 'veröffentlichte Events' },
   { value: euro(money.value.expected), label: 'erwartet' },
   { value: euro(money.value.confirmed), label: 'bestätigt' },
   { value: euro(money.value.open), label: 'offen' }
@@ -160,7 +160,7 @@ const running = computed<RunningRow[]>(() =>
 <template>
   <div>
     <p v-if="props.demo" class="text-caption text-medium-emphasis mb-2">
-      Demo-Daten (Stand v5) — der echte Endpunkt liefert gerade nichts.
+      Demo-Daten (Stand v6) — der echte Endpunkt liefert gerade nichts.
     </p>
 
     <!-- Kopf-Kasten: Statuswerte mit Separatoren, darunter — nur wenn
@@ -198,7 +198,7 @@ const running = computed<RunningRow[]>(() =>
         </v-list>
       </template>
     </v-card>
-    <p v-else class="text-body-2 text-medium-emphasis mb-2">Keine beworbenen Events</p>
+    <p v-else class="text-body-2 text-medium-emphasis mb-2">Keine veröffentlichten Events</p>
 
     <!-- Hauptinhalt: eine einheitliche Karte pro Event — gleiche Anatomie,
          gleiche Positionen, gleiche Größen. Sortiert nach Startdatum. -->

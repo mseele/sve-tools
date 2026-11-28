@@ -341,7 +341,7 @@ describe('dashboard prototype variants', () => {
     await flushPromises()
 
     const text = wrapper.text()
-    expect(text).toContain('beworbene Events')
+    expect(text).toContain('veröffentlichte Events')
     expect(text).toContain('110,00')
     expect(text).toContain('bestätigt')
     expect(text).toContain('offen')
