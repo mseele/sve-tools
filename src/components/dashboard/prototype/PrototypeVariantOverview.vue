@@ -1,14 +1,15 @@
 <script setup lang="ts">
-// PROTOTYPE Variante E v2 — Karten sind der Hauptinhalt.
+// PROTOTYPE Variante E v3 — Karten sind der Hauptinhalt.
 //
-// UX-Grundlage weiterhin Few (Monitoring-Sequenz), NN/g (Mengen über
-// Länge/Position, Farbe nur als Ausnahme-Signal), PatternFly (Ausnahmen
-// nur wenn > 0), Turas/REN (Zusammenfassung vor Detail). Neu gewichtet
-// nach Feedback: Der große KPI-Block mit Balken drückte die Karten unter
-// den sichtbaren Bereich. Jetzt beantwortet eine schmale Statuszeile
-// Plus/Minus, darunter stehen rote Problemzeilen (nur echte Probleme:
-// überfällige Zahlungen, abgelaufene laufende Events), dann folgen die
-// Karten als Hauptinhalt, laufende Events schließen ab.
+// UX-Grundlage weiterhin Few (Monitoring-Sequenz), NN/g (Farbe nur als
+// Ausnahme-Signal), PatternFly (Ausnahmen nur wenn > 0), Turas/REN
+// (Zusammenfassung vor Detail). Vor den Karten steht jetzt nur das
+// Nötigste: EINE Statuszeile (Plus/Minus) und — nur wenn vorhanden —
+// rote, verlinkte Problemzeilen. Der SEPA/Überweisungs-Split, die
+// Überfälligkeitszahl und der Kurven-Hinweis leben auf den Karten
+// bzw. im Tooltip statt als Textblock oben. Unbegrenzte Events bekommen
+// einen statischen Schraffur-Balken (keine Animation) in demselben Slot
+// wie die Auslastungsbalken.
 import { computed } from 'vue'
 import type { PrototypeProps } from './prototypeData'
 import {
@@ -51,7 +52,7 @@ interface RunningRow {
 
 interface StatusPart {
   text: string
-  emphasis: 'high' | 'medium' | 'error'
+  emphasis: 'high' | 'medium'
 }
 
 const props = defineProps<PrototypeProps>()
@@ -65,8 +66,6 @@ const model = computed(() =>
   })
 )
 
-const promotedIds = computed(() => new Set(props.events.filter(isPromoted).map((ev) => ev.id)))
-
 /** Überfällige Zahlungen pro Event — das einzige Rot auf einer Karte. */
 const overdueByEvent = computed(() => {
   const map = new Map<string, number>()
@@ -78,20 +77,6 @@ const overdueByEvent = computed(() => {
     }
   }
   return map
-})
-
-const overduePromoted = computed(() => {
-  let count = 0
-  let total = 0
-  for (const list of Object.values(props.unpaidBookings)) {
-    for (const booking of list) {
-      if (booking.due_in_days < 0 && promotedIds.value.has(booking.event_id)) {
-        count += 1
-        total += parseFloat(booking.price) || 0
-      }
-    }
-  }
-  return { count, total }
 })
 
 const cards = computed<CampaignCard[]>(() =>
@@ -118,52 +103,21 @@ const money = computed(() =>
     (acc, card) => {
       acc.expected += card.money.expected
       acc.confirmed += card.money.confirmed
-      if (card.money.method === PM.SepaDirectDebit) acc.sepaOpen += card.money.open
-      else acc.transferOpen += card.money.open
-      acc.sepaNotExported += card.money.sepaNotExported
+      acc.open += card.money.open
       return acc
     },
-    { expected: 0, confirmed: 0, sepaOpen: 0, transferOpen: 0, sepaNotExported: 0 }
+    { expected: 0, confirmed: 0, open: 0 }
   )
 )
 
-const openTotal = computed(() => money.value.sepaOpen + money.value.transferOpen)
-
-/** «SEPA 602 €, 3 n. exportiert · Überweisung 270 €» — nur offene Teile. */
-const openSplit = computed(() => {
-  const parts: string[] = []
-  if (money.value.sepaOpen > 0) {
-    let sepa = `SEPA ${euro(money.value.sepaOpen)}`
-    if (money.value.sepaNotExported > 0) sepa += `, ${money.value.sepaNotExported} n. exportiert`
-    parts.push(sepa)
-  }
-  if (money.value.transferOpen > 0) parts.push(`Überweisung ${euro(money.value.transferOpen)}`)
-  return parts.join(' · ')
-})
-
-const statusParts = computed<StatusPart[]>(() => {
-  const grey = (text: string): StatusPart => ({ text, emphasis: 'medium' })
-  const parts: StatusPart[] = [
-    grey(`${cards.value.length} beworbene Events`),
-    { text: `erwartet ${euro(money.value.expected)}`, emphasis: 'high' },
-    { text: `bestätigt ${euro(money.value.confirmed)}`, emphasis: 'high' },
-    openTotal.value > 0
-      ? { text: `offen ${euro(openTotal.value)}`, emphasis: 'high' }
-      : grey('komplett bestätigt')
-  ]
-  if (openTotal.value > 0) {
-    parts.push(grey(openSplit.value))
-    if (overduePromoted.value.count > 0) {
-      parts.push({
-        text: `${overduePromoted.value.count} ${
-          overduePromoted.value.count === 1 ? 'Zahlung' : 'Zahlungen'
-        } überfällig`,
-        emphasis: 'error'
-      })
-    }
-  }
-  return parts
-})
+const statusParts = computed<StatusPart[]>(() => [
+  { text: `${cards.value.length} beworbene Events`, emphasis: 'medium' },
+  { text: `erwartet ${euro(money.value.expected)}`, emphasis: 'high' },
+  { text: `bestätigt ${euro(money.value.confirmed)}`, emphasis: 'high' },
+  money.value.open > 0
+    ? { text: `offen ${euro(money.value.open)}`, emphasis: 'high' }
+    : { text: 'komplett bestätigt', emphasis: 'medium' }
+])
 
 // Echte Probleme für den roten Block: überfällige Zahlungen und
 // abgelaufene laufende Events. Noch nicht fällige offene Zahlungen sind
@@ -208,20 +162,12 @@ const running = computed<RunningRow[]>(() =>
       Demo-Daten — der echte Endpunkt liefert gerade nichts.
     </p>
 
-    <!-- Statuszeile: Plus/Minus in einer Zeile, direkt gefolgt von den Karten. -->
+    <!-- Statuszeile: Plus/Minus in einer Zeile, direkt gefolgt von
+         Problemen (falls vorhanden) und den Karten. -->
     <p v-if="cards.length > 0" class="text-body-2 mb-1">
       <template v-for="(part, i) in statusParts" :key="`${i}-${part.text}`"
         ><template v-if="i > 0"> · </template>
-        <span
-          :class="
-            part.emphasis === 'high'
-              ? ''
-              : part.emphasis === 'error'
-                ? 'text-error font-weight-medium'
-                : 'text-medium-emphasis'
-          "
-          >{{ part.text }}</span
-        >
+        <span :class="part.emphasis === 'high' ? '' : 'text-medium-emphasis'">{{ part.text }}</span>
       </template>
     </p>
     <p v-else class="text-body-2 text-medium-emphasis mb-1">Keine beworbenen Events</p>
@@ -239,9 +185,6 @@ const running = computed<RunningRow[]>(() =>
     <!-- Hauptinhalt: eine einheitliche Karte pro Event — gleiche Anatomie,
          gleiche Positionen, gleiche Größen. Sortiert nach Startdatum. -->
     <template v-if="cards.length > 0">
-      <p class="text-caption text-medium-emphasis mb-2">
-        Nach Startdatum sortiert · Mini-Kurve: Buchungen der letzten 8 Wochen
-      </p>
       <v-row dense>
         <v-col v-for="card in cards" :key="card.event.id" cols="12" sm="6" lg="4">
           <v-card variant="outlined" to="/actions/bookings" class="fill-height">
@@ -264,12 +207,19 @@ const running = computed<RunningRow[]>(() =>
             <v-card-text class="pt-0">
               <div class="d-flex align-center ga-3 mb-2">
                 <template v-if="card.avail.unlimited">
-                  <v-progress-linear
-                    indeterminate
-                    color="primary"
-                    height="6"
-                    rounded
-                    class="flex-grow-1"
+                  <!-- Statische Schraffur statt Animation: gleicher Slot
+                       wie die Auslastungsbalken, aber keine Bewegung. -->
+                  <div
+                    class="flex-grow-1 rounded"
+                    title="Unbegrenzte Plätze"
+                    style="
+                      height: 6px;
+                      background: repeating-linear-gradient(
+                        45deg,
+                        rgba(var(--v-theme-primary), 0.35) 0 6px,
+                        transparent 6px 12px
+                      );
+                    "
                   />
                   <span class="text-body-2 text-no-wrap text-medium-emphasis">
                     Unbegrenzt · {{ card.avail.enrolled }} gebucht
@@ -309,7 +259,7 @@ const running = computed<RunningRow[]>(() =>
                 </span>
               </div>
 
-              <div class="mt-2 d-flex align-center">
+              <div class="mt-2 d-flex align-center" title="Buchungen der letzten 8 Wochen">
                 <PrototypeTrend
                   :values="card.trend"
                   :width="130"
