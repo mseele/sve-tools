@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// PROTOTYPE Variante E v3 — Karten sind der Hauptinhalt.
+// PROTOTYPE Variante E v4 — Karten sind der Hauptinhalt.
 //
 // UX-Grundlage weiterhin Few (Monitoring-Sequenz), NN/g (Farbe nur als
 // Ausnahme-Signal), PatternFly (Ausnahmen nur wenn > 0), Turas/REN
