@@ -11,6 +11,7 @@
     "type-check:tsrs": "tsrs -p tsconfig.app.json --noEmit --composite false",
     "lint": "oxlint",
     "format": "oxfmt",
+    "test": "vitest run",
     "release": "standard-version"
   },
   "dependencies": {
@@ -38,9 +39,12 @@
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.16.1",
     "@types/node": "^26.6.6",
+    "@vue/test-utils": "^2.6.0",
+    "jsdom": "^31.0.1",
     "oxfmt": "0.78.0",
     "oxlint": "^1.93.0",
     "standard-version": "^9.5.0",
-    "tsrs": "^0.25.0-ts7.1.0-beta"
+    "tsrs": "^0.25.0-ts7.1.0-beta",
+    "vitest": "^5.1.2"
   }
 }
