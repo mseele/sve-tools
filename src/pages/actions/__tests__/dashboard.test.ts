@@ -351,7 +351,7 @@ describe('dashboard prototype variants', () => {
     const text = wrapper.text()
     expect(text).toContain('Events')
     expect(text).toContain('110,00')
-    expect(text).toContain('neue Buchungen')
+    expect(text).toContain('neu (7 Tage)')
     expect(text).toContain('Ergebnis')
     expect(text).toContain('+ 60')
     expect(text).toContain('bestätigt')

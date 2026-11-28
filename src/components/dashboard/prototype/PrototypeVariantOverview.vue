@@ -1,17 +1,16 @@
 <script setup lang="ts">
-// PROTOTYPE Variante E v10 — Karten sind der Hauptinhalt.
+// PROTOTYPE Variante E v11 — Karten sind der Hauptinhalt.
 //
 // UX-Grundlage weiterhin Few (Monitoring-Sequenz), NN/g (Farbe nur als
 // Ausnahme-Signal), PatternFly (Ausnahmen nur wenn > 0). Der Kopf-Kasten
-// zeigt Events, neue Buchungen und die Geldwerte erwartet/bestätigt/
-// offen — Labels bewusst kurz. Jede Karte folgt einer festen Bänderung:
+// zeigt Events, neu (7 Tage) und die Geldwerte erwartet/bestätigt/offen
+// — Labels bewusst kurz. Jede Karte folgt einer festen Bänderung:
 // Identität + Zeit (Titelzeile), Auslastung (Balken + X / Y), Geld
-// (Wert-Label-Paare erwartet → bestätigt → offen → Ergebnis; das
-// Ergebnis ist Einnahmen − Termine × Preis pro Einheit wie auf der
-// Buchungsseite, neutral mit Vorzeichen, Überfälliges rot im
-// offen-Label), Fußzeile (Zahlart · SEPA-Export-Rückstand; keine
-// Kurven-Grafik). Unbegrenzte Events: statischer Schraffur-Balken,
-// X / ∞ in derselben Form.
+// (Wert-Label-Paare erwartet → offen → Ergebnis; das Ergebnis ist
+// Einnahmen − Termine × Preis pro Einheit wie auf der Buchungsseite,
+// plus grün / minus rot, Überfälliges rot im offen-Label), Fußzeile
+// (Zahlart · SEPA-Export-Rückstand; keine Kurven-Grafik). Unbegrenzte
+// Events: statischer Schraffur-Balken, X / ∞ in derselben Form.
 import { computed } from 'vue'
 import type { PrototypeProps } from './prototypeData'
 import {
@@ -125,18 +124,24 @@ const newBookings = computed(() => {
 
 const stats = computed<StatusValue[]>(() => [
   { value: String(cards.value.length), label: 'Events' },
-  { value: String(newBookings.value), label: 'neue Buchungen' },
+  { value: String(newBookings.value), label: 'neu (7 Tage)' },
   { value: euro(money.value.expected), label: 'erwartet' },
   { value: euro(money.value.confirmed), label: 'bestätigt' },
   { value: euro(money.value.open), label: 'offen' }
 ])
 
 // Ergebnis mit Vorzeichen wie von der Buchungsseite vertraut
-// (Einnahmen − Termine × Preis pro Einheit), aber neutral gefärbt —
-// Rot bleibt auf dem Dashboard Alarmen vorbehalten.
+// (Einnahmen − Termine × Preis pro Einheit), Farbe wie dort:
+// plus grün, minus rot.
 function resultText(result: number | undefined): string {
   if (result == undefined || result === 0) return euro(0)
   return result > 0 ? `+ ${euro(result)}` : `- ${euro(-result)}`
+}
+
+/** Plus grün, Minus rot — wie das Ergebnis auf der Buchungsseite. */
+function resultClass(result: number | undefined): string {
+  if (result == undefined || result === 0) return ''
+  return result < 0 ? 'text-error' : 'text-success'
 }
 
 // Überfällige Zahlungen nur als Zählzeile — bei 10, 20 Stück wäre eine
@@ -186,7 +191,7 @@ const running = computed<RunningRow[]>(() =>
 <template>
   <div>
     <p v-if="props.demo" class="text-caption text-medium-emphasis mb-2">
-      Demo-Daten (Stand v10) — der echte Endpunkt liefert gerade nichts.
+      Demo-Daten (Stand v11) — der echte Endpunkt liefert gerade nichts.
     </p>
 
     <!-- Kopf-Kasten: Statuswerte mit Separatoren, darunter — nur wenn
@@ -303,21 +308,16 @@ const running = computed<RunningRow[]>(() =>
                 </template>
               </div>
 
-              <!-- Geld: dieselben ausgerichteten Wert-Label-Paare wie im
-                   Kopf-Kasten, gleiche Reihenfolge erwartet → bestätigt →
-                   offen → Ergebnis. Überfällige Zahlungen sind das
-                   einzige Rot, direkt im Label unter offen. -->
+              <!-- Geld: ausgerichtete Wert-Label-Paare wie im Kopf-Kasten,
+                   Reihenfolge erwartet → offen → Ergebnis. Bestätigt ist
+                   erwartet − offen und bleibt nur im Kopf-Kasten. Das
+                   Ergebnis trägt plus grün / minus rot wie auf der
+                   Buchungsseite; Überfälliges bleibt rot im Label unter
+                   offen. -->
               <div class="d-flex flex-wrap align-center">
                 <div>
                   <div class="text-body-1 font-weight-medium">{{ euro(card.money.expected) }}</div>
                   <div class="text-caption text-medium-emphasis">erwartet</div>
-                </div>
-                <v-divider vertical class="mx-3 my-1 align-self-stretch" />
-                <div>
-                  <div class="text-body-1 font-weight-medium">
-                    {{ euro(card.money.confirmed) }}
-                  </div>
-                  <div class="text-caption text-medium-emphasis">bestätigt</div>
                 </div>
                 <v-divider vertical class="mx-3 my-1 align-self-stretch" />
                 <div>
@@ -333,7 +333,9 @@ const running = computed<RunningRow[]>(() =>
                 <template v-if="card.money.result != undefined">
                   <v-divider vertical class="mx-3 my-1 align-self-stretch" />
                   <div>
-                    <div class="text-body-1 font-weight-medium">
+                    <div
+                      :class="['text-body-1 font-weight-medium', resultClass(card.money.result)]"
+                    >
                       {{ resultText(card.money.result) }}
                     </div>
                     <div class="text-caption text-medium-emphasis">Ergebnis</div>
