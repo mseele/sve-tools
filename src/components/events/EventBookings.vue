@@ -118,6 +118,13 @@ async function markPayed(subscriber: EventSubscriber) {
   refresh()
 }
 
+function showMarkPayed(event: Event, subscriber: EventSubscriber) {
+  if (event.payment_method === PaymentMethod.SepaDirectDebit) {
+    return !subscriber.sepa_exported_at
+  }
+  return !subscriber.payment_confirmed_at
+}
+
 function displayCancelBookingDialog(subscriber: EventSubscriber) {
   cancelBookingId.value = subscriber.id
   cancelBookingLoading.value = false
@@ -312,12 +319,7 @@ async function exportSepa(event: Event) {
             </template>
             <td>
               <div class="d-flex align-center justify-end">
-                <template
-                  v-if="
-                    !item.payment_confirmed_at &&
-                    event.payment_method !== PaymentMethod.SepaDirectDebit
-                  "
-                >
+                <template v-if="showMarkPayed(event, item)">
                   <v-tooltip bottom>
                     <template v-slot:activator="{ props }">
                       <v-icon size="xs" class="mr-2" @click="markPayed(item)" v-bind="props">{{
