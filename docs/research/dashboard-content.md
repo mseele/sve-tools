@@ -1,0 +1,137 @@
+# Landing dashboard: which information is relevant?
+
+Research date: 2026-11-28. Primary sources only — official help docs and design-system docs, one vendor blog and one vendor tour video, every claim cited to its owning URL. After the product owner's course correction this doc focuses on **information relevance**: which top-line facts real event/booking dashboards surface for organizers, and which of those this system's data can serve. Design guidance is compressed to one short guardrails section.
+
+## Question and scope
+
+A small German sports club runs courses with limited seats, waiting lists, and payments by SEPA direct debit or bank transfer; events move Draft → Published (veröffentlicht) → Running (läuft) → Finished. The landing dashboard loads **Published + Running events only** (no drafts, no finished events in this view).
+
+**Question:** beyond the per-event overview (the cards themselves), which information is most valuable on the landing dashboard?
+
+### Established design rules (validated with the PO — used as filters)
+
+- **R1** — Cards per event are the main content; a compact structured summary block sits above; running events are one closing line.
+- **R2** — Red is reserved exclusively for items needing action (overdue payments, events to close); open money is neutral info on the cards.
+- **R3** — Uniform card anatomy for every event; no animated or decorative elements.
+- **R4** — Summary before detail; detail lives one click away on linked pages.
+- **R5** — Only data available without backend changes:
+  - per-event subscribers: booking timestamp, enrolled/waiting flag, member flag, payment-confirmed timestamp, SEPA-export timestamp, per-subscriber price
+  - event fields: dates, capacity, waiting-list capacity, prices, location, duration, payment method, cost_per_date
+  - unpaid bookings with `due_in_days` and reminder-sent timestamp
+  - newsletter subscriber counts per topic
+
+## Design guardrails (short)
+
+The established rules match the core design literature, so they stand as filters without further debate:
+
+- A dashboard is "the most important information … consolidated and arranged on a single screen so the information can be monitored at a glance"; detail is reached through "convenient links to additional information" (Stephen Few, *Common Pitfalls in Dashboard Design*, http://www.perceptualedge.com/articles/Whitepapers/Common_Pitfalls.pdf). Few: color stays "subdued and neutral, except when you are using color to highlight something as especially important" (same PDF) — i.e. R2.
+- NN/g classifies dashboards as operational (time-sensitive action) vs analytical (investigation); ours is operational, and "a red dot will easily stand out in a conglomerate of blue dots" while color must not encode magnitudes (https://www.nngroup.com/articles/dashboards-preattentive/). Progressive disclosure: "Initially, show users only a few of the most important options" and link out with clear expectations (https://www.nngroup.com/articles/progressive-disclosure/) — i.e. R4.
+- PatternFly's dashboard pattern prescribes exactly our layout: a top "dashbar … to provide essential information so that you can take immediate action", aggregate status cards whose exception counts show "only non-zero items" with a link to details, and clickable cards as drilldowns (https://www.patternfly.org/patterns/dashboard/design-guidelines, https://www.patternfly.org/components/card/design-guidelines).
+- Material (M3, used by this app's Vuetify stack): "Cards should be easy to scan for relevant and actionable information" and serve as "entry points into deeper levels of detail" (https://m3.material.io/components/cards/guidelines); importance hierarchy with "key information that is discernable at a glance" (https://m3.material.io/foundations/designing/structure); color highlights only "when it is used sparingly" (https://m2.material.io/design/communication/data-visualization.html).
+- Backing principle for link-to-detail: Shneiderman's "overview first, zoom and filter, then details on demand" (https://www.cs.umd.edu/~ben/papers/Shneiderman1996eyes.pdf). Restraint: "Irrelevant data is the same thing as noise" (Iliinsky, *Beautiful Visualization* ch. 1, https://www.oreilly.com/library/view/beautiful-visualization/9781449379889/ch01.html).
+
+## What real organizer dashboards surface (market validation)
+
+### Eventbrite — ticketed events, per-event dashboard
+
+Eventbrite's own tour video describes the event dashboard as "a high-level overview of your event details, including ticket sales, and event URLs" (official Eventbrite channel, https://www.youtube.com/watch?v=JlLFQKXxI7c). Their blog states a dashboard "displays the most relevant metrics at a glance, so you can keep tabs on your event in real-time" (https://www.eventbrite.com/blog/event-management-dashboard-ds00).
+
+| Fact | Purpose | Source |
+| --- | --- | --- |
+| Event status / on-sale indicator (live, privacy) | know what is selling right now | tour video transcript, https://www.youtube.com/watch?v=JlLFQKXxI7c |
+| Net sales (total revenue) | "No event dashboard would be complete without closely monitoring your total revenue" | blog metric #1, https://www.eventbrite.com/blog/event-management-dashboard-ds00 |
+| Tickets sold / ticket count | fill progress per event | blog #1–#2; recurring help: dashboard "shows … ticket count and recent orders", https://support.eventbrite.com/hc/en-us/articles/34862278799122-Manage-dates-and-time-slots-in-Eventbrite-s-new-recurring-event-experience |
+| Tickets sold by day / net sales by day | "track your progress towards your goal of selling out" (momentum) | blog metric #2, https://www.eventbrite.com/blog/event-management-dashboard-ds00 |
+| Sales by ticket type | which registration class (early bird vs. VIP) sells | blog metric #3, same URL |
+| Recent orders | latest activity per event/time slot | recurring help article, URL above |
+| Seats sold/held/available | utilization at a glance (reserved seating) | https://www.eventbrite.com/help/en-us/articles/216108/how-to-manage-your-reserved-seating-event |
+| Sales by source, attendee geography, pageviews | marketing reach and conversion | blog metrics #4–#6, https://www.eventbrite.com/blog/event-management-dashboard-ds00 |
+| Traffic & conversion detail (page visits, orders, tickets, last 30 days) | kept **one level deeper**: "go to your event dashboard and select Reporting" | https://support.eventbrite.com/hc/en-us/articles/34865326775954-Access-your-Traffic-and-conversion-report |
+
+### Meetup — RSVP events with attendee limits and waitlists
+
+| Fact | Purpose | Source |
+| --- | --- | --- |
+| Attendees (Going) count + searchable list | know who is coming | https://help.meetup.com/hc/en-us/articles/9389668230541-Manage-attendees-and-track-attendance-for-your-Meetup-event-on-the-web |
+| Waitlist: count, its own tab, priority order (joined order), move/remove actions | manage demand beyond capacity | same URL; https://help.meetup.com/hc/en-us/articles/360003883411-Enable-a-Waitlist-for-your-Meetup-event |
+| Attendance states during/after event (checked in / not checked in / absent) | no-show tracking, "up to 24 hours after the event" | same first URL |
+
+### Eversports Manager — sports studios/course providers (closest domain match)
+
+The Manager dashboard "provides a quick overview of the most relevant areas" (https://helpcenter.eversportsmanager.com/1-kpis-key-performance-indicators):
+
+| Fact | Purpose | Source |
+| --- | --- | --- |
+| KPI row: **Bookings** and **Customers** in a selectable period | volume of bookings and distinct bookers | dashboard help, https://helpcenter.eversportsmanager.com/1-kpis-key-performance-indicators |
+| KPI row: **Created invoices** (invoiced revenue) and **Paid revenue** per period | expected vs. actually received money | same URL |
+| **Upcoming activities** with jump-to-sign-in | what is happening next | same URL |
+| **Recent bookings and cancellations** ("which customer or staff member … at a glance", one click to profile/sign-in) | latest activity | same URL; widgets newsletter, https://helpcenter.eversportsmanager.com/dashboard-widgets-cancellation-insights-04-25 |
+| **Recent sales** incl. price, one click to invoices | money detail | dashboard help, URL above |
+| **To-dos**: "unpaid invoices / open invoices", "unverified wallet", "bookings without a product" — "Click on an item to resolve it" | pending work the admin must act on | same URL |
+| Waiting-list count **inline next to registrations**: "(3/3) (1) indicates 3 registered participants and 1 on the waiting list", also "1 on waiting list" link on the sign-in page | capacity + overflow demand at a glance | https://helpcenter.eversportsmanager.com/how-can-i-see-if-a-customer-is-on-the-waiting-list |
+| SEPA payments "On hold" until the mandate is verified ("Eversports Manager will pause all payments until the SEPA mandate is validated") | collection readiness per invoice | https://helpcenter.eversportsmanager.com/1-creating-a-sepa-mandate |
+
+### Gymdesk — gyms, martial arts and sports clubs with recurring billing
+
+"The dashboard … acts as your gym's control center" (https://docs.gymdesk.com/en/help/docs/dashboard):
+
+| Fact | Purpose | Source |
+| --- | --- | --- |
+| **Payments this month: scheduled, received, overdue** | "track revenue at a glance and identify any outstanding payments" | https://docs.gymdesk.com/en/help/docs/dashboard |
+| **Overdue payments** section: member, amount, due date, direct actions (retry / send reminder) | follow up on money quickly | same URL |
+| **Today's schedule** (upcoming + in-progress sessions) | operational focus on the now | same URL |
+| Attendance (7-day check-ins), My Tasks, birthdays, notifications | retention and follow-ups | same URL |
+
+### Cross-product pattern
+
+Every reviewed product's landing screen answers three questions: **what is happening now/today**, **how full is it / how much demand**, and **what work is pending — money above all** (Eversports to-dos, Gymdesk overdue section, Eventbrite per-event sales status). Marketing analytics (source, geography, pageviews) — Eventbrite's biggest theme — consistently lives one click deeper in reports, not on the dashboard (https://support.eventbrite.com/hc/en-us/articles/34865326775954-Access-your-Traffic-and-conversion-report), and Eversports likewise points to "the analysis" for trends (https://helpcenter.eversportsmanager.com/dashboard-widgets-cancellation-insights-04-25).
+
+## Synthesis: info candidates
+
+| Info candidate | Admin question it answers | Do real products surface it? | Fits our data (R5)? |
+| --- | --- | --- | --- |
+| **Overdue payments** (count, total, oldest due, reminder/Mahnung state) | "Who still owes money, since when, and were they reminded?" | Yes — Eversports to-dos "open invoices" ([dashboard](https://helpcenter.eversportsmanager.com/1-kpis-key-performance-indicators)); Gymdesk "Overdue payments … amount and due date … send a payment reminder" ([dashboard](https://docs.gymdesk.com/en/help/docs/dashboard)) | ✅ unpaid bookings with `due_in_days` + reminder-sent timestamp. The only red item besides events-to-close (R2) |
+| **Events needing closure** (running, past end date) | "Which courses must be finalized (Teilnehmerliste/Abrechnung)?" | Partial — lifecycle status is top-line (Eventbrite status, [tour video](https://www.youtube.com/watch?v=JlLFQKXxI7c)); post-event window exists (Meetup, "up to 24 hours after the event", [attendee help](https://help.meetup.com/hc/en-us/articles/9389668230541-Manage-attendees-and-track-attendance-for-your-Meetup-event-on-the-web)); the "pending work" vehicle is the to-do/task pattern (Eversports, Gymdesk) | ✅ Running status + event dates. Presented as the established one closing line (R1), red (R2) |
+| **Seats per event** (enrolled/capacity) | "Is the course filling up?" | Yes — Eversports inline "(3/3)" ([waitlist help](https://helpcenter.eversportsmanager.com/how-can-i-see-if-a-customer-is-on-the-waiting-list)); Eventbrite tickets sold ([blog](https://www.eventbrite.com/blog/event-management-dashboard-ds00)); Meetup attendee limit ([waitlist help](https://help.meetup.com/hc/en-us/articles/360003883411-Enable-a-Waitlist-for-your-Meetup-event)) | ✅ enrolled flag + capacity. Card content, neutral |
+| **Waiting-list depth** (+ waiting-list capacity) | "Demand beyond capacity — open a second course?" | Yes — Eversports "(3/3) (1)" and "1 on waiting list" link ([waitlist help](https://helpcenter.eversportsmanager.com/how-can-i-see-if-a-customer-is-on-the-waiting-list)); Meetup Waitlist tab ([attendee help](https://help.meetup.com/hc/en-us/articles/9389668230541-Manage-attendees-and-track-attendance-for-your-Meetup-event-on-the-web)) | ✅ waiting flag + waiting-list capacity. One number on the card, links to subscriber list (R4) |
+| **Events starting this week / soon** | "What needs my attention next?" | Yes — Eversports "Upcoming activities" ([dashboard](https://helpcenter.eversportsmanager.com/1-kpis-key-performance-indicators)); Gymdesk "Today's schedule" ([dashboard](https://docs.gymdesk.com/en/help/docs/dashboard)) | ✅ event dates; Published+Running loaded. Grouping/ordering of the card list + one count line (R1) |
+| **Confirmed vs. booked money** (paid / open totals) | "How much money is in, how much is still open?" | Yes — Eversports KPIs "Created invoices" / "Paid revenue" ([dashboard](https://helpcenter.eversportsmanager.com/1-kpis-key-performance-indicators)); Eventbrite "Net sales" ([blog](https://www.eventbrite.com/blog/event-management-dashboard-ds00)); Gymdesk scheduled/received/overdue ([dashboard](https://docs.gymdesk.com/en/help/docs/dashboard)) | ✅ per-subscriber price × payment-confirmed timestamp; cross-checkable against unpaid list. Neutral on cards (R2) |
+| **SEPA export pending** | "Which confirmed payments must go into the next SEPA-Abbuchung run?" | Yes — Eversports pauses payments until mandate verified, invoice state "On hold" ([SEPA mandate](https://helpcenter.eversportsmanager.com/1-creating-a-sepa-mandate)) | ✅ SEPA-export timestamp + payment method per event. Neutral count in summary block; red only once overdue |
+| **Recent bookings** (latest across events) | "What happened since my last visit?" | Yes — Eversports "Recent bookings and cancellations" ([dashboard](https://helpcenter.eversportsmanager.com/1-kpis-key-performance-indicators)); Eventbrite "recent orders" ([recurring help](https://support.eventbrite.com/hc/en-us/articles/34862278799122-Manage-dates-and-time-slots-in-Eventbrite-s-new-recurring-event-experience)) | ✅ booking timestamps. ⚠️ cancellations are NOT in our data |
+| **Booking velocity** (bookings in last 7 days) | "Is momentum enough to fill the course before start?" | Yes — Eventbrite "tickets sold by day" ([blog](https://www.eventbrite.com/blog/event-management-dashboard-ds00)); Eversports "Bookings" per period ([dashboard](https://helpcenter.eversportsmanager.com/1-kpis-key-performance-indicators)) | ✅ booking timestamps. One neutral number in the summary block; charts on a linked view (R4) |
+| **Member vs. non-member split** | "Who is booking — Mitglieder or externals?" | Partial — closest analog is Eventbrite "sales by ticket type" ([blog](https://www.eventbrite.com/blog/event-management-dashboard-ds00)), a marketing metric for large events | ✅ member flag + per-subscriber price. No action attached → hide on landing, keep the flag in the subscriber list (R4) |
+| **Newsletter reach per topic** | "How big is my promotion audience per topic?" | Weak — Eventbrite's analog is organizer followers (notification per new event, [organizer deep-dive](https://www.eventbrite.com/blog/eventbrite-organizer-ds00)); no reviewed product shows newsletter counts on the dashboard | ✅ newsletter subscriber counts per topic. Optional; neutral, one line at most |
+| **Booking trends over time** (weekly curve, utilization trend) | "How do bookings develop over time?" | Yes, but not on the landing view — Eventbrite keeps it in Reporting ([traffic report](https://support.eventbrite.com/hc/en-us/articles/34865326775954-Access-your-Traffic-and-conversion-report)); Eversports points to "the analysis" for trends ([widgets newsletter](https://helpcenter.eversportsmanager.com/dashboard-widgets-cancellation-insights-04-25)) | ✅ computable from timestamps, but detail-page material (R4); no charts on cards (R3) |
+| **Sales by source / pageviews / geography** | "Where do bookings come from?" | Yes for Eventbrite ([blog](https://www.eventbrite.com/blog/event-management-dashboard-ds00)) — requires tracking | ❌ no page/referrer/address data in R5 |
+| **Attendance / check-ins, cancellations** | "Did people show up? Who cancelled?" | Yes — Gymdesk attendance, Meetup check-in, Eversports cancellations ([Gymdesk](https://docs.gymdesk.com/en/help/docs/dashboard), [Meetup](https://help.meetup.com/hc/en-us/articles/9389668230541-Manage-attendees-and-track-attendance-for-your-Meetup-event-on-the-web), [Eversports widgets](https://helpcenter.eversportsmanager.com/dashboard-widgets-cancellation-insights-04-25)) | ❌ no check-in or cancellation data in R5 |
+| **Event basics** (date, location, duration, price, payment method, cost_per_date) | "What/when/where/how much is this event?" | Yes — all products show event basics on their manage surfaces (e.g. [Eventbrite tour](https://www.youtube.com/watch?v=JlLFQKXxI7c), [Eversports dashboard](https://helpcenter.eversportsmanager.com/1-kpis-key-performance-indicators)) | ✅ full event fields → the uniform card anatomy (R3) |
+
+## Recommended shortlist (ranked by value per screen space)
+
+1. **Overdue payments** — count, open total, oldest due date, and reminder state, in the summary block, linking to the unpaid-bookings list. Both Eversports (to-dos) and Gymdesk (overdue section) make this the dashboard's first to-do; our `due_in_days` + reminder-sent data supports it exactly. **Red.**
+2. **Events to close** — one closing line per laufendes Event whose end date has passed, plus a count in the summary block. The second and only other red item (R2).
+3. **Per-card "12/15 · Warteliste 3"** — enrolled/capacity plus waiting count on every event card. Eversports puts exactly this inline in its calendar and class lists; two numbers per card, zero decoration.
+4. **Summary block (dashbar style)** — counts of veröffentlichte/laufende Events, "X starten diese Woche", paid vs. open money, unpaid count, SEPA-export-pending count — each entry links to its list. Mirrors the Eversports KPI row + to-dos and Gymdesk's payments trio.
+5. **Recent bookings** — a compact latest-bookings line (or 3–5 entries), the Eversports/Eventbrite activity widget; skip the cancellations half (no data).
+6. **Booking velocity as one neutral number** — "X Anmeldungen in den letzten 7 Tagen" in the summary block; any chart lives on a linked bookings view.
+7. *Optional, only if the PO wants audience facts:* member/non-member split and newsletter-reach counts, neutral, one line each.
+
+**Detail pages instead of landing view:** booking curves and utilization trends (computable, but chart material), per-subscriber lists with member flag and timestamps, unpaid-bookings list with `due_in_days` and Mahnung state.
+**Not feasible without backend work:** source/pageview analytics (Eventbrite's marketing layer), check-ins/attendance, cancellations.
+
+## Sources
+
+- Few, *Common Pitfalls in Dashboard Design* (white paper, 2006): http://www.perceptualedge.com/articles/Whitepapers/Common_Pitfalls.pdf
+- Few, *Tapping the Power of Visual Perception* (2004): https://perceptualedge.com/articles/ie/visual_perception.pdf
+- NN/g, *Dashboards: Making Charts and Graphs Easier to Understand*: https://www.nngroup.com/articles/dashboards-preattentive/
+- NN/g, *Progressive Disclosure*: https://www.nngroup.com/articles/progressive-disclosure/
+- NN/g, *8 Design Guidelines for Complex Applications*: https://www.nngroup.com/articles/complex-application-design/
+- PatternFly, *Dashboard design guidelines*: https://www.patternfly.org/patterns/dashboard/design-guidelines
+- PatternFly, *Card design guidelines*: https://www.patternfly.org/components/card/design-guidelines
+- Material 3, *Cards guidelines*: https://m3.material.io/components/cards/guidelines · *Accessibility designing*: https://m3.material.io/foundations/designing/structure · Material 2, *Data visualization*: https://m2.material.io/design/communication/data-visualization.html
+- Shneiderman, *The Eyes Have It* (1996): https://www.cs.umd.edu/~ben/papers/Shneiderman1996eyes.pdf
+- Iliinsky, *On Beauty*, in *Beautiful Visualization* (O'Reilly 2010): https://www.oreilly.com/library/view/beautiful-visualization/9781449379889/ch01.html
+- Eventbrite: dashboard metrics blog — https://www.eventbrite.com/blog/event-management-dashboard-ds00 · organizer deep-dive — https://www.eventbrite.com/blog/eventbrite-organizer-ds00 · recurring-event dashboards — https://support.eventbrite.com/hc/en-us/articles/34862278799122-Manage-dates-and-time-slots-in-Eventbrite-s-new-recurring-event-experience · traffic & conversion report — https://support.eventbrite.com/hc/en-us/articles/34865326775954-Access-your-Traffic-and-conversion-report · reserved seating — https://www.eventbrite.com/help/en-us/articles/216108/how-to-manage-your-reserved-seating-event · dashboard tour video (official Eventbrite channel) — https://www.youtube.com/watch?v=JlLFQKXxI7c
+- Meetup: attendee/waitlist/attendance management — https://help.meetup.com/hc/en-us/articles/9389668230541-Manage-attendees-and-track-attendance-for-your-Meetup-event-on-the-web · waitlist activation — https://help.meetup.com/hc/en-us/articles/360003883411-Enable-a-Waitlist-for-your-Meetup-event
+- Eversports Manager: dashboard overview — https://helpcenter.eversportsmanager.com/1-kpis-key-performance-indicators · dashboard widgets & cancellation insights — https://helpcenter.eversportsmanager.com/dashboard-widgets-cancellation-insights-04-25 · waiting list — https://helpcenter.eversportsmanager.com/how-can-i-see-if-a-customer-is-on-the-waiting-list · SEPA mandates — https://helpcenter.eversportsmanager.com/1-creating-a-sepa-mandate
+- Gymdesk: *Gym Dashboard Overview* — https://docs.gymdesk.com/en/help/docs/dashboard
