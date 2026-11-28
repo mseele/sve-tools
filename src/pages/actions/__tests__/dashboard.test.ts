@@ -93,7 +93,11 @@ function makeUnpaid(
 
 function dashboardEvents(): Event[] {
   const enrolled = Array.from({ length: 8 }, (_, i) =>
-    makeSubscriber({ id: `en-${i}`, enrolled: true })
+    makeSubscriber({
+      id: `en-${i}`,
+      enrolled: true,
+      created: i === 0 ? isoDateInDays(-2) : '2026-11-01'
+    })
   )
   const waiting = Array.from({ length: 2 }, (_, i) =>
     makeSubscriber({ id: `wl-${i}`, enrolled: false })
@@ -346,6 +350,7 @@ describe('dashboard prototype variants', () => {
     const text = wrapper.text()
     expect(text).toContain('veröffentlichte Events')
     expect(text).toContain('110,00')
+    expect(text).toContain('neue Buchungen (7 Tage)')
     expect(text).toContain('bestätigt')
     expect(text).toContain('offen')
     expect(text).toContain('überfällige Zahlung')

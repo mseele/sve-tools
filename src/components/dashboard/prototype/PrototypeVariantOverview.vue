@@ -1,13 +1,16 @@
 <script setup lang="ts">
-// PROTOTYPE Variante E v8 — Karten sind der Hauptinhalt.
+// PROTOTYPE Variante E v9 — Karten sind der Hauptinhalt.
 //
 // UX-Grundlage weiterhin Few (Monitoring-Sequenz), NN/g (Farbe nur als
-// Ausnahme-Signal), PatternFly (Ausnahmen nur wenn > 0). Jede Karte
-// folgt einer festen Bänderung: Identität + Zeit (Titelzeile),
-// Auslastung (Balken + X / Y), Geld (drei ausgerichtete Wert-Label-
-// Paare wie im Kopf-Kasten, Überfälliges rot im offen-Label), Fußzeile
-// (Zahlart · SEPA-Export links, Buchungs-Kurve rechts). Unbegrenzte
-// Events: statischer Schraffur-Balken, X / ∞ in derselben Form.
+// Ausnahme-Signal), PatternFly (Ausnahmen nur wenn > 0). Der Kopf-Kasten
+// zeigt veröffentlichte Events, neue Buchungen der letzten 7 Tage
+// (Markt-Muster: „Recent bookings", Eversports/Eventbrite) und die
+// Geldwerte erwartet/bestätigt/offen. Jede Karte folgt einer festen
+// Bänderung: Identität + Zeit (Titelzeile), Auslastung (Balken +
+// X / Y), Geld (drei ausgerichtete Wert-Label-Paare, Überfälliges rot
+// im offen-Label), Fußzeile (Zahlart · SEPA-Export links, Buchungs-
+// Kurve rechts). Unbegrenzte Events: statischer Schraffur-Balken,
+// X / ∞ in derselben Form.
 import { computed } from 'vue'
 import type { PrototypeProps } from './prototypeData'
 import {
@@ -111,8 +114,20 @@ const money = computed(() =>
   )
 )
 
+// Neue Buchungen der letzten 7 Tage über alle veröffentlichten Events
+// — „was ist passiert, seit ich zuletzt geschaut habe?" (Eversports
+// „Recent bookings", Eventbrite „recent orders").
+const newBookings = computed(() => {
+  const cutoff = props.now.getTime() - 7 * 24 * 60 * 60 * 1000
+  return cards.value.reduce((count, card) => {
+    const subs = card.event.subscribers ?? []
+    return count + subs.filter((sub) => new Date(sub.created).getTime() >= cutoff).length
+  }, 0)
+})
+
 const stats = computed<StatusValue[]>(() => [
   { value: String(cards.value.length), label: 'veröffentlichte Events' },
+  { value: String(newBookings.value), label: 'neue Buchungen (7 Tage)' },
   { value: euro(money.value.expected), label: 'erwartet' },
   { value: euro(money.value.confirmed), label: 'bestätigt' },
   { value: euro(money.value.open), label: 'offen' }
@@ -165,7 +180,7 @@ const running = computed<RunningRow[]>(() =>
 <template>
   <div>
     <p v-if="props.demo" class="text-caption text-medium-emphasis mb-2">
-      Demo-Daten (Stand v8) — der echte Endpunkt liefert gerade nichts.
+      Demo-Daten (Stand v9) — der echte Endpunkt liefert gerade nichts.
     </p>
 
     <!-- Kopf-Kasten: Statuswerte mit Separatoren, darunter — nur wenn
