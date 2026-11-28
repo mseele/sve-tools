@@ -32,21 +32,22 @@ const notify = useNotifyStore()
 const route = useRoute()
 const router = useRouter()
 
-// PROTOTYPE: Varianten nur im Dev-Build, schaltbar via ?variant=A|B|C.
+// PROTOTYPE: Varianten nur im Dev-Build, schaltbar via ?variant=A|B|C|D|E.
 const prototypeEnabled = import.meta.env.DEV
 const prototypeVariants = [
   { key: '', label: 'Aktueller Stand (PR #200)' },
   { key: 'A', label: 'Kampagnen-Karten' },
   { key: 'B', label: 'Verdichtete Tabelle' },
   { key: 'C', label: 'Einnahmen zuerst' },
-  { key: 'D', label: 'Fokus-Pipeline' }
+  { key: 'D', label: 'Fokus-Pipeline' },
+  { key: 'E', label: 'Klare Übersicht' }
 ]
 
 const variant = computed<string>(() => {
   if (!prototypeEnabled) return ''
   const raw = route.query.variant
   const key = Array.isArray(raw) ? raw[0] : raw
-  return typeof key === 'string' && ['A', 'B', 'C', 'D'].includes(key) ? key : ''
+  return typeof key === 'string' && ['A', 'B', 'C', 'D', 'E'].includes(key) ? key : ''
 })
 
 function selectVariant(key: string) {
@@ -243,6 +244,16 @@ async function loadNewsletterData() {
     />
     <PrototypeVariantPipeline
       v-else-if="variant === 'D'"
+      :events="protoEvents"
+      :unpaid-bookings="protoUnpaid"
+      :newsletter-subscribers="newsletterSubscribers"
+      :events-status="eventsStatus"
+      :unpaid-status="unpaidStatus"
+      :now="fetchedAt"
+      :demo="protoDemo"
+    />
+    <PrototypeVariantOverview
+      v-else-if="variant === 'E'"
       :events="protoEvents"
       :unpaid-bookings="protoUnpaid"
       :newsletter-subscribers="newsletterSubscribers"

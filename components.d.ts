@@ -29,6 +29,7 @@ declare module 'vue' {
     PrototypeSwitcher: typeof import('./src/components/dashboard/prototype/PrototypeSwitcher.vue')['default']
     PrototypeTrend: typeof import('./src/components/dashboard/prototype/PrototypeTrend.vue')['default']
     PrototypeVariantCards: typeof import('./src/components/dashboard/prototype/PrototypeVariantCards.vue')['default']
+    PrototypeVariantOverview: typeof import('./src/components/dashboard/prototype/PrototypeVariantOverview.vue')['default']
     PrototypeVariantPipeline: typeof import('./src/components/dashboard/prototype/PrototypeVariantPipeline.vue')['default']
     PrototypeVariantRevenue: typeof import('./src/components/dashboard/prototype/PrototypeVariantRevenue.vue')['default']
     PrototypeVariantTable: typeof import('./src/components/dashboard/prototype/PrototypeVariantTable.vue')['default']

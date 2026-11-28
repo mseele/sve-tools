@@ -334,6 +334,29 @@ describe('dashboard prototype variants', () => {
     expect(text).not.toContain('Demo-Daten')
   })
 
+  it('variant E renders the status KPI row and one uniform card per event', async () => {
+    mockHappyApi()
+
+    const { wrapper } = await mountDashboard('/actions/dashboard?variant=E')
+    await flushPromises()
+
+    const text = wrapper.text()
+    expect(text).toContain('Status beworbener Events')
+    expect(text).toContain('erwartet · 2 Events')
+    expect(text).toContain('bestätigt')
+    expect(text).toContain('SEPA offen')
+    expect(text).toContain('Überweisung offen')
+    expect(text).toContain('Rückenfitness')
+    expect(text).toContain('startet in 7 Tagen')
+    expect(text).toContain('Weihnachtsfeier')
+    expect(text).toContain('Unbegrenzt')
+    expect(text).toContain('offen')
+    expect(text).toContain('Braucht Aufmerksamkeit')
+    expect(text).toContain('3 Tage überfällig')
+    expect(text).not.toContain('endet heute')
+    expect(text).not.toContain('Demo-Daten')
+  })
+
   it('falls back to demo fixtures when the events endpoint fails', async () => {
     vi.mocked(loadEvents).mockRejectedValue(new Error('Backend nicht erreichbar'))
     vi.mocked(getUnpaidBookings).mockResolvedValue([])
