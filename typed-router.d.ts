@@ -45,6 +45,13 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
+    'default_action': RouteRecordInfo<
+      'default_action',
+      '/actions/dashboard',
+      Record<never, never>,
+      Record<never, never>,
+      | never
+    >,
     '/actions/deploy': RouteRecordInfo<
       '/actions/deploy',
       '/actions/deploy',
@@ -59,8 +66,8 @@ declare module 'vue-router/auto-routes' {
       Record<never, never>,
       | never
     >,
-    'default_action': RouteRecordInfo<
-      'default_action',
+    '/actions/events': RouteRecordInfo<
+      '/actions/events',
       '/actions/events',
       Record<never, never>,
       Record<never, never>,
@@ -116,6 +123,14 @@ declare module 'vue-router/auto-routes' {
       pathParamNames:
         | never
     }
+    'src/pages/actions/dashboard.vue': {
+      routes:
+        | 'default_action'
+      views:
+        | never
+      pathParamNames:
+        | never
+    }
     'src/pages/actions/deploy.vue': {
       routes:
         | '/actions/deploy'
@@ -134,7 +149,7 @@ declare module 'vue-router/auto-routes' {
     }
     'src/pages/actions/events.vue': {
       routes:
-        | 'default_action'
+        | '/actions/events'
       views:
         | never
       pathParamNames:

@@ -1,5 +1,9 @@
 [
   {
+    "name": "Dashboard",
+    "link": "/actions/dashboard"
+  },
+  {
     "name": "Manage Events",
     "link": "/actions/events"
   },

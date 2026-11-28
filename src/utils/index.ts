@@ -1,4 +1,5 @@
 import { EventType, LifecycleStatus } from '@/types'
+import { format, parseISO } from 'date-fns'
 
 export function validateEmail(email: string) {
   return email
@@ -67,4 +68,8 @@ export function statusIndex(status: LifecycleStatus) {
 
 export function formatPrice(price: string) {
   return price.replace('.', ',') + '  €'
+}
+
+export function formatIsoDay(date: string) {
+  return format(parseISO(date.slice(0, 10)), 'dd-MM-yyyy')
 }
