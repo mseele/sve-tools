@@ -13,6 +13,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     ActionColumn: typeof import('./src/components/ActionColumn.vue')['default']
     ActionsLayout: typeof import('./src/components/ActionsLayout.vue')['default']
+    AttentionList: typeof import('./src/components/dashboard/AttentionList.vue')['default']
     ButtonArea: typeof import('./src/components/ButtonArea.vue')['default']
     CreateNew: typeof import('./src/components/events/CreateNew.vue')['default']
     DescriptionEditor: typeof import('./src/components/events/DescriptionEditor.vue')['default']
@@ -22,6 +23,8 @@ declare module 'vue' {
     EventListItem: typeof import('./src/components/EventListItem.vue')['default']
     EventSelection: typeof import('./src/components/EventSelection.vue')['default']
     EventTypeSelection: typeof import('./src/components/EventTypeSelection.vue')['default']
+    FillList: typeof import('./src/components/dashboard/FillList.vue')['default']
+    KpiCards: typeof import('./src/components/dashboard/KpiCards.vue')['default']
     ManagerRecipients: typeof import('./src/components/events/ManagerRecipients.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

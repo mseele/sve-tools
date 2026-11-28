@@ -1,7 +1,3 @@
-<route lang="json">
-{ "name": "default_action" }
-</route>
-
 <script setup lang="ts">
 import { deleteEvent, loadCustomFields } from '@/api'
 import EventSelection from '@/components/EventSelection.vue'

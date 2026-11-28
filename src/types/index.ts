@@ -116,3 +116,5 @@ export interface EventSubscriber {
   comment?: string
   custom_values: string[]
 }
+
+export type FetchStatus = 'loading' | 'error' | 'ok'
