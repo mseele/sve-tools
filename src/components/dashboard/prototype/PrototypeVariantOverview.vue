@@ -1,16 +1,19 @@
 <script setup lang="ts">
-// PROTOTYPE Variante E v11 — Karten sind der Hauptinhalt.
+// PROTOTYPE Variante E v12 — Karten sind der Hauptinhalt.
 //
 // UX-Grundlage weiterhin Few (Monitoring-Sequenz), NN/g (Farbe nur als
 // Ausnahme-Signal), PatternFly (Ausnahmen nur wenn > 0). Der Kopf-Kasten
-// zeigt Events, neu (7 Tage) und die Geldwerte erwartet/bestätigt/offen
-// — Labels bewusst kurz. Jede Karte folgt einer festen Bänderung:
-// Identität + Zeit (Titelzeile), Auslastung (Balken + X / Y), Geld
-// (Wert-Label-Paare erwartet → offen → Ergebnis; das Ergebnis ist
-// Einnahmen − Termine × Preis pro Einheit wie auf der Buchungsseite,
-// plus grün / minus rot, Überfälliges rot im offen-Label), Fußzeile
-// (Zahlart · SEPA-Export-Rückstand; keine Kurven-Grafik). Unbegrenzte
-// Events: statischer Schraffur-Balken, X / ∞ in derselben Form.
+// zeigt Events, Buchungen (7 Tage) und die Geldwerte erwartet/offen
+// plus Gesamtergebnis — bestätigt ist erwartet − offen und entfällt.
+// Jede Karte folgt einer festen Bänderung: Identität + Zeit (Titel-
+// zeile), Auslastung (Balken + X / Y), Geld (Wert-Label-Paare erwartet
+// → offen → Ergebnis; das Ergebnis ist Einnahmen − Termine × Preis pro
+// Einheit wie auf der Buchungsseite, plus grün / minus rot, Über-
+// fälliges rot im offen-Label), Fußzeile (Zahlart · SEPA-Export-
+// Rückstand; keine Kurven-Grafik). Laufende Events schließen als
+// Zeilen-Liste in derselben Anatomie wie die Problemzeilen, nur
+// neutral. Unbegrenzte Events: statischer Schraffur-Balken,
+// X / ∞ in derselben Form.
 import { computed } from 'vue'
 import type { PrototypeProps } from './prototypeData'
 import {
@@ -32,7 +35,7 @@ import {
   type StragglerAttentionEntry
 } from '@/dashboard/model'
 import { formatIsoDay } from '@/utils'
-import { mdiBellOutline, mdiCalendarRemove } from '@mdi/js'
+import { mdiBellOutline, mdiCalendar, mdiCalendarRemove } from '@mdi/js'
 import { PaymentMethod as PM, type Event } from '@/types'
 
 interface CampaignCard {
@@ -54,6 +57,7 @@ interface RunningRow {
 interface StatusValue {
   value: string
   label: string
+  colorClass?: string
 }
 
 const props = defineProps<PrototypeProps>()
@@ -122,12 +126,22 @@ const newBookings = computed(() => {
   }, 0)
 })
 
+// Gesamtergebnis aller veröffentlichten Events mit gepflegtem Preis
+// pro Einheit — die Summe der Karten-Ergebnisse.
+const totalResult = computed(() =>
+  cards.value.reduce((sum, card) => sum + (card.money.result ?? 0), 0)
+)
+
 const stats = computed<StatusValue[]>(() => [
   { value: String(cards.value.length), label: 'Events' },
-  { value: String(newBookings.value), label: 'neu (7 Tage)' },
+  { value: String(newBookings.value), label: 'Buchungen (7 Tage)' },
   { value: euro(money.value.expected), label: 'erwartet' },
-  { value: euro(money.value.confirmed), label: 'bestätigt' },
-  { value: euro(money.value.open), label: 'offen' }
+  { value: euro(money.value.open), label: 'offen' },
+  {
+    value: resultText(totalResult.value),
+    label: 'Ergebnis',
+    colorClass: resultClass(totalResult.value)
+  }
 ])
 
 // Ergebnis mit Vorzeichen wie von der Buchungsseite vertraut
@@ -191,7 +205,7 @@ const running = computed<RunningRow[]>(() =>
 <template>
   <div>
     <p v-if="props.demo" class="text-caption text-medium-emphasis mb-2">
-      Demo-Daten (Stand v11) — der echte Endpunkt liefert gerade nichts.
+      Demo-Daten (Stand v12) — der echte Endpunkt liefert gerade nichts.
     </p>
 
     <!-- Kopf-Kasten: Statuswerte mit Separatoren, darunter — nur wenn
@@ -206,7 +220,7 @@ const running = computed<RunningRow[]>(() =>
           <template v-for="(stat, i) in stats" :key="stat.label">
             <v-divider v-if="i > 0" vertical class="mx-4 my-1 align-self-stretch" />
             <div>
-              <div class="text-h6">{{ stat.value }}</div>
+              <div class="text-h6" :class="stat.colorClass">{{ stat.value }}</div>
               <div class="text-caption text-medium-emphasis">{{ stat.label }}</div>
             </div>
           </template>
@@ -358,16 +372,18 @@ const running = computed<RunningRow[]>(() =>
       </v-row>
     </template>
 
-    <!-- Laufende Events als Abschluss. -->
-    <p v-if="running.length > 0" class="text-body-2 text-medium-emphasis mt-4 mb-0">
-      <span class="font-weight-medium text-high-emphasis">Laufende Events:</span>
-      <template v-for="(row, i) in running" :key="row.event.id"
-        ><template v-if="i > 0"> · </template>
-        <router-link to="/actions/bookings" class="text-decoration-none">
-          {{ row.event.name }}
-        </router-link>
-        {{ row.text }}
-      </template>
-    </p>
+    <!-- Laufende Events als Abschluss: dieselbe Zeilen-Anatomie wie die
+         Problemzeilen im Kopf-Kasten (Icon + Text + Link), nur neutral —
+         Information, kein Alarm. -->
+    <v-card v-if="running.length > 0" variant="outlined" class="mt-3">
+      <v-list density="compact" class="py-1">
+        <v-list-item v-for="row in running" :key="row.event.id" to="/actions/bookings" lines="one">
+          <template #prepend>
+            <v-icon class="text-medium-emphasis">{{ mdiCalendar }}</v-icon>
+          </template>
+          <v-list-item-title>{{ row.event.name }}: {{ row.text }}</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-card>
   </div>
 </template>
