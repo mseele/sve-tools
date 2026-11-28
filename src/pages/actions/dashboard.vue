@@ -17,11 +17,39 @@ import {
 import { mdiRefresh } from '@mdi/js'
 import { useHead } from '@unhead/vue'
 import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { demoEvents, demoUnpaid } from '@/components/dashboard/prototype/prototypeData'
 
 const title = 'Dashboard'
 useHead({ title })
 
 const notify = useNotifyStore()
+
+const route = useRoute()
+const router = useRouter()
+
+// PROTOTYPE: Varianten nur im Dev-Build, schaltbar via ?variant=A|B|C.
+const prototypeEnabled = import.meta.env.DEV
+const prototypeVariants = [
+  { key: '', label: 'Aktueller Stand (PR #200)' },
+  { key: 'A', label: 'Kampagnen-Karten' },
+  { key: 'B', label: 'Verdichtete Tabelle' },
+  { key: 'C', label: 'Einnahmen zuerst' }
+]
+
+const variant = computed<string>(() => {
+  if (!prototypeEnabled) return ''
+  const raw = route.query.variant
+  const key = Array.isArray(raw) ? raw[0] : raw
+  return key === 'A' || key === 'B' || key === 'C' ? key : ''
+})
+
+function selectVariant(key: string) {
+  const query = { ...route.query }
+  if (key) query.variant = key
+  else delete query.variant
+  router.replace({ query })
+}
 
 const eventsStatus = ref<FetchStatus>('loading')
 const unpaidStatus = ref<FetchStatus>('loading')
@@ -53,6 +81,18 @@ const loading = computed(
     eventsStatus.value === 'loading' ||
     unpaidStatus.value === 'loading' ||
     newsletterStatus.value === 'loading'
+)
+
+// PROTOTYPE: Demo-Fixtures, wenn im Varianten-Modus echte Daten fehlen.
+const protoActive = computed(() => prototypeEnabled && variant.value !== '')
+const protoDemo = computed(
+  () =>
+    protoActive.value &&
+    (eventsStatus.value !== 'ok' || unpaidStatus.value !== 'ok' || events.value.length === 0)
+)
+const protoEvents = computed(() => (protoDemo.value ? demoEvents(fetchedAt.value) : events.value))
+const protoUnpaid = computed(() =>
+  protoDemo.value ? demoUnpaid(fetchedAt.value) : unpaidBookings.value
 )
 
 onMounted(refresh)
@@ -145,23 +185,61 @@ async function loadNewsletterData() {
         </v-btn>
       </v-col>
     </v-row>
-    <KpiCards
-      :kpis="model.kpis"
+    <PrototypeVariantCards
+      v-if="variant === 'A'"
+      :events="protoEvents"
+      :unpaid-bookings="protoUnpaid"
+      :newsletter-subscribers="newsletterSubscribers"
       :events-status="eventsStatus"
       :unpaid-status="unpaidStatus"
-      :newsletter-status="newsletterStatus"
+      :now="fetchedAt"
+      :demo="protoDemo"
     />
-    <v-row dense class="mt-4">
-      <v-col cols="12" lg="6">
-        <FillList :fill="model.fill" :status="eventsStatus" />
-      </v-col>
-      <v-col cols="12" lg="6">
-        <AttentionList
-          :entries="model.attention"
-          :unpaid-status="unpaidStatus"
-          :events-status="eventsStatus"
-        />
-      </v-col>
-    </v-row>
+    <PrototypeVariantTable
+      v-else-if="variant === 'B'"
+      :events="protoEvents"
+      :unpaid-bookings="protoUnpaid"
+      :newsletter-subscribers="newsletterSubscribers"
+      :events-status="eventsStatus"
+      :unpaid-status="unpaidStatus"
+      :now="fetchedAt"
+      :demo="protoDemo"
+    />
+    <PrototypeVariantRevenue
+      v-else-if="variant === 'C'"
+      :events="protoEvents"
+      :unpaid-bookings="protoUnpaid"
+      :newsletter-subscribers="newsletterSubscribers"
+      :events-status="eventsStatus"
+      :unpaid-status="unpaidStatus"
+      :now="fetchedAt"
+      :demo="protoDemo"
+    />
+    <template v-else>
+      <KpiCards
+        :kpis="model.kpis"
+        :events-status="eventsStatus"
+        :unpaid-status="unpaidStatus"
+        :newsletter-status="newsletterStatus"
+      />
+      <v-row dense class="mt-4">
+        <v-col cols="12" lg="6">
+          <FillList :fill="model.fill" :status="eventsStatus" />
+        </v-col>
+        <v-col cols="12" lg="6">
+          <AttentionList
+            :entries="model.attention"
+            :unpaid-status="unpaidStatus"
+            :events-status="eventsStatus"
+          />
+        </v-col>
+      </v-row>
+    </template>
+    <PrototypeSwitcher
+      v-if="prototypeEnabled"
+      :variants="prototypeVariants"
+      :current="variant"
+      @select="selectVariant"
+    />
   </ActionsLayout>
 </template>

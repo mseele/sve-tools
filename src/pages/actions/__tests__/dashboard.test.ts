@@ -169,7 +169,11 @@ function mockHappyApi() {
   })
 }
 
-function mountDashboard(): { wrapper: VueWrapper; pinia: Pinia; router: Router } {
+async function mountDashboard(path = '/actions/dashboard'): Promise<{
+  wrapper: VueWrapper
+  pinia: Pinia
+  router: Router
+}> {
   const pinia = createPinia()
   const router = createRouter({
     history: createMemoryHistory(),
@@ -182,6 +186,7 @@ function mountDashboard(): { wrapper: VueWrapper; pinia: Pinia; router: Router }
       { path: '/actions/newsletter', component: { template: '<div />' } }
     ]
   })
+  await router.push(path)
   const vuetify = createVuetify({
     components: vuetifyComponents,
     directives: vuetifyDirectives,
@@ -206,7 +211,7 @@ describe('dashboard page', () => {
   it('renders all three zones from the model', async () => {
     mockHappyApi()
 
-    const { wrapper } = mountDashboard()
+    const { wrapper } = await mountDashboard()
     await flushPromises()
 
     const text = wrapper.text()
@@ -241,7 +246,7 @@ describe('dashboard page', () => {
     vi.mocked(getUnpaidBookings).mockRejectedValue(new Error('Backend nicht erreichbar'))
     vi.mocked(getNewsletterSubscribers).mockResolvedValue([])
 
-    const { wrapper, pinia } = mountDashboard()
+    const { wrapper, pinia } = await mountDashboard()
     await flushPromises()
 
     const notify = useNotifyStore(pinia)
@@ -255,5 +260,74 @@ describe('dashboard page', () => {
     expect(text).toContain('Rückenfitness')
     expect(text).toContain('3')
     expect(text).toContain('Laufend Alt')
+  })
+})
+
+describe('dashboard prototype variants', () => {
+  it('variant A renders campaign cards for promoted events', async () => {
+    mockHappyApi()
+
+    const { wrapper } = await mountDashboard('/actions/dashboard?variant=A')
+    await flushPromises()
+
+    const text = wrapper.text()
+    expect(text).toContain('2')
+    expect(text).toContain('beworben')
+    expect(text).toContain('Rückenfitness')
+    expect(text).toContain('startet in 7 Tagen')
+    expect(text).toContain('erwartet')
+    expect(text).toContain('bestätigt')
+    expect(text).toContain('Überweisung')
+    expect(text).toContain('Unbegrenzt')
+    expect(text).toContain('Braucht Aufmerksamkeit')
+    expect(text).not.toContain('endet heute')
+    expect(text).not.toContain('Demo-Daten')
+  })
+
+  it('variant B renders the dense matrix for promoted events', async () => {
+    mockHappyApi()
+
+    const { wrapper } = await mountDashboard('/actions/dashboard?variant=B')
+    await flushPromises()
+
+    const text = wrapper.text()
+    expect(text).toContain('2 beworbene Events')
+    expect(text).toContain('Rückenfitness')
+    expect(text).toContain('startet in 7 Tagen')
+    expect(text).toContain('Erwartet')
+    expect(text).toContain('Zahlart')
+    expect(text).toContain('Trend')
+    expect(text).toContain('Braucht Aufmerksamkeit')
+    expect(text).not.toContain('endet heute')
+  })
+
+  it('variant C renders the revenue-first aggregate', async () => {
+    mockHappyApi()
+
+    const { wrapper } = await mountDashboard('/actions/dashboard?variant=C')
+    await flushPromises()
+
+    const text = wrapper.text()
+    expect(text).toContain('Erwartete Einnahmen')
+    expect(text).toContain('Nach Event')
+    expect(text).toContain('Rückenfitness')
+    expect(text).toContain('bestätigt')
+    expect(text).toContain('SEPA-Lastschrift')
+    expect(text).toContain('Überweisung')
+    expect(text).toContain('Braucht Aufmerksamkeit')
+  })
+
+  it('falls back to demo fixtures when the events endpoint fails', async () => {
+    vi.mocked(loadEvents).mockRejectedValue(new Error('Backend nicht erreichbar'))
+    vi.mocked(getUnpaidBookings).mockResolvedValue([])
+    vi.mocked(getNewsletterSubscribers).mockResolvedValue([])
+
+    const { wrapper } = await mountDashboard('/actions/dashboard?variant=A')
+    await flushPromises()
+
+    const text = wrapper.text()
+    expect(text).toContain('Demo-Daten')
+    expect(text).toContain('Pilates Frühjahr')
+    expect(text).toContain('endet in 3 Tagen')
   })
 })
