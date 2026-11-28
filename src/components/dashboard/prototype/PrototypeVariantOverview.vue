@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// PROTOTYPE Variante E v4 — Karten sind der Hauptinhalt.
+// PROTOTYPE Variante E v5 — Karten sind der Hauptinhalt.
 //
 // UX-Grundlage weiterhin Few (Monitoring-Sequenz), NN/g (Farbe nur als
 // Ausnahme-Signal), PatternFly (Ausnahmen nur wenn > 0), Turas/REN
@@ -34,6 +34,7 @@ import {
   type EventAvailability
 } from '@/dashboard/model'
 import { formatIsoDay, formatPrice } from '@/utils'
+import { mdiBellOutline, mdiCalendarRemove } from '@mdi/js'
 import { PaymentMethod as PM, type Event } from '@/types'
 
 interface CampaignCard {
@@ -158,35 +159,51 @@ const running = computed<RunningRow[]>(() =>
 
 <template>
   <div>
-    <p v-if="props.demo" class="text-caption text-medium-emphasis mb-1">
-      Demo-Daten (Stand v4) — der echte Endpunkt liefert gerade nichts.
+    <p v-if="props.demo" class="text-caption text-medium-emphasis mb-2">
+      Demo-Daten (Stand v5) — der echte Endpunkt liefert gerade nichts.
     </p>
 
-    <!-- Statuswerte: Plus/Minus als ausgerichtete Zahl-Label-Paare —
-         leichter zu scannen als Fließtext, klein genug, um die Karten
-         nicht zu verdrängen. Probleme folgen direkt darunter. -->
-    <div v-if="cards.length > 0" class="d-flex flex-wrap ga-6 mb-2">
-      <div v-for="stat in stats" :key="stat.label">
-        <div class="text-h6">{{ stat.value }}</div>
-        <div class="text-caption text-medium-emphasis">{{ stat.label }}</div>
-      </div>
-    </div>
-    <p v-else class="text-body-2 text-medium-emphasis mb-1">Keine beworbenen Events</p>
-
-    <!-- Echte Probleme, rot, nur wenn es sie gibt. -->
-    <router-link
-      v-for="entry in problems"
-      :key="problemKey(entry)"
-      :to="entry.link"
-      class="d-block text-body-2 text-error text-decoration-none mb-1"
-    >
-      {{ problemText(entry) }}
-    </router-link>
+    <!-- Kopf-Kasten: Statuswerte mit Separatoren, darunter — nur wenn
+         vorhanden — die Probleme als ausgerichtete Liste. -->
+    <v-card v-if="cards.length > 0 || problems.length > 0" variant="outlined" class="mb-3">
+      <v-card-text v-if="cards.length > 0" class="pb-2">
+        <div class="d-flex flex-wrap align-center">
+          <template v-for="(stat, i) in stats" :key="stat.label">
+            <v-divider v-if="i > 0" vertical class="mx-4 my-1 align-self-stretch" />
+            <div>
+              <div class="text-h6">{{ stat.value }}</div>
+              <div class="text-caption text-medium-emphasis">{{ stat.label }}</div>
+            </div>
+          </template>
+        </div>
+      </v-card-text>
+      <template v-if="problems.length > 0">
+        <v-divider v-if="cards.length > 0" class="mx-4" />
+        <v-list density="compact" class="py-1">
+          <v-list-item
+            v-for="entry in problems"
+            :key="problemKey(entry)"
+            :to="entry.link"
+            lines="one"
+          >
+            <template #prepend>
+              <v-icon color="error">
+                {{ entry.kind === 'unpaid_booking' ? mdiBellOutline : mdiCalendarRemove }}
+              </v-icon>
+            </template>
+            <v-list-item-title class="text-error font-weight-medium">
+              {{ problemText(entry) }}
+            </v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </template>
+    </v-card>
+    <p v-else class="text-body-2 text-medium-emphasis mb-2">Keine beworbenen Events</p>
 
     <!-- Hauptinhalt: eine einheitliche Karte pro Event — gleiche Anatomie,
          gleiche Positionen, gleiche Größen. Sortiert nach Startdatum. -->
     <template v-if="cards.length > 0">
-      <v-row dense>
+      <v-row density="compact">
         <v-col v-for="card in cards" :key="card.event.id" cols="12" sm="6" lg="4">
           <v-card variant="outlined" to="/actions/bookings" class="fill-height">
             <v-card-item>
