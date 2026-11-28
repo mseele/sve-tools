@@ -11,10 +11,12 @@ bun run build-only   # build only
 bun run type-check
 bun run lint         # oxlint
 bun run format       # oxfmt
+bun run test         # vitest
 bun run release      # version bump
 ```
 
-No test framework configured; use Vitest if adding tests.
+Tests use Vitest. Test files live in `src/**/__tests__/` (excluded from the app
+type-check) and run against `vitest.config.ts`.
 
 ## Style
 
