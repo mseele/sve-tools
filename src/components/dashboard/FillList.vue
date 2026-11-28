@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { EventFillEntry, EventPhase } from '@/dashboard/model'
-import { format, parseISO } from 'date-fns'
 import type { FetchStatus } from '@/types'
+import { formatIsoDay } from '@/utils'
 
 const props = defineProps<{
   fill: EventFillEntry[]
@@ -13,10 +13,6 @@ const phaseColors: Record<EventPhase, string> = {
   Subscribing: 'success',
   WaitingList: 'warning',
   FullyBooked: 'error'
-}
-
-function formatDate(date: string) {
-  return format(parseISO(date.slice(0, 10)), 'dd-MM-yyyy')
 }
 </script>
 
@@ -42,7 +38,7 @@ function formatDate(date: string) {
               {{ entry.name }}
             </v-list-item-title>
             <v-list-item-subtitle>
-              Nächster Termin: {{ formatDate(entry.nextDate) }}
+              Nächster Termin: {{ formatIsoDay(entry.nextDate) }}
             </v-list-item-subtitle>
             <template v-slot:append>
               <div class="d-flex align-center flex-column ga-1">

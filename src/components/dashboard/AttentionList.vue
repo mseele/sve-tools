@@ -4,9 +4,8 @@ import type {
   StragglerAttentionEntry,
   UnpaidAttentionEntry
 } from '@/dashboard/model'
-import { format, parseISO } from 'date-fns'
 import { computed } from 'vue'
-import { formatPrice } from '@/utils'
+import { formatIsoDay, formatPrice } from '@/utils'
 import type { FetchStatus } from '@/types'
 import { mdiBellOutline, mdiCalendarRemove } from '@mdi/js'
 
@@ -26,7 +25,7 @@ const stragglers = computed(() =>
   )
 )
 
-const nothingToDo = computed(
+const nothingPending = computed(
   () =>
     props.unpaidStatus === 'ok' &&
     props.eventsStatus === 'ok' &&
@@ -45,10 +44,6 @@ function dueText(entry: UnpaidAttentionEntry) {
     return 'morgen fällig'
   }
   return `in ${entry.dueInDays} Tagen fällig`
-}
-
-function formatDate(date: string) {
-  return format(parseISO(date.slice(0, 10)), 'dd-MM-yyyy')
 }
 </script>
 
@@ -101,7 +96,7 @@ function formatDate(date: string) {
               <v-icon color="warning">{{ mdiCalendarRemove }}</v-icon>
             </template>
             <v-list-item-title>
-              {{ entry.eventName }} (letzter Termin {{ formatDate(entry.lastDate) }})
+              {{ entry.eventName }} (letzter Termin {{ formatIsoDay(entry.lastDate) }})
             </v-list-item-title>
             <v-list-item-subtitle>
               {{ entry.hint }}
@@ -109,7 +104,7 @@ function formatDate(date: string) {
           </v-list-item>
         </v-list>
 
-        <p v-if="nothingToDo" class="text-h6 text-medium-emphasis mb-0">
+        <p v-if="nothingPending" class="text-h6 text-medium-emphasis mb-0">
           Nichts braucht Aufmerksamkeit
         </p>
       </template>
