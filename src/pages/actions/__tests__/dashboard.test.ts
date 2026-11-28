@@ -131,6 +131,7 @@ function fitnessUnpaid(): UnpaidBooking[] {
   return [
     makeUnpaid({
       booking_id: 'b-1',
+      event_id: 'e-ruecken',
       first_name: 'Max',
       last_name: 'Mahnung',
       due_in_days: -3,
@@ -138,6 +139,7 @@ function fitnessUnpaid(): UnpaidBooking[] {
     }),
     makeUnpaid({
       booking_id: 'b-2',
+      event_id: 'e-ruecken',
       first_name: 'Nur',
       last_name: 'Zukunft',
       due_in_days: 5
@@ -149,6 +151,7 @@ function eventsUnpaid(): UnpaidBooking[] {
   return [
     makeUnpaid({
       booking_id: 'b-3',
+      event_id: 'e-weihnachten',
       event_name: 'Weihnachtsfeier',
       first_name: 'Erika',
       last_name: 'Bald',
@@ -354,6 +357,8 @@ describe('dashboard prototype variants', () => {
     expect(text).toContain('startet in 7 Tagen')
     expect(text).toContain('Weihnachtsfeier')
     expect(text).toContain('3 / ∞')
+    expect(text).toContain('2 WL')
+    expect(text).toContain('1 überfällig')
     expect(text).not.toContain('Braucht Aufmerksamkeit')
     expect(text).not.toContain('endet heute')
     expect(text).not.toContain('Demo-Daten')

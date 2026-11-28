@@ -1,17 +1,13 @@
 <script setup lang="ts">
-// PROTOTYPE Variante E v7 — Karten sind der Hauptinhalt.
+// PROTOTYPE Variante E v8 — Karten sind der Hauptinhalt.
 //
 // UX-Grundlage weiterhin Few (Monitoring-Sequenz), NN/g (Farbe nur als
-// Ausnahme-Signal), PatternFly (Ausnahmen nur wenn > 0), Turas/REN
-// (Zusammenfassung vor Detail). Vor den Karten steht jetzt nur das
-// Nötigste: ausgerichtete Statuswerte (Plus/Minus) und — nur wenn
-// vorhanden —
-// rote, verlinkte Problemzeilen. Der SEPA/Überweisungs-Split, die
-// Überfälligkeitszahl und der Kurven-Hinweis leben auf den Karten
-// bzw. im Tooltip statt als Textblock oben. Unbegrenzte Events bekommen
-// einen statischen Schraffur-Balken (keine Animation) in demselben Slot
-// wie die Auslastungsbalken, die Buchungszahl in derselben «X / Y»-Form
-// mit ∞ als Obergrenze.
+// Ausnahme-Signal), PatternFly (Ausnahmen nur wenn > 0). Jede Karte
+// folgt einer festen Bänderung: Identität + Zeit (Titelzeile),
+// Auslastung (Balken + X / Y), Geld (drei ausgerichtete Wert-Label-
+// Paare wie im Kopf-Kasten, Überfälliges rot im offen-Label), Fußzeile
+// (Zahlart · SEPA-Export links, Buchungs-Kurve rechts). Unbegrenzte
+// Events: statischer Schraffur-Balken, X / ∞ in derselben Form.
 import { computed } from 'vue'
 import type { PrototypeProps } from './prototypeData'
 import {
@@ -41,6 +37,7 @@ interface CampaignCard {
   event: Event
   startDays: number
   startText: string
+  terms: number
   avail: EventAvailability
   money: EventMoney
   trend: number[]
@@ -92,6 +89,7 @@ const cards = computed<CampaignCard[]>(() =>
         event,
         startDays,
         startText: start === undefined ? '' : countdown(Math.max(0, startDays), 'startet').text,
+        terms: event.custom_date ? 1 : event.dates.length,
         avail: readEventAvailability(event),
         money: eventMoney(event),
         trend: enrollmentTrend(event, props.now),
@@ -167,7 +165,7 @@ const running = computed<RunningRow[]>(() =>
 <template>
   <div>
     <p v-if="props.demo" class="text-caption text-medium-emphasis mb-2">
-      Demo-Daten (Stand v7) — der echte Endpunkt liefert gerade nichts.
+      Demo-Daten (Stand v8) — der echte Endpunkt liefert gerade nichts.
     </p>
 
     <!-- Kopf-Kasten: Statuswerte mit Separatoren, darunter — nur wenn
@@ -239,7 +237,10 @@ const running = computed<RunningRow[]>(() =>
                   {{ card.startText }}
                 </span>
               </template>
-              <v-card-subtitle class="pl-0">{{ card.event.type }}</v-card-subtitle>
+              <v-card-subtitle class="pl-0">
+                {{ card.event.type
+                }}<template v-if="card.terms > 1"> · {{ card.terms }} Termine</template>
+              </v-card-subtitle>
             </v-card-item>
             <v-card-text class="pt-0">
               <div class="d-flex align-center ga-3 mb-2">
@@ -281,30 +282,54 @@ const running = computed<RunningRow[]>(() =>
                 </template>
               </div>
 
-              <div class="d-flex align-baseline flex-wrap ga-2">
-                <span class="text-h6">{{ euro(card.money.expected) }}</span>
-                <span class="text-body-2 text-medium-emphasis">
-                  <template v-if="card.money.open > 0">
-                    {{ euro(card.money.confirmed) }} bestätigt · {{ euro(card.money.open) }} offen ·
-                    {{ methodLabel(card.money.method)
-                    }}<template v-if="card.money.sepaNotExported > 0">
-                      · {{ card.money.sepaNotExported }} n. exportiert</template
-                    >
-                  </template>
-                  <template v-else>komplett bezahlt</template>
-                </span>
-                <span v-if="card.overdue > 0" class="text-body-2 text-error font-weight-medium">
-                  {{ card.overdue }} überfällig
-                </span>
+              <!-- Geld: dieselben ausgerichteten Wert-Label-Paare wie im
+                   Kopf-Kasten, gleiche Reihenfolge erwartet → bestätigt →
+                   offen. Überfällige Zahlungen sind das einzige Rot,
+                   direkt im Label unter offen. -->
+              <div class="d-flex flex-wrap align-center">
+                <div>
+                  <div class="text-body-1 font-weight-medium">{{ euro(card.money.expected) }}</div>
+                  <div class="text-caption text-medium-emphasis">erwartet</div>
+                </div>
+                <v-divider vertical class="mx-3 my-1 align-self-stretch" />
+                <div>
+                  <div class="text-body-1 font-weight-medium">
+                    {{ euro(card.money.confirmed) }}
+                  </div>
+                  <div class="text-caption text-medium-emphasis">bestätigt</div>
+                </div>
+                <v-divider vertical class="mx-3 my-1 align-self-stretch" />
+                <div>
+                  <div class="text-body-1 font-weight-medium">{{ euro(card.money.open) }}</div>
+                  <div class="text-caption text-medium-emphasis">
+                    offen<template v-if="card.overdue > 0">
+                      <span class="text-error font-weight-medium">
+                        · {{ card.overdue }} überfällig</span
+                      >
+                    </template>
+                  </div>
+                </div>
               </div>
 
-              <div class="mt-2 d-flex align-center" title="Buchungen der letzten 8 Wochen">
-                <PrototypeTrend
-                  :values="card.trend"
-                  :width="130"
-                  :height="22"
-                  color="rgba(0, 0, 0, 0.25)"
-                />
+              <!-- Fußzeile: Zahlart (+ SEPA-Export-Rückstand) links,
+                   Buchungs-Kurve rechts — fester Slot auf jeder Karte. -->
+              <v-divider class="mt-3 mb-2" />
+              <div class="d-flex align-center">
+                <span class="text-caption text-medium-emphasis">
+                  {{ methodLabel(card.money.method)
+                  }}<template v-if="card.money.sepaNotExported > 0">
+                    · {{ card.money.sepaNotExported }} n. exportiert</template
+                  >
+                </span>
+                <v-spacer />
+                <div title="Buchungen der letzten 8 Wochen">
+                  <PrototypeTrend
+                    :values="card.trend"
+                    :width="110"
+                    :height="18"
+                    color="rgba(0, 0, 0, 0.25)"
+                  />
+                </div>
               </div>
             </v-card-text>
           </v-card>
