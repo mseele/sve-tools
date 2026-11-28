@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// PROTOTYPE Variante E v6 — Karten sind der Hauptinhalt.
+// PROTOTYPE Variante E v7 — Karten sind der Hauptinhalt.
 //
 // UX-Grundlage weiterhin Few (Monitoring-Sequenz), NN/g (Farbe nur als
 // Ausnahme-Signal), PatternFly (Ausnahmen nur wenn > 0), Turas/REN
@@ -30,10 +30,10 @@ import {
 import {
   deriveDashboardModel,
   readEventAvailability,
-  type AttentionEntry,
-  type EventAvailability
+  type EventAvailability,
+  type StragglerAttentionEntry
 } from '@/dashboard/model'
-import { formatIsoDay, formatPrice } from '@/utils'
+import { formatIsoDay } from '@/utils'
 import { mdiBellOutline, mdiCalendarRemove } from '@mdi/js'
 import { PaymentMethod as PM, type Event } from '@/types'
 
@@ -120,25 +120,32 @@ const stats = computed<StatusValue[]>(() => [
   { value: euro(money.value.open), label: 'offen' }
 ])
 
-// Echte Probleme für den roten Block: überfällige Zahlungen und
-// abgelaufene laufende Events. Noch nicht fällige offene Zahlungen sind
-// Information auf den Karten, kein Alarm hier.
-const problems = computed(() =>
-  model.value.attention.filter((entry) =>
-    entry.kind === 'unpaid_booking' ? entry.dueInDays < 0 : true
+// Überfällige Zahlungen nur als Zählzeile — bei 10, 20 Stück wäre eine
+// Einzelliste zu lang. Details stehen im Zahlungen-Tab.
+const overdue = computed(() => {
+  let count = 0
+  let total = 0
+  for (const list of Object.values(props.unpaidBookings)) {
+    for (const booking of list) {
+      if (booking.due_in_days < 0) {
+        count += 1
+        total += parseFloat(booking.price) || 0
+      }
+    }
+  }
+  return { count, total }
+})
+
+// Straggler einzeln: laufende Events mit zurückliegendem Termin müssen
+// je Event abgeschlossen werden. Noch nicht fällige offene Zahlungen
+// sind Information auf den Karten, kein Alarm hier.
+const stragglers = computed(() =>
+  model.value.attention.filter(
+    (entry): entry is StragglerAttentionEntry => entry.kind === 'lifecycle_straggler'
   )
 )
 
-function problemKey(entry: AttentionEntry): string {
-  return entry.kind === 'unpaid_booking' ? entry.bookingId : entry.eventId
-}
-
-function problemText(entry: AttentionEntry): string {
-  if (entry.kind === 'unpaid_booking') {
-    const due = entry.dueInDays === -1 ? '1 Tag überfällig' : `${-entry.dueInDays} Tage überfällig`
-    const base = `${entry.name} — ${entry.eventName}: ${due} (${formatPrice(entry.price)})`
-    return entry.reminderSent ? `${base} · Erinnerung gesendet` : base
-  }
+function stragglerText(entry: StragglerAttentionEntry): string {
   return `${entry.eventName}: letzter Termin ${formatIsoDay(entry.lastDate)} — abschließen`
 }
 
@@ -160,12 +167,16 @@ const running = computed<RunningRow[]>(() =>
 <template>
   <div>
     <p v-if="props.demo" class="text-caption text-medium-emphasis mb-2">
-      Demo-Daten (Stand v6) — der echte Endpunkt liefert gerade nichts.
+      Demo-Daten (Stand v7) — der echte Endpunkt liefert gerade nichts.
     </p>
 
     <!-- Kopf-Kasten: Statuswerte mit Separatoren, darunter — nur wenn
          vorhanden — die Probleme als ausgerichtete Liste. -->
-    <v-card v-if="cards.length > 0 || problems.length > 0" variant="outlined" class="mb-3">
+    <v-card
+      v-if="cards.length > 0 || stragglers.length > 0 || overdue.count > 0"
+      variant="outlined"
+      class="mb-3"
+    >
       <v-card-text v-if="cards.length > 0" class="pb-2">
         <div class="d-flex flex-wrap align-center">
           <template v-for="(stat, i) in stats" :key="stat.label">
@@ -177,22 +188,30 @@ const running = computed<RunningRow[]>(() =>
           </template>
         </div>
       </v-card-text>
-      <template v-if="problems.length > 0">
+      <template v-if="overdue.count > 0 || stragglers.length > 0">
         <v-divider v-if="cards.length > 0" class="mx-4" />
         <v-list density="compact" class="py-1">
+          <v-list-item v-if="overdue.count > 0" to="/actions/payments" lines="one">
+            <template #prepend>
+              <v-icon color="error">{{ mdiBellOutline }}</v-icon>
+            </template>
+            <v-list-item-title class="text-error font-weight-medium">
+              {{ overdue.count }}
+              {{ overdue.count === 1 ? 'überfällige Zahlung' : 'überfällige Zahlungen' }}
+              ({{ euro(overdue.total) }})
+            </v-list-item-title>
+          </v-list-item>
           <v-list-item
-            v-for="entry in problems"
-            :key="problemKey(entry)"
+            v-for="entry in stragglers"
+            :key="entry.eventId"
             :to="entry.link"
             lines="one"
           >
             <template #prepend>
-              <v-icon color="error">
-                {{ entry.kind === 'unpaid_booking' ? mdiBellOutline : mdiCalendarRemove }}
-              </v-icon>
+              <v-icon color="error">{{ mdiCalendarRemove }}</v-icon>
             </template>
             <v-list-item-title class="text-error font-weight-medium">
-              {{ problemText(entry) }}
+              {{ stragglerText(entry) }}
             </v-list-item-title>
           </v-list-item>
         </v-list>
