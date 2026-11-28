@@ -61,7 +61,7 @@ JWT in `localStorage`. Router redirects to `/` when unauthenticated.
 
 ### Issue tracker
 
-Issues live as GitHub issues in `mseele/sve-tools`; external PRs are **not** a triage surface. See `docs/agents/issue-tracker.md`.
+Issues live as GitHub issues in `mseele/sve-tools`, managed via the `gh` CLI; external PRs are **not** a triage surface. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
