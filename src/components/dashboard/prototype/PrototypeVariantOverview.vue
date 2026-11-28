@@ -8,8 +8,9 @@
 // Geldwerte erwartet/bestätigt/offen. Jede Karte folgt einer festen
 // Bänderung: Identität + Zeit (Titelzeile), Auslastung (Balken +
 // X / Y), Geld (drei ausgerichtete Wert-Label-Paare, Überfälliges rot
-// im offen-Label), Fußzeile (Zahlart · SEPA-Export links, Buchungs-
-// Kurve rechts). Unbegrenzte Events: statischer Schraffur-Balken,
+// im offen-Label), Fußzeile (Zahlart · SEPA-Export-Rückstand; keine
+// Kurven-Grafik — Charts sind laut Research Detailseiten-Material).
+// Unbegrenzte Events: statischer Schraffur-Balken,
 // X / ∞ in derselben Form.
 import { computed } from 'vue'
 import type { PrototypeProps } from './prototypeData'
@@ -17,7 +18,6 @@ import {
   countdown,
   dayDiff,
   endsOn,
-  enrollmentTrend,
   euro,
   eventMoney,
   isPromoted,
@@ -43,7 +43,6 @@ interface CampaignCard {
   terms: number
   avail: EventAvailability
   money: EventMoney
-  trend: number[]
   overdue: number
 }
 
@@ -95,7 +94,6 @@ const cards = computed<CampaignCard[]>(() =>
         terms: event.custom_date ? 1 : event.dates.length,
         avail: readEventAvailability(event),
         money: eventMoney(event),
-        trend: enrollmentTrend(event, props.now),
         overdue: overdueByEvent.value.get(event.id) ?? 0
       }
     })
@@ -326,26 +324,15 @@ const running = computed<RunningRow[]>(() =>
                 </div>
               </div>
 
-              <!-- Fußzeile: Zahlart (+ SEPA-Export-Rückstand) links,
-                   Buchungs-Kurve rechts — fester Slot auf jeder Karte. -->
+              <!-- Fußzeile: Zahlart (+ SEPA-Export-Rückstand) — fester
+                   Slot auf jeder Karte. -->
               <v-divider class="mt-3 mb-2" />
-              <div class="d-flex align-center">
-                <span class="text-caption text-medium-emphasis">
-                  {{ methodLabel(card.money.method)
-                  }}<template v-if="card.money.sepaNotExported > 0">
-                    · {{ card.money.sepaNotExported }} n. exportiert</template
-                  >
-                </span>
-                <v-spacer />
-                <div title="Buchungen der letzten 8 Wochen">
-                  <PrototypeTrend
-                    :values="card.trend"
-                    :width="110"
-                    :height="18"
-                    color="rgba(0, 0, 0, 0.25)"
-                  />
-                </div>
-              </div>
+              <span class="text-caption text-medium-emphasis">
+                {{ methodLabel(card.money.method)
+                }}<template v-if="card.money.sepaNotExported > 0">
+                  · {{ card.money.sepaNotExported }} n. exportiert</template
+                >
+              </span>
             </v-card-text>
           </v-card>
         </v-col>
