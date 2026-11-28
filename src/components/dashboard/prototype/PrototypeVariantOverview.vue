@@ -159,7 +159,7 @@ const running = computed<RunningRow[]>(() =>
 <template>
   <div>
     <p v-if="props.demo" class="text-caption text-medium-emphasis mb-1">
-      Demo-Daten — der echte Endpunkt liefert gerade nichts.
+      Demo-Daten (Stand v4) — der echte Endpunkt liefert gerade nichts.
     </p>
 
     <!-- Statuswerte: Plus/Minus als ausgerichtete Zahl-Label-Paare —
