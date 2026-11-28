@@ -317,6 +317,23 @@ describe('dashboard prototype variants', () => {
     expect(text).toContain('Braucht Aufmerksamkeit')
   })
 
+  it('variant D renders hero and compact pipeline rows', async () => {
+    mockHappyApi()
+
+    const { wrapper } = await mountDashboard('/actions/dashboard?variant=D')
+    await flushPromises()
+
+    const text = wrapper.text()
+    expect(text).toContain('Braucht Aufmerksamkeit')
+    expect(text).toContain('Rückenfitness')
+    expect(text).toContain('startet in 7 Tagen')
+    expect(text).toContain('Weihnachtsfeier')
+    expect(text).toContain('Unbegrenzt')
+    expect(text).toContain('offen')
+    expect(text).not.toContain('endet heute')
+    expect(text).not.toContain('Demo-Daten')
+  })
+
   it('falls back to demo fixtures when the events endpoint fails', async () => {
     vi.mocked(loadEvents).mockRejectedValue(new Error('Backend nicht erreichbar'))
     vi.mocked(getUnpaidBookings).mockResolvedValue([])

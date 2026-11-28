@@ -38,14 +38,15 @@ const prototypeVariants = [
   { key: '', label: 'Aktueller Stand (PR #200)' },
   { key: 'A', label: 'Kampagnen-Karten' },
   { key: 'B', label: 'Verdichtete Tabelle' },
-  { key: 'C', label: 'Einnahmen zuerst' }
+  { key: 'C', label: 'Einnahmen zuerst' },
+  { key: 'D', label: 'Fokus-Pipeline' }
 ]
 
 const variant = computed<string>(() => {
   if (!prototypeEnabled) return ''
   const raw = route.query.variant
   const key = Array.isArray(raw) ? raw[0] : raw
-  return key === 'A' || key === 'B' || key === 'C' ? key : ''
+  return typeof key === 'string' && ['A', 'B', 'C', 'D'].includes(key) ? key : ''
 })
 
 function selectVariant(key: string) {
@@ -232,6 +233,16 @@ async function loadNewsletterData() {
     />
     <PrototypeVariantRevenue
       v-else-if="variant === 'C'"
+      :events="protoEvents"
+      :unpaid-bookings="protoUnpaid"
+      :newsletter-subscribers="newsletterSubscribers"
+      :events-status="eventsStatus"
+      :unpaid-status="unpaidStatus"
+      :now="fetchedAt"
+      :demo="protoDemo"
+    />
+    <PrototypeVariantPipeline
+      v-else-if="variant === 'D'"
       :events="protoEvents"
       :unpaid-bookings="protoUnpaid"
       :newsletter-subscribers="newsletterSubscribers"

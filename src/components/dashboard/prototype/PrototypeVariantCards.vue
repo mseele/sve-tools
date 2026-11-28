@@ -1,7 +1,7 @@
 <script setup lang="ts">
-// PROTOTYPE Variante A — Kampagnen-Karten, geschärft.
-// Farbenregel: neutral für alles Informative, primary als einzige
-// Strukturfarbe, rot nur für offenes Geld — pro Karte höchstens ein Rot.
+// PROTOTYPE Variante A — Kampagnen-Karten, v3.
+// Farbenregel: rot nur für echte Probleme (Aufmerksamkeitsliste oben),
+// primary als einzige Strukturfarbe, Geld ist Information, kein Alarm.
 import { computed } from 'vue'
 import type { PrototypeProps } from './prototypeData'
 import {
@@ -91,20 +91,24 @@ const total = computed(() =>
       Demo-Daten — der echte Endpunkt liefert gerade nichts.
     </p>
 
-    <p v-if="rows.length > 0" class="text-body-2 text-medium-emphasis mb-2">
+    <!-- Probleme zuerst — das einzige Rot auf der Seite -->
+    <AttentionList
+      :entries="model.attention"
+      :unpaid-status="props.demo ? 'ok' : props.unpaidStatus"
+      :events-status="props.demo ? 'ok' : props.eventsStatus"
+    />
+
+    <p v-if="rows.length > 0" class="text-body-2 text-medium-emphasis mt-4 mb-2">
       <b class="text-high-emphasis">{{ rows.length }}</b> beworben · erwartet
       <b class="text-high-emphasis">{{ euro(total.expected) }}</b> · bestätigt
       <b class="text-high-emphasis">{{ euro(total.confirmed) }}</b
       ><template v-if="total.sepaOpen > 0">
         · SEPA offen <b class="text-high-emphasis">{{ euro(total.sepaOpen) }}</b></template
       ><template v-if="total.transferOpen > 0">
-        ·
-        <span class="text-error"
-          >Überweisung offen <b>{{ euro(total.transferOpen) }}</b></span
-        ></template
+        · Überweisung offen
+        <b class="text-high-emphasis">{{ euro(total.transferOpen) }}</b></template
       >
     </p>
-    <p v-else class="text-body-2 text-medium-emphasis mb-2">Keine beworbenen Events</p>
 
     <v-row dense>
       <v-col v-for="row in rows" :key="row.event.id" cols="12" sm="6" lg="4">
@@ -131,7 +135,7 @@ const total = computed(() =>
             </v-card-subtitle>
           </v-card-item>
           <v-card-text class="pt-0">
-            <div class="d-flex align-center mb-3">
+            <div class="d-flex align-center mb-2">
               <template v-if="row.avail.unlimited">
                 <span class="text-body-2 text-medium-emphasis">
                   Unbegrenzt · {{ row.avail.enrolled }} gebucht
@@ -154,26 +158,28 @@ const total = computed(() =>
               </template>
             </div>
 
-            <div class="d-flex align-baseline flex-wrap ga-2">
+            <div class="d-flex align-baseline ga-2">
               <span class="text-h6">{{ euro(row.money.expected) }}</span>
               <span class="text-body-2 text-medium-emphasis">erwartet</span>
-              <span
-                v-if="row.money.open > 0"
-                class="text-body-2 text-error font-weight-medium ml-auto"
-              >
-                {{ euro(row.money.open) }} offen
-              </span>
-              <span v-else class="text-body-2 text-medium-emphasis ml-auto">bezahlt</span>
             </div>
-            <div v-if="row.money.open > 0" class="text-body-2 text-medium-emphasis mt-1">
-              {{ methodLabel(row.money.method)
-              }}<template v-if="row.money.sepaNotExported > 0">
-                · {{ row.money.sepaNotExported }} noch nicht exportiert</template
-              >
+            <div class="text-body-2 text-medium-emphasis mt-1">
+              <template v-if="row.money.open > 0">
+                {{ euro(row.money.confirmed) }} bestätigt · {{ euro(row.money.open) }} offen ·
+                {{ methodLabel(row.money.method)
+                }}<template v-if="row.money.sepaNotExported > 0">
+                  · {{ row.money.sepaNotExported }} noch nicht exportiert</template
+                >
+              </template>
+              <template v-else>komplett bezahlt</template>
             </div>
 
             <div class="mt-3 d-flex align-center ga-2">
-              <PrototypeTrend :values="row.trend" :width="140" :height="24" />
+              <PrototypeTrend
+                :values="row.trend"
+                :width="140"
+                :height="24"
+                color="rgba(0, 0, 0, 0.25)"
+              />
               <span class="text-caption text-medium-emphasis">Buchungen (8 Wochen)</span>
             </div>
           </v-card-text>
@@ -191,11 +197,5 @@ const total = computed(() =>
         {{ r.end.text }}
       </template>
     </p>
-
-    <AttentionList
-      :entries="model.attention"
-      :unpaid-status="props.demo ? 'ok' : props.unpaidStatus"
-      :events-status="props.demo ? 'ok' : props.eventsStatus"
-    />
   </div>
 </template>
