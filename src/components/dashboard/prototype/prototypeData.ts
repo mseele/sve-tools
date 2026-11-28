@@ -101,10 +101,9 @@ export function countdown(
   days: number,
   verb: 'startet' | 'endet'
 ): { color: string; text: string } {
-  if (days <= 0) return { color: 'error', text: `${verb} heute` }
+  if (days <= 0) return { color: 'warning', text: `${verb} heute` }
   const text = `${verb} in ${days} ${days === 1 ? 'Tag' : 'Tagen'}`
-  if (days <= 7) return { color: 'warning', text }
-  if (days <= 21) return { color: 'info', text }
+  if (days <= 7) return { color: 'primary', text }
   return { color: 'default', text }
 }
 

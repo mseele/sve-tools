@@ -1,6 +1,7 @@
 <script setup lang="ts">
-// PROTOTYPE Variante A — Kampagnen-Karten: ein Karte pro beworbenem Event,
-// Countdown + Auslastung + Einnahmen + Zahlungsart + Buchungstrend im Fokus.
+// PROTOTYPE Variante A — Kampagnen-Karten, geschärft.
+// Farbenregel: neutral für alles Informative, primary als einzige
+// Strukturfarbe, rot nur für offenes Geld — pro Karte höchstens ein Rot.
 import { computed } from 'vue'
 import type { PrototypeProps } from './prototypeData'
 import {
@@ -26,6 +27,7 @@ import { PaymentMethod as PM, type Event } from '@/types'
 interface CardRow {
   event: Event
   start?: { color: string; text: string }
+  startDays?: number
   avail: EventAvailability
   money: EventMoney
   trend: number[]
@@ -47,22 +49,23 @@ const rows = computed<CardRow[]>(() =>
     .filter(isPromoted)
     .map((event) => {
       const start = startsOn(event, props.now)
+      const startDays = start === undefined ? undefined : dayDiff(start, props.now)
       return {
         event,
-        start: start ? countdown(dayDiff(start, props.now), 'startet') : undefined,
+        start: start === undefined ? undefined : countdown(startDays ?? 0, 'startet'),
+        startDays,
         avail: readEventAvailability(event),
         money: eventMoney(event),
         trend: enrollmentTrend(event, props.now)
       }
     })
-    .sort((a, b) => (a.start?.text ?? '').localeCompare(b.start?.text ?? ''))
+    .sort((a, b) => (a.startDays ?? 9999) - (b.startDays ?? 9999))
 )
 
 const running = computed(() =>
   props.events.filter(isRunning).flatMap((event) => {
+    // Abgelaufene laufende Events sind Straggler — Aufmerksamkeitsliste.
     const end = endsOn(event)
-    // Abgelaufene laufende Events sind Straggler — die stehen in der
-    // Aufmerksamkeitsliste, nicht im Countdown-Streifen.
     if (!end || dayDiff(end, props.now) < 0) return []
     return [{ event, end: countdown(dayDiff(end, props.now), 'endet') }]
   })
@@ -80,45 +83,28 @@ const total = computed(() =>
     { expected: 0, confirmed: 0, sepaOpen: 0, transferOpen: 0 }
   )
 )
-
-function fillColor(avail: EventAvailability): string {
-  if (avail.unlimited) return 'primary'
-  if (avail.waitingList > 0) return 'warning'
-  if ((avail.maxSubscribers ?? 0) <= avail.enrolled) return 'error'
-  return 'success'
-}
 </script>
 
 <template>
   <div>
-    <v-row v-if="props.demo" dense>
-      <v-col cols="12">
-        <v-chip size="small" color="secondary" variant="tonal">
-          Demo-Daten — echter Endpunkt liefert gerade nichts
-        </v-chip>
-      </v-col>
-    </v-row>
+    <p v-if="props.demo" class="text-caption text-medium-emphasis mb-2">
+      Demo-Daten — der echte Endpunkt liefert gerade nichts.
+    </p>
 
-    <v-row dense>
-      <v-col cols="12">
-        <v-chip-group>
-          <v-chip size="small"> <b>{{ rows.length }}</b>&nbsp;beworben </v-chip>
-          <v-chip size="small" color="primary" variant="tonal">
-            Erwartet&nbsp;<b>{{ euro(total.expected) }}</b>
-          </v-chip>
-          <v-chip size="small" color="success" variant="tonal">
-            Bestätigt&nbsp;<b>{{ euro(total.confirmed) }}</b>
-          </v-chip>
-          <v-chip v-if="total.sepaOpen > 0" size="small" color="primary">
-            SEPA offen&nbsp;<b>{{ euro(total.sepaOpen) }}</b>
-          </v-chip>
-          <v-chip v-if="total.transferOpen > 0" size="small" color="error">
-            Überweisung offen&nbsp;<b>{{ euro(total.transferOpen) }}</b>
-          </v-chip>
-          <v-chip size="small"> Warteliste&nbsp;<b>{{ model.kpis.waitingListTotal }}</b> </v-chip>
-        </v-chip-group>
-      </v-col>
-    </v-row>
+    <p v-if="rows.length > 0" class="text-body-2 text-medium-emphasis mb-2">
+      <b class="text-high-emphasis">{{ rows.length }}</b> beworben · erwartet
+      <b class="text-high-emphasis">{{ euro(total.expected) }}</b> · bestätigt
+      <b class="text-high-emphasis">{{ euro(total.confirmed) }}</b
+      ><template v-if="total.sepaOpen > 0">
+        · SEPA offen <b class="text-high-emphasis">{{ euro(total.sepaOpen) }}</b></template
+      ><template v-if="total.transferOpen > 0">
+        ·
+        <span class="text-error"
+          >Überweisung offen <b>{{ euro(total.transferOpen) }}</b></span
+        ></template
+      >
+    </p>
+    <p v-else class="text-body-2 text-medium-emphasis mb-2">Keine beworbenen Events</p>
 
     <v-row dense>
       <v-col v-for="row in rows" :key="row.event.id" cols="12" sm="6" lg="4">
@@ -128,60 +114,66 @@ function fillColor(avail: EventAvailability): string {
               {{ row.event.name }}
             </v-card-title>
             <template #append>
-              <v-chip v-if="row.start" size="small" :color="row.start.color">
+              <v-chip
+                v-if="row.start && (row.startDays ?? 99) <= 7"
+                size="x-small"
+                variant="tonal"
+                :color="row.start.color"
+              >
                 {{ row.start.text }}
               </v-chip>
             </template>
-            <v-card-subtitle class="pl-0">{{ row.event.type }}</v-card-subtitle>
+            <v-card-subtitle class="pl-0">
+              {{ row.event.type
+              }}<template v-if="row.start && (row.startDays ?? 99) > 7">
+                · {{ row.start.text }}</template
+              >
+            </v-card-subtitle>
           </v-card-item>
           <v-card-text class="pt-0">
-            <div class="d-flex align-center mb-1">
+            <div class="d-flex align-center mb-3">
               <template v-if="row.avail.unlimited">
-                <v-chip size="x-small" color="primary" variant="tonal">Unbegrenzt</v-chip>
-                <span class="ml-2 text-body-2">{{ row.avail.enrolled }} gebucht</span>
+                <span class="text-body-2 text-medium-emphasis">
+                  Unbegrenzt · {{ row.avail.enrolled }} gebucht
+                </span>
               </template>
               <template v-else>
                 <v-progress-linear
                   :model-value="row.avail.fillPercent"
-                  :color="fillColor(row.avail)"
-                  height="8"
+                  color="primary"
+                  height="6"
                   rounded
-                  class="flex-grow-1 mr-2"
+                  class="flex-grow-1 mr-3"
                 />
-                <span class="text-body-2 text-no-wrap">
-                  {{ row.avail.enrolled }} / {{ row.avail.maxSubscribers }}
-                  <span v-if="row.avail.waitingList > 0" class="text-warning">
-                    · {{ row.avail.waitingList }} WL
-                  </span>
+                <span class="text-body-2 text-no-wrap text-medium-emphasis">
+                  {{ row.avail.enrolled }} / {{ row.avail.maxSubscribers
+                  }}<template v-if="row.avail.waitingList > 0">
+                    · {{ row.avail.waitingList }} Warteliste</template
+                  >
                 </span>
               </template>
             </div>
 
-            <div class="d-flex align-baseline ga-2">
+            <div class="d-flex align-baseline flex-wrap ga-2">
               <span class="text-h6">{{ euro(row.money.expected) }}</span>
               <span class="text-body-2 text-medium-emphasis">erwartet</span>
-              <v-spacer />
-              <span class="text-body-2" :class="row.money.open > 0 ? 'text-error' : 'text-success'">
-                {{ euro(row.money.confirmed) }} bestätigt
-              </span>
-            </div>
-            <div v-if="row.money.open > 0" class="text-body-2 mt-1">
-              <v-chip
-                size="x-small"
-                :color="row.money.method === PM.SepaDirectDebit ? 'primary' : 'error'"
-                variant="tonal"
+              <span
+                v-if="row.money.open > 0"
+                class="text-body-2 text-error font-weight-medium ml-auto"
               >
-                {{ methodLabel(row.money.method) }}
-              </v-chip>
-              {{ euro(row.money.open) }} offen
-              <span v-if="row.money.sepaNotExported > 0" class="text-medium-emphasis">
-                · {{ row.money.sepaNotExported }} noch nicht exportiert
+                {{ euro(row.money.open) }} offen
               </span>
+              <span v-else class="text-body-2 text-medium-emphasis ml-auto">bezahlt</span>
             </div>
-            <div v-else class="text-body-2 text-success mt-1">alles bestätigt</div>
+            <div v-if="row.money.open > 0" class="text-body-2 text-medium-emphasis mt-1">
+              {{ methodLabel(row.money.method)
+              }}<template v-if="row.money.sepaNotExported > 0">
+                · {{ row.money.sepaNotExported }} noch nicht exportiert</template
+              >
+            </div>
 
             <div class="mt-3 d-flex align-center ga-2">
-              <PrototypeTrend :values="row.trend" :width="140" :height="26" />
+              <PrototypeTrend :values="row.trend" :width="140" :height="24" />
               <span class="text-caption text-medium-emphasis">Buchungen (8 Wochen)</span>
             </div>
           </v-card-text>
@@ -189,24 +181,16 @@ function fillColor(avail: EventAvailability): string {
       </v-col>
     </v-row>
 
-    <v-row v-if="running.length > 0" dense>
-      <v-col cols="12">
-        <v-card variant="tonal">
-          <v-card-text class="d-flex align-center flex-wrap ga-2">
-            <span class="text-body-2 font-weight-bold">Laufende Events:</span>
-            <v-chip
-              v-for="r in running"
-              :key="r.event.id"
-              size="small"
-              to="/actions/bookings"
-              :color="r.end?.color"
-            >
-              {{ r.event.name }} · {{ r.end?.text }}
-            </v-chip>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+    <p v-if="running.length > 0" class="text-body-2 text-medium-emphasis mt-2 mb-0">
+      <span class="font-weight-medium">Laufende Events:</span>
+      <template v-for="(r, i) in running" :key="r.event.id"
+        ><template v-if="i > 0"> · </template>
+        <router-link to="/actions/bookings" class="text-decoration-none">
+          {{ r.event.name }}
+        </router-link>
+        {{ r.end.text }}
+      </template>
+    </p>
 
     <AttentionList
       :entries="model.attention"
