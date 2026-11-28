@@ -4,12 +4,14 @@
 // UX-Grundlage weiterhin Few (Monitoring-Sequenz), NN/g (Farbe nur als
 // Ausnahme-Signal), PatternFly (Ausnahmen nur wenn > 0), Turas/REN
 // (Zusammenfassung vor Detail). Vor den Karten steht jetzt nur das
-// Nötigste: EINE Statuszeile (Plus/Minus) und — nur wenn vorhanden —
+// Nötigste: ausgerichtete Statuswerte (Plus/Minus) und — nur wenn
+// vorhanden —
 // rote, verlinkte Problemzeilen. Der SEPA/Überweisungs-Split, die
 // Überfälligkeitszahl und der Kurven-Hinweis leben auf den Karten
 // bzw. im Tooltip statt als Textblock oben. Unbegrenzte Events bekommen
 // einen statischen Schraffur-Balken (keine Animation) in demselben Slot
-// wie die Auslastungsbalken.
+// wie die Auslastungsbalken, die Buchungszahl in derselben «X / Y»-Form
+// mit ∞ als Obergrenze.
 import { computed } from 'vue'
 import type { PrototypeProps } from './prototypeData'
 import {
@@ -50,9 +52,9 @@ interface RunningRow {
   text: string
 }
 
-interface StatusPart {
-  text: string
-  emphasis: 'high' | 'medium'
+interface StatusValue {
+  value: string
+  label: string
 }
 
 const props = defineProps<PrototypeProps>()
@@ -110,13 +112,11 @@ const money = computed(() =>
   )
 )
 
-const statusParts = computed<StatusPart[]>(() => [
-  { text: `${cards.value.length} beworbene Events`, emphasis: 'medium' },
-  { text: `erwartet ${euro(money.value.expected)}`, emphasis: 'high' },
-  { text: `bestätigt ${euro(money.value.confirmed)}`, emphasis: 'high' },
-  money.value.open > 0
-    ? { text: `offen ${euro(money.value.open)}`, emphasis: 'high' }
-    : { text: 'komplett bestätigt', emphasis: 'medium' }
+const stats = computed<StatusValue[]>(() => [
+  { value: String(cards.value.length), label: 'beworbene Events' },
+  { value: euro(money.value.expected), label: 'erwartet' },
+  { value: euro(money.value.confirmed), label: 'bestätigt' },
+  { value: euro(money.value.open), label: 'offen' }
 ])
 
 // Echte Probleme für den roten Block: überfällige Zahlungen und
@@ -162,14 +162,15 @@ const running = computed<RunningRow[]>(() =>
       Demo-Daten — der echte Endpunkt liefert gerade nichts.
     </p>
 
-    <!-- Statuszeile: Plus/Minus in einer Zeile, direkt gefolgt von
-         Problemen (falls vorhanden) und den Karten. -->
-    <p v-if="cards.length > 0" class="text-body-2 mb-1">
-      <template v-for="(part, i) in statusParts" :key="`${i}-${part.text}`"
-        ><template v-if="i > 0"> · </template>
-        <span :class="part.emphasis === 'high' ? '' : 'text-medium-emphasis'">{{ part.text }}</span>
-      </template>
-    </p>
+    <!-- Statuswerte: Plus/Minus als ausgerichtete Zahl-Label-Paare —
+         leichter zu scannen als Fließtext, klein genug, um die Karten
+         nicht zu verdrängen. Probleme folgen direkt darunter. -->
+    <div v-if="cards.length > 0" class="d-flex flex-wrap ga-6 mb-2">
+      <div v-for="stat in stats" :key="stat.label">
+        <div class="text-h6">{{ stat.value }}</div>
+        <div class="text-caption text-medium-emphasis">{{ stat.label }}</div>
+      </div>
+    </div>
     <p v-else class="text-body-2 text-medium-emphasis mb-1">Keine beworbenen Events</p>
 
     <!-- Echte Probleme, rot, nur wenn es sie gibt. -->
@@ -222,7 +223,9 @@ const running = computed<RunningRow[]>(() =>
                     "
                   />
                   <span class="text-body-2 text-no-wrap text-medium-emphasis">
-                    Unbegrenzt · {{ card.avail.enrolled }} gebucht
+                    {{ card.avail.enrolled }} / ∞<template v-if="card.avail.waitingList > 0">
+                      · {{ card.avail.waitingList }} WL</template
+                    >
                   </span>
                 </template>
                 <template v-else>
